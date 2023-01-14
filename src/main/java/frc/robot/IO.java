@@ -3,7 +3,9 @@ package frc.robot;
 import java.util.Map;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -21,7 +23,7 @@ public class IO {
     private static final double NOMINAL_ANALOG_VALUE = 0.5;
 
 
-    private XboxController xbox;
+    private CommandXboxController xbox;
 
     // Custom buttons on the Xbox Controller
     private Trigger rightTriggerButton;
@@ -57,7 +59,7 @@ public class IO {
      * This does not need to be called when initializing with the getInstance() method.
      */
     public void init(){
-        xbox = new XboxController(XBOX_PORT);
+        xbox = new CommandXboxController(XBOX_PORT);
         initializeCustomButtons();
         customButtons = Map.of(
             11,rightTriggerButton,
@@ -138,7 +140,7 @@ public class IO {
         if (xboxButton.VALUE >= 11) {
             button = customButtons.get(xboxButton.VALUE);
         } else {
-            button = new JoystickButton(xbox, xboxButton.VALUE);
+            button = new JoystickButton(xbox.getHID(), xboxButton.VALUE);
         }
         
         switch(type) {
@@ -173,19 +175,19 @@ public class IO {
         } );
 
         radialUp = new Trigger( () -> {
-            return xbox.getPOV() == 0;
+            return xbox.pov(0).getAsBoolean();
         } );
 
         radialRight = new Trigger( () -> {
-            return xbox.getPOV() == 90;
+            return xbox.pov(90).getAsBoolean();
         } );
 
         radialDown = new Trigger( () -> {
-            return xbox.getPOV() == 180;
+            return xbox.pov(180).getAsBoolean();
         } );
-
+  
         radialLeft = new Trigger( () -> {
-            return xbox.getPOV() == 270;
+            return xbox.pov(270).getAsBoolean();
         } );
     }
     
