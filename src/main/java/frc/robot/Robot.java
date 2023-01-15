@@ -6,6 +6,9 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.IO.ButtonActionType;
+import frc.robot.IO.ControllerButton;
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -21,10 +24,17 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   @Override
-  public void robotInit() {}
+  public void robotInit() {
+    try {
+      SubsystemManager.getInstance().init();
+    } catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
 
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+  }
 
   @Override
   public void autonomousInit() {}

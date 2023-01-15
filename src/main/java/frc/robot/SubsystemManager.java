@@ -3,11 +3,21 @@ package frc.robot;
 import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.IO.ButtonActionType;
+import frc.robot.IO.ControllerButton;
+import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
+import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
+import frc.robot.subsystems.telemetry.Pigeon;
 
 /**
  * This class instantiates and initializes all of the subsystems and stores references to them.
@@ -16,7 +26,8 @@ public class SubsystemManager {
 
   private Logger logger = Logger.getLogger("Subsystem Factory");
   private BotType botType;
-  
+  private Pigeon pigeon;
+  private SwerveDrivetrain drivetrain;
   private PowerDistribution pdp;
 
   /**
@@ -28,8 +39,7 @@ public class SubsystemManager {
     "00:80:2F:25:B4:CA", BotType.RAPID_REACT,
     "00:80:2F:28:64:39", BotType.RIO99,
     "00:80:2F:28:64:38", BotType.RIO99,
-    "00:80:2F:17:F8:3F", BotType.RIO1, //radio
-    "00:80:2F:17:F8:40", BotType.RIO1, //usb
+    "00:80:2F:35:54:1E", BotType.CHARGED_UP_PROTO,
     "00:80:2F:17:D7:4B", BotType.RIO2,
     "00:80:2F:27:04:C6", BotType.RIO3,
     "00:80:2F:27:1D:E9", BotType.BLUE
@@ -79,15 +89,49 @@ public class SubsystemManager {
       case RIO99:
         initRIO99();
         break;
-      case RIO1:
-        initRIO1();
+      case CHARGED_UP_PROTO:
+        initCHARGED_UP_PROTO();
         break;
       default:
         logger.info("Unrecognized bot");
     }
   }
 
-  private void initRIO1() throws Exception {}
+  private void initCHARGED_UP_PROTO() throws Exception {
+    pigeon = new Pigeon(5);
+    pigeon.reset();
+
+    HashMap<String, Integer> portAssignments = new HashMap<String, Integer>();
+    portAssignments.put("FL.SwerveMotor", 59);
+    portAssignments.put("FL.DriveMotor", 41);
+    portAssignments.put("FL.Encoder", 1);
+    
+
+    portAssignments.put("FR.SwerveMotor", 8);
+    portAssignments.put("FR.DriveMotor", 40);
+    portAssignments.put("FR.Encoder", 3);
+
+    portAssignments.put("BL.SwerveMotor", 17);
+    portAssignments.put("BL.DriveMotor", 42);
+    portAssignments.put("BL.Encoder", 2);
+
+    portAssignments.put("BR.SwerveMotor", 15);
+    portAssignments.put("BR.DriveMotor", 43);
+    portAssignments.put("BR.Encoder", 0);
+
+    HashMap<String, Double> wheelOffsets = new HashMap<String, Double>();
+    wheelOffsets.put("FL", 184.0);
+    wheelOffsets.put("FR", 161.87);
+    wheelOffsets.put("BL", 13.87);
+    wheelOffsets.put("BR", 307.1);
+    
+    // Create and initialize all subsystems:
+    drivetrain = new SingleFalconDrivetrain();
+    drivetrain.init(portAssignments, wheelOffsets);
+    drivetrain.resetLocation(new Pose2d());
+
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(pigeon::reset));
+  }
 
   private void initBLUE() {}
 
@@ -128,6 +172,14 @@ public class SubsystemManager {
    */
   public PowerDistribution getPdp() {
     return pdp;
+  }
+
+  public Pigeon getPigeon() {
+    return pigeon;
+  }
+
+  public SwerveDrivetrain getDrivetrain() {
+    return drivetrain;
   }
 
 
@@ -186,9 +238,9 @@ public class SubsystemManager {
     RAPID_REACT,
     BLUE,
     RIO99,
-    RIO1,
+    CHARGED_UP_PROTO,
     RIO2, 
     RIO3,
-    UNRECOGNIZED
+    UNRECOGNIZED,
   }
 }
