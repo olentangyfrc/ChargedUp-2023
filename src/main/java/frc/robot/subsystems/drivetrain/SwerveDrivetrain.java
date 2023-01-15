@@ -13,8 +13,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -24,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.drivetrain.commands.DriveCommand;
 import frc.robot.subsystems.drivetrain.modules.SwerveModule;
+import frc.robot.subsystems.telemetry.Pigeon;
 
 public abstract class SwerveDrivetrain extends SubsystemBase {
 
@@ -86,16 +85,13 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
             new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2) // BR
         );
 
-        odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), getModulePositions());
+        odometry = new SwerveDriveOdometry(kinematics, SubsystemManager.getInstance().getPigeon().getRotation2D(), getModulePositions());
 
-    /*
-
-        poseEstimator = new SwerveDrivePoseEstimator(new Rotation2d(), new Pose2d(), kinematics,
-            new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.05, 0.05, Units.degreesToRadians(5)), 
-            new MatBuilder<>(Nat.N1(), Nat.N1()).fill(Units.degreesToRadians(0.01)),
-            new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.01, 0.01, Units.degreesToRadians(30))
-        );
-    */
+        // poseEstimator = new SwerveDrivePoseEstimator(new Rotation2d(), new Pose2d(), kinematics,
+        //     new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.05, 0.05, Units.degreesToRadians(5)), 
+        //     new MatBuilder<>(Nat.N1(), Nat.N1()).fill(Units.degreesToRadians(0.01)),
+        //     new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.01, 0.01, Units.degreesToRadians(30))
+        // );
 
         anglePid.enableContinuousInput(0, 360);
         anglePid.setTolerance(3);
@@ -144,33 +140,33 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
             backRightModule.updateState(new SwerveModuleState(0, Rotation2d.fromDegrees(225)));
             return;
         }
-        // Gyro gyro = SubsystemManager.getInstance().getGyro();
-        // if(fieldOriented) {
-        //     speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-        //         speeds.vxMetersPerSecond, 
-        //         speeds.vyMetersPerSecond,
-        //         speeds.omegaRadiansPerSecond, 
-        //         Rotation2d.fromDegrees(gyro.getAngle())
-        //     );
-        // }
-        // SmartDashboard.putNumber("Target angle: ", targetAngle);
-        // if(!Double.isNaN(targetAngle)) {
-        //     speeds.omegaRadiansPerSecond = anglePid.calculate(gyro.getAngle());
-        //     isAtTargetAngle = anglePid.atSetpoint();
-        // }
+        Pigeon pigeon = SubsystemManager.getInstance().getPigeon();
+        if(fieldOriented) {
+            speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                speeds.vxMetersPerSecond, 
+                speeds.vyMetersPerSecond,
+                speeds.omegaRadiansPerSecond, 
+                Rotation2d.fromDegrees(pigeon.getAngle())
+            );
+        }
+        SmartDashboard.putNumber("Target angle: ", targetAngle);
+        if(!Double.isNaN(targetAngle)) {
+            speeds.omegaRadiansPerSecond = anglePid.calculate(pigeon.getAngle());
+            isAtTargetAngle = anglePid.atSetpoint();
+        }
         // Negate the vyMetersPerSecond so that a positive value will drive in the positive y direction. This must be done
         // Because for the wheels, clockwise is positive.
         // TODO: Make counter-clockwise positive for swerve modules.
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_LINEAR_SPEED); // Normalize wheel speeds so we don't go faster than 100%
         
-        // odometry.update(gyro.getRotation2d(), getModulePositions());
+        odometry.update(pigeon.getRotation2D(), getModulePositions());
         
-        // field.setRobotPose(
-        //     odometry.getPoseMeters().getX(),
-        //     odometry.getPoseMeters().getY(),
-        //     gyro.getRotation2d()
-        // );
+        field.setRobotPose(
+            odometry.getPoseMeters().getX(),
+            odometry.getPoseMeters().getY(),
+            pigeon.getRotation2D()
+        );
 
         // Update SwerveModule states
         frontLeftModule.updateState(SwerveModuleState.optimize(states[0], frontLeftModule.getAngle()));
@@ -276,15 +272,12 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
      * @return The estimated position of the bot.
      */
     public Pose2d getLocation() {
-        // Pigeon pigeon = (Pigeon) SubsystemManager.getInstance().getGyro();
-        // return new Pose2d(odometry.getPoseMeters().getTranslation(), pigeon.getRotation2d());
-        return new Pose2d();
+        return new Pose2d(odometry.getPoseMeters().getTranslation(), SubsystemManager.getInstance().getPigeon().getRotation2D());
     }
 
     public void resetLocation(Pose2d botLocation) {
-        // Pigeon pigeon = (Pigeon) SubsystemManager.getInstance().getGyro();
-        // odometry.resetPosition(botLocation, botLocation.getRotation());
-        // pigeon.reset(botLocation.getRotation());
+        odometry.resetPosition(botLocation.getRotation(), getModulePositions(), botLocation);
+        SubsystemManager.getInstance().getPigeon().setReset(botLocation.getRotation());
     }
 
     /**

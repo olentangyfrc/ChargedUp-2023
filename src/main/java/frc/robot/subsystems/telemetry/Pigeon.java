@@ -1,14 +1,19 @@
 package frc.robot.subsystems.telemetry;
 
+import com.ctre.phoenix.sensors.WPI_Pigeon2;
+
 import edu.wpi.first.math.geometry.Rotation2d;
-import com.ctre.phoenix.sensors.Pigeon2;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 public class Pigeon {
-    private Pigeon2 imu;
+    private WPI_Pigeon2 imu;
     private boolean isInverted = false;
     
     public Pigeon(int deviceID){
-        this.imu = new Pigeon2(deviceID);
+        this.imu = new WPI_Pigeon2(deviceID);
+        imu.configFactoryDefault();
+
+        Shuffleboard.getTab("Gyro").addNumber("Yaw", this::getAngle);
     }
 
     public double getAngle() {
