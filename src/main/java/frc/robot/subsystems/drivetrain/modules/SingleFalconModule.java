@@ -22,7 +22,9 @@ import edu.wpi.first.wpilibj.AnalogInput;
  * 
  */
 public class SingleFalconModule extends SwerveModule {
-    static int num;
+    private static final double DRIVE_GEAR_RATIO = 1 / 8.25;
+    private static final double DRIVE_TICKS_PER_REVOLUTION = 2048;
+
 
     private WPI_TalonFX driveMotor;
     private CANSparkMax angleMotor;
@@ -90,7 +92,7 @@ public class SingleFalconModule extends SwerveModule {
      */
     @Override
     public double getVelocity() {
-        return driveMotor.getSelectedSensorVelocity(0) / 2048.0 * 2 * WHEEL_RADIUS * Math.PI * 0.623;
+        return driveMotor.getSelectedSensorVelocity(0) * DRIVE_GEAR_RATIO / DRIVE_TICKS_PER_REVOLUTION * WHEEL_RADIUS * 2 * Math.PI;
     }
 
     @Override
@@ -127,7 +129,7 @@ public class SingleFalconModule extends SwerveModule {
 
     @Override
     public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(driveMotor.getSelectedSensorPosition() / 2048.0 * 2 * WHEEL_RADIUS * Math.PI, getAngle());
+        return new SwerveModulePosition(driveMotor.getSelectedSensorPosition() * DRIVE_GEAR_RATIO / DRIVE_TICKS_PER_REVOLUTION * WHEEL_RADIUS * 2 * Math.PI, getAngle());
     }
     
 }
