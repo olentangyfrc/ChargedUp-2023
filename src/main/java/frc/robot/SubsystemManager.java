@@ -6,8 +6,12 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.subsystems.telemetry.Pigeon;
 
 /**
  * This class instantiates and initializes all of the subsystems and stores references to them.
@@ -16,7 +20,7 @@ public class SubsystemManager {
 
   private Logger logger = Logger.getLogger("Subsystem Factory");
   private BotType botType;
-  
+  private Pigeon pigeon;
   private PowerDistribution pdp;
 
   /**
@@ -28,8 +32,7 @@ public class SubsystemManager {
     "00:80:2F:25:B4:CA", BotType.RAPID_REACT,
     "00:80:2F:28:64:39", BotType.RIO99,
     "00:80:2F:28:64:38", BotType.RIO99,
-    "00:80:2F:17:F8:3F", BotType.RIO1, //radio
-    "00:80:2F:17:F8:40", BotType.RIO1, //usb
+    "00:80:2F:35:54:1E", BotType.CHARGED_UP_PROTO,
     "00:80:2F:17:D7:4B", BotType.RIO2,
     "00:80:2F:27:04:C6", BotType.RIO3,
     "00:80:2F:27:1D:E9", BotType.BLUE
@@ -79,15 +82,23 @@ public class SubsystemManager {
       case RIO99:
         initRIO99();
         break;
-      case RIO1:
-        initRIO1();
+      case CHARGED_UP_PROTO:
+        initCHARGED_UP_PROTO();
         break;
       default:
         logger.info("Unrecognized bot");
     }
   }
 
-  private void initRIO1() throws Exception {}
+  private void initCHARGED_UP_PROTO() throws Exception {
+    pigeon = new Pigeon(5);
+    System.out.println("Init CHARGED_UP_PROTO");
+    // Shuffleboard.getTab("Gyro").addNumber("Yaw", pigeon::getAngle);
+    // Shuffleboard.getTab("Gyro").addNumber("Roll", pigeon::getRoll);
+    // Shuffleboard.getTab("Gyro").addNumber("Pitch", pigeon::getPitch);
+    // Shuffleboard.getTab("Gyro").add("Reset Zero", new InstantCommand(pigeon::reset));
+    // Shuffleboard.getTab("Gyro").add("reset 30", new InstantCommand(() -> pigeon.setReset(Rotation2d.fromDegrees(30))));
+  }
 
   private void initBLUE() {}
 
@@ -186,9 +197,9 @@ public class SubsystemManager {
     RAPID_REACT,
     BLUE,
     RIO99,
-    RIO1,
+    CHARGED_UP_PROTO,
     RIO2, 
     RIO3,
-    UNRECOGNIZED
+    UNRECOGNIZED,
   }
 }
