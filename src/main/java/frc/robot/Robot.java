@@ -6,9 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.IO.ButtonActionType;
-import frc.robot.IO.ControllerButton;
+import frc.robot.auton.AutonPaths;
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -19,17 +17,16 @@ import frc.robot.IO.ControllerButton;
  * project.
  */
 public class Robot extends TimedRobot {
+  private AutonPaths paths;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   @Override
   public void robotInit() {
-    try {
-      SubsystemManager.getInstance().init();
-    } catch(Exception ex) {
-      ex.printStackTrace();
-    }
+    SubsystemManager.getInstance().init();
+    paths = new AutonPaths(SubsystemManager.getInstance().getDrivetrain());
   }
 
   @Override
@@ -37,7 +34,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    paths.getTestTrajectoryCommand().schedule();
+  }
 
   @Override
   public void autonomousPeriodic() {
@@ -53,7 +52,8 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+  }
 
   @Override
   public void disabledPeriodic() {}

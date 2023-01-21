@@ -3,6 +3,8 @@ package frc.robot.subsystems.drivetrain;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.pathplanner.lib.auto.PIDConstants;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.drivetrain.commands.DriveCommand;
 import frc.robot.subsystems.drivetrain.modules.SwerveModule;
-import frc.robot.subsystems.telemetry.Pigeon;
+import frc.robot.subsystems.telemetry.OzoneImu;
 
 public abstract class SwerveDrivetrain extends SubsystemBase {
 
@@ -37,10 +39,14 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
     // Distance from center of wheel to center of wheel across the front of the bot in meters
     public static final double TRACK_WIDTH = 0.4445;
 
-    public static final double MAX_LINEAR_SPEED = 3.5; // Meters per second
-    public static final double MAX_LINEAR_ACCELERATION = 3.5; // Meters per second squared
-    public static final double MAX_ROTATION_SPEED = 15.1; // Radians per second
-    public static final double MAX_ROTATION_ACCELERATION = Math.PI; // Radians per second squared
+    
+    public static final double MAX_LINEAR_SPEED = 3; // Meters per second
+    public static final double MAX_LINEAR_ACCELERATION = 5; // Meters per second squared
+    // public static final double MAX_LINEAR_SPEED = 6; // Meters per second
+    // public static final double MAX_LINEAR_ACCELERATION = 12; // Meters per second squared
+
+    public static final double MAX_ROTATION_SPEED = 15; // Radians per second
+    public static final double MAX_ROTATION_ACCELERATION = 8 * 2 * Math.PI; // Radians per second squared
 
     // In meters per second
     public static final double IS_MOVING_TRANSLATION_TOLERANCE = 3.5;
@@ -51,6 +57,9 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
     public PIDController xController;
     public PIDController yController;
     public PIDController thetaController;
+
+    public PIDConstants translationPidConstants;
+    public PIDConstants rotationPidConstants;
 
 
     // Used to convert from ChassisSpeeds to SwerveModuleStates
@@ -67,14 +76,16 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
 
     private PIDController anglePid = new PIDController(.12, 0, 0);
     private double targetAngle = Double.NaN;
-    public boolean isAtTargetAngle = false;
+    private boolean isAtTargetAngle = false;
 
     private boolean isInBrakeMode = false;
+    private boolean isFollowingPath = false;
+
 
     /**
      * Initialize the drivetrain subsystem
      */
-    public void init(Map<String, Integer> portAssignments, Map<String, Double> wheelOffsets) throws Exception {
+    public void init(Map<String, Integer> portAssignments, Map<String, Double> wheelOffsets) {
         initializeSwerveModules(portAssignments, wheelOffsets);
 
         // Pass in the coordinates of each wheel relative to the center of the bot.
@@ -85,7 +96,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
             new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2) // BR
         );
 
-        odometry = new SwerveDriveOdometry(kinematics, SubsystemManager.getInstance().getPigeon().getRotation2D(), getModulePositions());
+        odometry = new SwerveDriveOdometry(kinematics, SubsystemManager.getInstance().getImu().getRotation2d(), getModulePositions());
 
         // poseEstimator = new SwerveDrivePoseEstimator(new Rotation2d(), new Pose2d(), kinematics,
         //     new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.05, 0.05, Units.degreesToRadians(5)), 
@@ -106,6 +117,16 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         tab.addBoolean("Is Moving", this::isMoving);
         tab.add(field);
 
+        tab.addNumber("FL Speed", frontLeftModule::getVelocity);
+        tab.addNumber("FR Speed", frontRightModule::getVelocity);
+        tab.addNumber("BL Speed", backLeftModule::getVelocity);
+        tab.addNumber("BR Speed", backRightModule::getVelocity);
+
+        tab.addNumber("FL Position", () -> frontLeftModule.getPosition().distanceMeters);
+        tab.addNumber("FR Position", () -> frontRightModule.getPosition().distanceMeters);
+        tab.addNumber("BL Position", () -> backLeftModule.getPosition().distanceMeters);
+        tab.addNumber("BR Position", () -> backRightModule.getPosition().distanceMeters);
+
     }
 
     /**
@@ -117,11 +138,16 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
      * @param wheelOffsets The offsets for the modules
      * @throws Exception If there is an issue acquiring a port.
      */
-    protected abstract void initializeSwerveModules(Map<String, Integer> portAssignments, Map<String, Double> wheelOffsets) throws Exception;
+    protected abstract void initializeSwerveModules(Map<String, Integer> portAssignments, Map<String, Double> wheelOffsets);
 
     @Override
     public void periodic() {
         // Run the drive command periodically
+        field.setRobotPose(
+            odometry.getPoseMeters().getX(),
+            odometry.getPoseMeters().getY(),
+            SubsystemManager.getInstance().getImu().getRotation2d()
+        );
     }
 
     /** 
@@ -140,7 +166,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
             backRightModule.updateState(new SwerveModuleState(0, Rotation2d.fromDegrees(225)));
             return;
         }
-        Pigeon pigeon = SubsystemManager.getInstance().getPigeon();
+        OzoneImu pigeon = SubsystemManager.getInstance().getImu();
         if(fieldOriented) {
             speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 speeds.vxMetersPerSecond, 
@@ -149,6 +175,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
                 Rotation2d.fromDegrees(pigeon.getAngle())
             );
         }
+
         SmartDashboard.putNumber("Target angle: ", targetAngle);
         if(!Double.isNaN(targetAngle)) {
             speeds.omegaRadiansPerSecond = anglePid.calculate(pigeon.getAngle());
@@ -160,12 +187,12 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_LINEAR_SPEED); // Normalize wheel speeds so we don't go faster than 100%
         
-        odometry.update(pigeon.getRotation2D(), getModulePositions());
+        odometry.update(pigeon.getRotation2d(), getModulePositions());
         
         field.setRobotPose(
             odometry.getPoseMeters().getX(),
             odometry.getPoseMeters().getY(),
-            pigeon.getRotation2D()
+            pigeon.getRotation2d()
         );
 
         // Update SwerveModule states
@@ -173,6 +200,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         frontRightModule.updateState(SwerveModuleState.optimize(states[1], frontRightModule.getAngle()));
         backLeftModule.updateState(SwerveModuleState.optimize(states[2], backLeftModule.getAngle()));
         backRightModule.updateState(SwerveModuleState.optimize(states[3], backRightModule.getAngle()));
+
     }
 
     /**
@@ -272,16 +300,15 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
      * @return The estimated position of the bot.
      */
     public Pose2d getLocation() {
-        return new Pose2d(odometry.getPoseMeters().getTranslation(), SubsystemManager.getInstance().getPigeon().getRotation2D());
+        return new Pose2d(odometry.getPoseMeters().getTranslation(), SubsystemManager.getInstance().getImu().getRotation2d());
     }
 
     public void resetLocation(Pose2d botLocation) {
         odometry.resetPosition(botLocation.getRotation(), getModulePositions(), botLocation);
-        SubsystemManager.getInstance().getPigeon().setReset(botLocation.getRotation());
+        SubsystemManager.getInstance().getImu().setReset(botLocation.getRotation());
     }
 
     /**
-     * 
      * @return Returns PoseEstimator
      */
     public SwerveDriveOdometry getSwerveDriveOdometry(){
@@ -294,5 +321,13 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
 
     public void disableBrakeMode() {
         isInBrakeMode = false;
+    }
+
+    public void setIsFollowingPath(boolean isFollowingPath) {
+        this.isFollowingPath = isFollowingPath;
+    }
+
+    public boolean getIsFollowingPath() {
+        return isFollowingPath;
     }
 }

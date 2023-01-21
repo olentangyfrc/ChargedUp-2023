@@ -1,23 +1,26 @@
 package frc.robot;
 
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.IO.ButtonActionType;
 import frc.robot.IO.ControllerButton;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
+import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
+import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
+import frc.robot.subsystems.telemetry.OzoneImu;
 import frc.robot.subsystems.telemetry.Pigeon;
+import frc.robot.subsystems.telemetry.Pigeon2;
 
 /**
  * This class instantiates and initializes all of the subsystems and stores references to them.
@@ -26,7 +29,7 @@ public class SubsystemManager {
 
   private Logger logger = Logger.getLogger("Subsystem Factory");
   private BotType botType;
-  private Pigeon pigeon;
+  private OzoneImu imu;
   private SwerveDrivetrain drivetrain;
   private PowerDistribution pdp;
 
@@ -72,7 +75,7 @@ public class SubsystemManager {
   /**
    * Create and initialize all of the subsystems.
    */
-  public void init() throws Exception {
+  public void init() {
     pdp = new PowerDistribution(52, ModuleType.kCTRE);
     botType = getBotType();
 
@@ -83,7 +86,7 @@ public class SubsystemManager {
       case RAPID_REACT:
         initRAPID_REACT();
         break;
-      case BLUE:
+        case BLUE:
         initBLUE();
         break;
       case RIO99:
@@ -94,13 +97,13 @@ public class SubsystemManager {
         break;
       default:
         logger.info("Unrecognized bot");
-    }
+      }
   }
-
-  private void initCHARGED_UP_PROTO() throws Exception {
-    pigeon = new Pigeon(5);
-    pigeon.reset();
-
+  
+  private void initCHARGED_UP_PROTO() {
+    imu = new Pigeon2(5);
+    imu.reset();
+    
     HashMap<String, Integer> portAssignments = new HashMap<String, Integer>();
     portAssignments.put("FL.SwerveMotor", 59);
     portAssignments.put("FL.DriveMotor", 41);
@@ -114,11 +117,11 @@ public class SubsystemManager {
     portAssignments.put("BL.SwerveMotor", 17);
     portAssignments.put("BL.DriveMotor", 42);
     portAssignments.put("BL.Encoder", 2);
-
+    
     portAssignments.put("BR.SwerveMotor", 15);
     portAssignments.put("BR.DriveMotor", 43);
     portAssignments.put("BR.Encoder", 0);
-
+    
     HashMap<String, Double> wheelOffsets = new HashMap<String, Double>();
     wheelOffsets.put("FL", 184.0);
     wheelOffsets.put("FR", 161.87);
@@ -128,24 +131,57 @@ public class SubsystemManager {
     // Create and initialize all subsystems:
     drivetrain = new SingleFalconDrivetrain();
     drivetrain.init(portAssignments, wheelOffsets);
-    drivetrain.resetLocation(new Pose2d());
 
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(pigeon::reset));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
   }
-
+  
   private void initBLUE() {}
-
+  
   /**
    * Initializes COVID subsystems
    * @throws Exception
    */
-  public void initCOVID() throws Exception {}
+  public void initCOVID() {
+    imu = new Pigeon(21);
+    imu.reset();
+    
+    HashMap<String, Integer> portAssignments = new HashMap<String, Integer>();
+    portAssignments.put("FL.SwerveMotor", 35);
+    portAssignments.put("FL.DriveMotor", 34);
+    portAssignments.put("FL.Encoder", 0);
+    
+    
+    portAssignments.put("FR.SwerveMotor", 32);
+    portAssignments.put("FR.DriveMotor", 33);
+    portAssignments.put("FR.Encoder", 1);
+
+    portAssignments.put("BL.SwerveMotor", 36);
+    portAssignments.put("BL.DriveMotor", 37);
+    portAssignments.put("BL.Encoder", 2);
+
+    portAssignments.put("BR.SwerveMotor", 31);
+    portAssignments.put("BR.DriveMotor", 30);
+    portAssignments.put("BR.Encoder", 3);
+    
+    HashMap<String, Double> wheelOffsets = new HashMap<String, Double>();
+    wheelOffsets.put("FL", 22.4);
+    wheelOffsets.put("FR", 147.75);
+    wheelOffsets.put("BL", 319.5);
+    wheelOffsets.put("BR", 159.65);
+
+    drivetrain = new SparkMaxDrivetrain();
+    drivetrain.init(portAssignments, wheelOffsets);
+    
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new EnableBrakeMode(drivetrain));
+    IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RadialUp, new DisableBrakeMode(drivetrain));
+  }
 
   /**
    * Initializes Califorinia Bot subsystems
    * @throws Exception
    */
-  public void initRAPID_REACT() throws Exception {}
+  public void initRAPID_REACT() {}
 
   /**
    * Initializes the RIO99 subsystems
@@ -174,8 +210,8 @@ public class SubsystemManager {
     return pdp;
   }
 
-  public Pigeon getPigeon() {
-    return pigeon;
+  public OzoneImu getImu() {
+    return imu;
   }
 
   public SwerveDrivetrain getDrivetrain() {
@@ -191,20 +227,24 @@ public class SubsystemManager {
    * @return The active bot type
    * @throws Exception
    */
-  private BotType getBotType() throws Exception {
-    Enumeration<NetworkInterface> networks;
-    networks = NetworkInterface.getNetworkInterfaces();
-    BotType bot = BotType.UNRECOGNIZED;
-    for (NetworkInterface net : Collections.list(networks)) {
-        String mac = formatMACAddress(net.getHardwareAddress());
-        logger.info("Network #"+net.getIndex()+" "+net.getName()+" "+mac);
-        if (allMACs.containsKey(mac)) {
-            bot = allMACs.get(mac);
-            logger.info("   this MAC is for "+bot);
-        }
-    }
+  private BotType getBotType() {
+    try {
+      Enumeration<NetworkInterface> networks;
+      networks = NetworkInterface.getNetworkInterfaces();
+      BotType bot = BotType.UNRECOGNIZED;
+      for (NetworkInterface net : Collections.list(networks)) {
+          String mac = formatMACAddress(net.getHardwareAddress());
+          logger.info("Network #"+net.getIndex()+" "+net.getName()+" "+mac);
+          if (allMACs.containsKey(mac)) {
+              bot = allMACs.get(mac);
+              logger.info("   this MAC is for "+bot);
+          }
+      }
 
-    return bot;
+      return bot;
+    } catch(SocketException ex) {
+      return BotType.UNRECOGNIZED;
+    }
   }
 
   /**

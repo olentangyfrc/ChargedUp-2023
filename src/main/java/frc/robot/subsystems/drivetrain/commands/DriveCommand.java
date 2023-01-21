@@ -40,8 +40,10 @@ public class DriveCommand extends CommandBase {
       -io.getLeftX() * SwerveDrivetrain.MAX_LINEAR_SPEED * speedEntry.getDouble(1),
       -io.getRightX() * SwerveDrivetrain.MAX_ROTATION_SPEED * speedEntry.getDouble(1)
     );
-  
-    drivetrain.drive(speeds, true);
+    
+    if(!drivetrain.getIsFollowingPath()) {
+      drivetrain.drive(speeds, true);
+    }
 
   }
 

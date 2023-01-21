@@ -48,10 +48,10 @@ public class SingleFalconModule extends SwerveModule {
         anglePid.enableContinuousInput(0.0, 2 * Math.PI);
         anglePid.setTolerance(0.005);
 
-        velocityFactorPID = new PIDController(0.01, 0, 0);
+        velocityFactorPID = new PIDController(0.2, 0, 0);
         velocityFactorPID.setSetpoint(0); // We want the error to be 0
 
-        velocityConversionFactor = 2.48;
+        velocityConversionFactor = 3;
         velocityConversionOffset = 0.7;
         this.maxSpeed = maxSpeed;
         this.angleOffset = angleOffset;
@@ -92,7 +92,7 @@ public class SingleFalconModule extends SwerveModule {
      */
     @Override
     public double getVelocity() {
-        return driveMotor.getSelectedSensorVelocity(0) * DRIVE_GEAR_RATIO / DRIVE_TICKS_PER_REVOLUTION * WHEEL_RADIUS * 2 * Math.PI;
+        return driveMotor.getSelectedSensorVelocity(0) * DRIVE_GEAR_RATIO / DRIVE_TICKS_PER_REVOLUTION * WHEEL_RADIUS * 2 * Math.PI * 10; // Multiply by 10 due to sample rate
     }
 
     @Override

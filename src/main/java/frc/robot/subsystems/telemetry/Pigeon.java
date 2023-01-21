@@ -1,55 +1,60 @@
 package frc.robot.subsystems.telemetry;
 
-import com.ctre.phoenix.sensors.WPI_Pigeon2;
+import com.ctre.phoenix.sensors.WPI_PigeonIMU;
+import com.ctre.phoenix.sensors.PigeonIMU.CalibrationMode;
+import com.ctre.phoenix.sensors.PigeonIMU.PigeonState;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
-public class Pigeon {
-    private WPI_Pigeon2 imu;
-    private boolean isInverted = false;
-    
-    public Pigeon(int deviceID){
-        this.imu = new WPI_Pigeon2(deviceID);
-        imu.configFactoryDefault();
+public class Pigeon extends OzoneImu {
+    private WPI_PigeonIMU pigeon;
 
-        Shuffleboard.getTab("Gyro").addNumber("Yaw", this::getAngle);
+    public Pigeon(int deviceID) {
+        pigeon = new WPI_PigeonIMU(deviceID);
     }
 
+    @Override
     public double getAngle() {
-        if(isInverted){
-            return -imu.getYaw();
-        } else {
-            return imu.getYaw();
-        }
+        return pigeon.getYaw() % 360;
     }
 
+    @Override
     public double getPitch() {
-        return imu.getPitch();
+        return pigeon.getPitch() % 360;
     }
 
+    @Override
     public double getRoll() {
-        return imu.getRoll();
+        return pigeon.getRoll() % 360;
     }
 
-    public Rotation2d getRotation2D() {
-        return Rotation2d.fromDegrees(getAngle());
+    @Override
+    public void setReset(Rotation2d angle) {
+        pigeon.setYaw(angle.getDegrees());
     }
 
-    public void reset(){
-        imu.setYaw(0);
+    /**
+     * Enter gyro calibration mode.
+     * <p>
+     * Wait at least 4 seconds after calling this to move the bot.
+     */
+    public void calibrate() {
+        new Thread(() -> {
+            while (!pigeon.getState().equals(PigeonState.Ready));
+            pigeon.enterCalibrationMode(CalibrationMode.BootTareGyroAccel);
+        }).start();
     }
 
-    public void setReset(Rotation2d angle){
-        // Resets the gyro angle to a given value
-        imu.setYaw(angle.getDegrees());
+    /**
+     * Enter accelerometer calibration mode.
+     * <p>
+     * Make sure that the gyro is completely level and still for 10s after this is called.
+     */
+    public void calibrateAccelerometer() {
+        new Thread(() -> {
+            while (!pigeon.getState().equals(PigeonState.Ready));
+            pigeon.enterCalibrationMode(CalibrationMode.Accelerometer);
+        }).start();
     }
-
-    public void setInverted(boolean inverted) {
-        isInverted = inverted; 
-    }
-
-    public boolean getInverted(){
-        return isInverted;
-    }
+    
 }

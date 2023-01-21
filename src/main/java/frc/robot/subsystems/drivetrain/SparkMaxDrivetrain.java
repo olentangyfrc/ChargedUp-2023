@@ -6,17 +6,17 @@ package frc.robot.subsystems.drivetrain;
 
 import java.util.Map;
 
-import edu.wpi.first.math.controller.PIDController;
+import com.pathplanner.lib.auto.PIDConstants;
+
 import frc.robot.subsystems.drivetrain.modules.CANSparkMaxModule;
 
 public class SparkMaxDrivetrain extends SwerveDrivetrain {
 
     @Override
-    public void initializeSwerveModules(Map<String, Integer> portAssignments, Map<String, Double> wheelOffsets) throws Exception {
+    public void initializeSwerveModules(Map<String, Integer> portAssignments, Map<String, Double> wheelOffsets) {
 
-        xController = new PIDController(1, 0, 0);
-        yController = new PIDController(1, 0, 0);
-        thetaController = new PIDController(1, 0, 0);
+        translationPidConstants = new PIDConstants(2, 0, 0);
+        rotationPidConstants = new PIDConstants(3, 0, 0);
 
         // Initialize swerve modules
         frontLeftModule = new CANSparkMaxModule(

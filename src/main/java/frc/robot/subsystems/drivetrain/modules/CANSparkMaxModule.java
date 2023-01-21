@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.AnalogInput;
  * A swerve module using two CANSparkMax motor controllers and an encoder on analog input.
  */
 public class CANSparkMaxModule extends SwerveModule {
+    private static final double DRIVE_GEAR_RATIO = 1 / 8.25;
+
     // Motors (Make sure these are set to percent output mode)
     private CANSparkMax angleMotor;
     private CANSparkMax driveMotor;
@@ -39,24 +41,24 @@ public class CANSparkMaxModule extends SwerveModule {
 
         anglePid = new PIDController(0.5, 0, 0.0001);
         anglePid.enableContinuousInput(0, 2 * Math.PI);
+        anglePid.setTolerance(0.005);
 
-        // Make the angle motor turn clockwise with a positive input
         angleMotor.setInverted(true);
 
         angleEncoder = new AnalogInput(angleEncoderChannel);
         driveEncoder = driveMotor.getEncoder();
 
         // Set the position conversion factor to the circumference of the wheel.
-        driveEncoder.setPositionConversionFactor(2 * Math.PI * WHEEL_RADIUS);
+        driveEncoder.setPositionConversionFactor(DRIVE_GEAR_RATIO * 2 * WHEEL_RADIUS * Math.PI);
 
         // Set the velocity conversion factor to the circumference of the wheel
-        driveEncoder.setVelocityConversionFactor(2 * Math.PI * WHEEL_RADIUS);
+        driveEncoder.setVelocityConversionFactor(DRIVE_GEAR_RATIO * 2 * WHEEL_RADIUS * Math.PI);
 
         velocityFactorPID = new PIDController(0.01, 0, 0);
         velocityFactorPID.setSetpoint(0); // We want the error to be 0
 
-        velocityConversionFactor = 1.7799;
-        velocityConversionOffset = -0.4126;
+        velocityConversionFactor = 3;
+        velocityConversionOffset = 0.7;
         this.maxSpeed = maxSpeed;
         this.angleOffset = angleOffset;
     }
@@ -77,7 +79,7 @@ public class CANSparkMaxModule extends SwerveModule {
      */
     public Rotation2d getAngle() {
         // Raw angle
-        double angle = (angleEncoder.getValue() / ANGLE_ENCODER_TICKS * 2 * Math.PI); // Convert rotations to an angle in radians
+        double angle = (-angleEncoder.getValue() / ANGLE_ENCODER_TICKS * 2 * Math.PI); // Convert rotations to an angle in radians
         // Convert the offset into radians and subtract it from the angle
         angle -= angleOffset * Math.PI / 180;
         // Add a full rotation in radians to make sure the angle is always positive
