@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.drivetrain.commands.DriveCommand;
 import frc.robot.subsystems.drivetrain.modules.SwerveModule;
-import frc.robot.subsystems.telemetry.OzoneImu;
+import frc.robot.telemetry.OzoneImu;
 
 public abstract class SwerveDrivetrain extends SubsystemBase {
 
@@ -84,9 +84,12 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
 
     /**
      * Initialize the drivetrain subsystem
+     * 
+     * @param moduleInfo info for the swerve modules, in the order fl, fr, bl, br.
+     * @param driveGearRatio The number of times the actual wheel rotates for each rotation of the drive motor.
      */
-    public void init(Map<String, Integer> portAssignments, Map<String, Double> wheelOffsets) {
-        initializeSwerveModules(portAssignments, wheelOffsets);
+    public void init(SwerveModuleSetupInfo[] moduleInfo, double driveGearRatio) {
+        initializeSwerveModules(moduleInfo, driveGearRatio);
 
         // Pass in the coordinates of each wheel relative to the center of the bot.
         kinematics = new SwerveDriveKinematics(
@@ -134,11 +137,11 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
      * <p>
      * Initialize the swerve modules
      * 
-     * @param portAssignments The ports for the swerve modules
-     * @param wheelOffsets The offsets for the modules
+     * @param moduleInfo info for the swerve modules, in the order fl, fr, bl, br.
+     * @param driveGearRatio The number of times the actual wheel rotates for each rotation of the drive motor.
      * @throws Exception If there is an issue acquiring a port.
      */
-    protected abstract void initializeSwerveModules(Map<String, Integer> portAssignments, Map<String, Double> wheelOffsets);
+    protected abstract void initializeSwerveModules(SwerveModuleSetupInfo[] moduleInfo, double driveGearRatio);
 
     @Override
     public void periodic() {

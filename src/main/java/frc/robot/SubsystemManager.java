@@ -4,7 +4,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -16,11 +15,12 @@ import frc.robot.IO.ControllerButton;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
-import frc.robot.subsystems.telemetry.OzoneImu;
-import frc.robot.subsystems.telemetry.Pigeon;
-import frc.robot.subsystems.telemetry.Pigeon2;
+import frc.robot.telemetry.OzoneImu;
+import frc.robot.telemetry.Pigeon;
+import frc.robot.telemetry.Pigeon2;
 
 /**
  * This class instantiates and initializes all of the subsystems and stores references to them.
@@ -104,33 +104,14 @@ public class SubsystemManager {
     imu = new Pigeon2(5);
     imu.reset();
     
-    HashMap<String, Integer> portAssignments = new HashMap<String, Integer>();
-    portAssignments.put("FL.SwerveMotor", 59);
-    portAssignments.put("FL.DriveMotor", 41);
-    portAssignments.put("FL.Encoder", 1);
-    
-
-    portAssignments.put("FR.SwerveMotor", 8);
-    portAssignments.put("FR.DriveMotor", 40);
-    portAssignments.put("FR.Encoder", 3);
-
-    portAssignments.put("BL.SwerveMotor", 17);
-    portAssignments.put("BL.DriveMotor", 42);
-    portAssignments.put("BL.Encoder", 2);
-    
-    portAssignments.put("BR.SwerveMotor", 15);
-    portAssignments.put("BR.DriveMotor", 43);
-    portAssignments.put("BR.Encoder", 0);
-    
-    HashMap<String, Double> wheelOffsets = new HashMap<String, Double>();
-    wheelOffsets.put("FL", 184.0);
-    wheelOffsets.put("FR", 161.87);
-    wheelOffsets.put("BL", 13.87);
-    wheelOffsets.put("BR", 307.1);
-    
     // Create and initialize all subsystems:
     drivetrain = new SingleFalconDrivetrain();
-    drivetrain.init(portAssignments, wheelOffsets);
+    drivetrain.init(new SwerveModuleSetupInfo[] {
+      new SwerveModuleSetupInfo(41, 59, 1, 331.6),
+      new SwerveModuleSetupInfo(40, 8, 3, 28.39),
+      new SwerveModuleSetupInfo(42, 17, 2, 28.87),
+      new SwerveModuleSetupInfo(43, 15, 0, 267.34),
+    }, 1 / 8.07);
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
   }
@@ -144,33 +125,14 @@ public class SubsystemManager {
   public void initCOVID() {
     imu = new Pigeon(21);
     imu.reset();
-    
-    HashMap<String, Integer> portAssignments = new HashMap<String, Integer>();
-    portAssignments.put("FL.SwerveMotor", 35);
-    portAssignments.put("FL.DriveMotor", 34);
-    portAssignments.put("FL.Encoder", 0);
-    
-    
-    portAssignments.put("FR.SwerveMotor", 32);
-    portAssignments.put("FR.DriveMotor", 33);
-    portAssignments.put("FR.Encoder", 1);
-
-    portAssignments.put("BL.SwerveMotor", 36);
-    portAssignments.put("BL.DriveMotor", 37);
-    portAssignments.put("BL.Encoder", 2);
-
-    portAssignments.put("BR.SwerveMotor", 31);
-    portAssignments.put("BR.DriveMotor", 30);
-    portAssignments.put("BR.Encoder", 3);
-    
-    HashMap<String, Double> wheelOffsets = new HashMap<String, Double>();
-    wheelOffsets.put("FL", 22.4);
-    wheelOffsets.put("FR", 147.75);
-    wheelOffsets.put("BL", 319.5);
-    wheelOffsets.put("BR", 159.65);
 
     drivetrain = new SparkMaxDrivetrain();
-    drivetrain.init(portAssignments, wheelOffsets);
+    drivetrain.init(new SwerveModuleSetupInfo[] {
+      new SwerveModuleSetupInfo(34, 35, 0, 22.4),
+      new SwerveModuleSetupInfo(33, 32, 1, 147.75),
+      new SwerveModuleSetupInfo(37, 36, 2, 319.5),
+      new SwerveModuleSetupInfo(30, 31, 3, 159.65),
+    }, 1 / 8.33);
     
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new EnableBrakeMode(drivetrain));
