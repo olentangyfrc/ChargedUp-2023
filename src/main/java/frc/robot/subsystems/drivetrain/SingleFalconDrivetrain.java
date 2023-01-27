@@ -14,41 +14,45 @@ import frc.robot.subsystems.drivetrain.modules.SingleFalconModule;
 public class SingleFalconDrivetrain extends SwerveDrivetrain {
 
     @Override
-    public void initializeSwerveModules(Map<String, Integer> portAssignments, Map<String, Double> wheelOffsets) {
+    public void initializeSwerveModules(SwerveModuleSetupInfo[] moduleInfo, double driveGearRatio) {
 
         translationPidConstants = new PIDConstants(0.8, 0, 0);
         rotationPidConstants = new PIDConstants(0.1, 0, 0);
                 
         // Initialize swerve modules
         frontLeftModule = new SingleFalconModule(
-            portAssignments.get("FL.SwerveMotor"),
-            portAssignments.get("FL.DriveMotor"),
-            portAssignments.get("FL.Encoder"),
-            wheelOffsets.get("FL"),
+            moduleInfo[0].getAngleMotorCanId(),
+            moduleInfo[0].getDriveMotorCanId(),
+            moduleInfo[0].getEncoderPort(),
+            moduleInfo[0].getWheelOffset(),
+            driveGearRatio,
             MAX_LINEAR_SPEED
         );
 
         frontRightModule = new SingleFalconModule(
-            portAssignments.get("FR.SwerveMotor"),
-            portAssignments.get("FR.DriveMotor"),
-            portAssignments.get("FR.Encoder"),
-            wheelOffsets.get("FR"),
+            moduleInfo[1].getAngleMotorCanId(),
+            moduleInfo[1].getDriveMotorCanId(),
+            moduleInfo[1].getEncoderPort(),
+            moduleInfo[1].getWheelOffset(),
+            driveGearRatio,
             MAX_LINEAR_SPEED
         );
 
         backLeftModule = new SingleFalconModule(
-            portAssignments.get("BL.SwerveMotor"),
-            portAssignments.get("BL.DriveMotor"),
-            portAssignments.get("BL.Encoder"),
-            wheelOffsets.get("BL"),
+            moduleInfo[2].getAngleMotorCanId(),
+            moduleInfo[2].getDriveMotorCanId(),
+            moduleInfo[2].getEncoderPort(),
+            moduleInfo[2].getWheelOffset(),
+            driveGearRatio,
             MAX_LINEAR_SPEED
         );
 
         backRightModule = new SingleFalconModule(
-            portAssignments.get("BR.SwerveMotor"),
-            portAssignments.get("BR.DriveMotor"),
-            portAssignments.get("BR.Encoder"),
-            wheelOffsets.get("BR"),
+            moduleInfo[3].getAngleMotorCanId(),
+            moduleInfo[3].getDriveMotorCanId(),
+            moduleInfo[3].getEncoderPort(),
+            moduleInfo[3].getWheelOffset(),
+            driveGearRatio,
             MAX_LINEAR_SPEED
         );
 

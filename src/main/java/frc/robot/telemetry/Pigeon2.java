@@ -1,4 +1,4 @@
-package frc.robot.subsystems.telemetry;
+package frc.robot.telemetry;
 
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 
