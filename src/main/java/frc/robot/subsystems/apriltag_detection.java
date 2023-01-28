@@ -75,7 +75,7 @@ public class apriltag_detection extends SubsystemBase {
       for (AprilTagDetection detection : detections) {
         Transform3d pose = estimator.estimate(detection);
         double lastVisionTime = Timer.getFPGATimestamp();
-        
+
         var in_vec = VecBuilder.fill(pose.getX(), pose.getY(), pose.getZ());
 
         var cv2_correction_mat = Matrix.mat(Nat.N3(), Nat.N3()).fill(
@@ -89,7 +89,7 @@ public class apriltag_detection extends SubsystemBase {
 
 
         // Build our rotation matrix
-        double pitch = -30 * Math.PI / 180; //Change Angle
+        double pitch = -31 * Math.PI / 180; //Change Angle
         double c = Math.cos(pitch);
         double s = Math.sin(pitch);
         var camera_to_bot = Matrix.mat(Nat.N3(), Nat.N3()).fill(
@@ -101,14 +101,14 @@ public class apriltag_detection extends SubsystemBase {
         var corrected_bot_oriented = camera_to_bot.times(corrected_vec);
 
 
-        var trans2_vec = VecBuilder.fill(-0.1016, -0.381, -0.127); //Change this where we know the displacement of the camera to the center of the robot
+        var trans2_vec = VecBuilder.fill(-0.1016, 0.381, -0.1778); //Change this where we know the displacement of the camera to the center of the robot
         
         var out_vec = trans2_vec.plus(corrected_bot_oriented);
 
 
         
         //double gyro_angle = getPastPose(elapsedtime).getEstimatedPosition().getRotation().getRadians();
-        double gyro_angle = 180;
+        double gyro_angle = SubsystemManager.getInstance().getImu().getAngle();
         c = Math.cos(gyro_angle);
         s = Math.sin(gyro_angle);
         var bot_to_field = Matrix.mat(Nat.N3(), Nat.N3()).fill(
@@ -117,17 +117,20 @@ public class apriltag_detection extends SubsystemBase {
             0, 0, 1);
         var final_vec = bot_to_field.times(out_vec);
         
-        //var apriltag_1 =  new Pose3d(Units.inchesToMeters(610.77),Units.inchesToMeters(42.19),Units.inchesToMeters(18.22),new Rotation3d(0.0, 0.0, 0.0))
         var apriltag_1 = VecBuilder.fill(Units.inchesToMeters(610.77),Units.inchesToMeters(42.19),Units.inchesToMeters(18.22));
         
-
-        if(detection.getId()=='1'){
+        //System.out.println("Apriltag Detected");
+        System.out.println(detection.getId());
+        if(detection.getId()==1){
           var position =  apriltag_1.minus(final_vec);
+          SmartDashboard.putNumber("pos_z", position.get(2,0));
           var robot_pose = new Pose2d(position.get(0, 0), position.get(1, 0), new Rotation2d());
           var poseEstimator = SubsystemManager.getInstance().getDrivetrain().getSwerveDrivePoseEstimator();
           poseEstimator.addVisionMeasurement(robot_pose, lastVisionTime);
-          SmartDashboard.putNumber("robot_position_x", poseEstimator.getEstimatedPosition().getX());
-          SmartDashboard.putNumber("robot_position_x", poseEstimator.getEstimatedPosition().getX());
+          //SmartDashboard.putNumber("robot_position_x", poseEstimator.getEstimatedPosition().getX());
+          //SmartDashboard.putNumber("robot_position_x", poseEstimator.getEstimatedPosition().getX());
+          //SmartDashboard.putNumber("robot_position_x", robot_pose.getX());
+          System.out.println("Apriltag Detected");
 
         }
 
