@@ -121,6 +121,7 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
 
     intakeArm = new intakeArm();
+    intakeArm.init();
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new toggleClaw(intakeArm));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new armDown(intakeArm));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new armUp(intakeArm));

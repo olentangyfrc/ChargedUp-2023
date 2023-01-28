@@ -29,8 +29,9 @@ public class intakeArm extends SubsystemBase{
         compressor = new Compressor(PCM_CAN_ID, PneumaticsModuleType.CTREPCM);
         compressor.enableDigital();
         arm = new DoubleSolenoid(PCM_CAN_ID, PneumaticsModuleType.CTREPCM, pnematicsArmForward, pnematicsArmBackward);
+        arm.set(Value.kOff);
         claw = new DoubleSolenoid(PCM_CAN_ID, PneumaticsModuleType.CTREPCM, pnematicsClawForward, pnematicsClawBackward);
-        claw.set(Value.kReverse);
+        claw.set(Value.kOff);
     }
 
     public void extendArm() {
