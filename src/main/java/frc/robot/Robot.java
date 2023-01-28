@@ -4,11 +4,15 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.auton.AutonPaths;
-import frc.robot.subsystems.telemetry.commands.autoBalance;
+import frc.robot.subsystems.telemetry.Pigeon;
+import frc.robot.subsystems.telemetry.commands.autoBalancePitch;
+import frc.robot.subsystems.telemetry.commands.autoBalancePitchGroup;
+import frc.robot.subsystems.telemetry.commands.resetGyro;
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -29,6 +33,8 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     SubsystemManager.getInstance().init();
     paths = new AutonPaths(SubsystemManager.getInstance().getDrivetrain());
+    SmartDashboard.putData("Auto Balance", new autoBalancePitchGroup(new Rotation2d(0)));
+    SmartDashboard.putData("Reset Gyro", new resetGyro());
   }
 
   @Override
@@ -51,8 +57,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     CommandScheduler.getInstance().run();
-    System.out.println(SubsystemManager.getInstance().getImu().getPitch());
-    System.out.println(SubsystemManager.getInstance().getImu().getRoll());
+    SmartDashboard.putNumber("Pitch", SubsystemManager.getInstance().getImu().getPitch());
   }
 
   @Override
