@@ -17,8 +17,8 @@ import frc.robot.subsystems.telemetry.OzoneImu;
 public class autoBalancePitch extends CommandBase {
   SwerveDrivetrain drivetrain;
   OzoneImu pigeon;
-  final double SPEED = .065;
-  final double TOLERANCE = 1.5;
+  final double SPEED = .0668;
+  final double TOLERANCE = 10.0;
   double pitchSpeed = 0;
   double rollSpeed = 0;
   double pitch;
@@ -61,6 +61,7 @@ public class autoBalancePitch extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return bangBang(pitch, TOLERANCE) == 0;
+    return false;
+    //return bangBang(pitch, TOLERANCE) == 0;
   }
 }
