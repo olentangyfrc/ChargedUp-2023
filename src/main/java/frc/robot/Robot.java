@@ -7,6 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.auton.AutonPaths;
+import frc.robot.subsystems.apriltag_detection;
+
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -27,6 +29,9 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     SubsystemManager.getInstance().init();
     paths = new AutonPaths(SubsystemManager.getInstance().getDrivetrain());
+    Thread visionThread = new Thread(() -> apriltagVisionThreadProc());
+    visionThread.setDaemon(true);
+    visionThread.start();
   }
 
   @Override

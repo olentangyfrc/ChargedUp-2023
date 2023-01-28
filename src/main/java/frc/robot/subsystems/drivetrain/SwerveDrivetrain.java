@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.drivetrain.commands.DriveCommand;
 import frc.robot.subsystems.drivetrain.modules.SwerveModule;
@@ -69,6 +70,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
     
     // Odometry
     private SwerveDriveOdometry odometry;
+    private SwerveDrivePoseEstimator poseEstimator;
     private Field2d field = new Field2d();
     
     private ShuffleboardTab tab = Shuffleboard.getTab("Drive");
@@ -99,8 +101,10 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
             new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2) // BR
         );
 
+        OzoneImu pigeon = SubsystemManager.getInstance().getImu();
+        
         odometry = new SwerveDriveOdometry(kinematics, SubsystemManager.getInstance().getImu().getRotation2d(), getModulePositions());
-
+        poseEstimator = new SwerveDrivePoseEstimator(kinematics, pigeon.getRotation2d(), getModulePositions(), getLocation());
         // poseEstimator = new SwerveDrivePoseEstimator(new Rotation2d(), new Pose2d(), kinematics,
         //     new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.05, 0.05, Units.degreesToRadians(5)), 
         //     new MatBuilder<>(Nat.N1(), Nat.N1()).fill(Units.degreesToRadians(0.01)),
@@ -316,6 +320,10 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
      */
     public SwerveDriveOdometry getSwerveDriveOdometry(){
         return odometry;
+    }
+
+    public SwerveDrivePoseEstimator getSwerveDrivePoseEstimator(){
+        return poseEstimator;
     }
 
     public void enableBrakeMode() {
