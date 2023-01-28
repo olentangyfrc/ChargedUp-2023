@@ -39,7 +39,7 @@ public class apriltag_detection extends SubsystemBase {
 
 
 
-  void apriltagVisionThreadProc() {
+  public void apriltagVisionThreadProc() {
     AprilTagDetector detector = new AprilTagDetector();
     
     detector.addFamily(tagFamily, 0);
