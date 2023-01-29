@@ -18,6 +18,7 @@ import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
+import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.telemetry.OzoneImu;
 import frc.robot.telemetry.Pigeon;
 import frc.robot.telemetry.Pigeon2;
@@ -32,6 +33,7 @@ public class SubsystemManager {
   private OzoneImu imu;
   private SwerveDrivetrain drivetrain;
   private PowerDistribution pdp;
+  private Elevator elevator;
 
   /**
    * Map of known bot addresses and respective types
@@ -113,6 +115,8 @@ public class SubsystemManager {
       new SwerveModuleSetupInfo(43, 15, 0, 267.34),
     }, 1 / 8.07);
 
+    elevator = new Elevator();
+
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
   }
   
@@ -178,6 +182,10 @@ public class SubsystemManager {
 
   public SwerveDrivetrain getDrivetrain() {
     return drivetrain;
+  }
+
+  public Elevator getElevator() {
+    return elevator;
   }
 
 
