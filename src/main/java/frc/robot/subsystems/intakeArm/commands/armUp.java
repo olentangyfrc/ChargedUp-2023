@@ -18,15 +18,7 @@ public class armUp extends InstantCommand{
     @Override
     public void initialize(){
         logger.info("Putting Arm Up");
-    }
-
-    @Override
-    public void execute(){
         intakeArm.extendArm();
-    }
-
-    @Override
-    public void end(boolean interrupted){
     }
 
     @Override
