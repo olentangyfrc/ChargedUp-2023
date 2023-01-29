@@ -55,6 +55,8 @@ public class apriltag_detection extends SubsystemBase {
 
     UsbCamera camera = CameraServer.startAutomaticCapture();
     camera.setResolution(640, 480);
+    camera.setExposureManual(20);
+    camera.setExposureHoldCurrent();
 
     CvSink cvSink = CameraServer.getVideo();
     CvSource outputStream = CameraServer.putVideo("USB Camera", 640, 480);
@@ -89,7 +91,7 @@ public class apriltag_detection extends SubsystemBase {
 
 
         // Build our rotation matrix
-        double pitch = -31 * Math.PI / 180; //Change Angle
+        double pitch = -32.25 * Math.PI / 180; //Change Angle
         double c = Math.cos(pitch);
         double s = Math.sin(pitch);
         var camera_to_bot = Matrix.mat(Nat.N3(), Nat.N3()).fill(
@@ -99,9 +101,13 @@ public class apriltag_detection extends SubsystemBase {
 
         // Rotate
         var corrected_bot_oriented = camera_to_bot.times(corrected_vec);
+        SmartDashboard.putNumber("apriltag x", corrected_bot_oriented.get(0,0));
+        SmartDashboard.putNumber("apriltag y", corrected_bot_oriented.get(1,0));
+        SmartDashboard.putNumber("apriltag z", corrected_bot_oriented.get(2,0));
 
 
-        var trans2_vec = VecBuilder.fill(-0.1016, 0.381, -0.1778); //Change this where we know the displacement of the camera to the center of the robot
+
+        var trans2_vec = VecBuilder.fill(0.1016, -0.381, -0.1778); //Change this where we know the displacement of the camera to the center of the robot
         
         var out_vec = trans2_vec.plus(corrected_bot_oriented);
 
@@ -129,7 +135,7 @@ public class apriltag_detection extends SubsystemBase {
           poseEstimator.addVisionMeasurement(robot_pose, lastVisionTime);
           //SmartDashboard.putNumber("robot_position_x", poseEstimator.getEstimatedPosition().getX());
           //SmartDashboard.putNumber("robot_position_x", poseEstimator.getEstimatedPosition().getX());
-          //SmartDashboard.putNumber("robot_position_x", robot_pose.getX());
+          SmartDashboard.putNumber("robot_position_x", robot_pose.getX());
           System.out.println("Apriltag Detected");
 
         }
