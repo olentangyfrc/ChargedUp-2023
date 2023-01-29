@@ -18,15 +18,7 @@ public class armDown extends InstantCommand{
     @Override
     public void initialize(){
         logger.info("Putting Arm Down");
-    }
-
-    @Override
-    public void execute(){
         intakeArm.retractArm();
-    }
-
-    @Override
-    public void end(boolean interrupted){
     }
 
     @Override
