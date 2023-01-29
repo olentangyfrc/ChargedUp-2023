@@ -18,6 +18,10 @@ import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
+import frc.robot.subsystems.intakeArm.intakeArm;
+import frc.robot.subsystems.intakeArm.commands.armDown;
+import frc.robot.subsystems.intakeArm.commands.armUp;
+import frc.robot.subsystems.intakeArm.commands.toggleClaw;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.telemetry.OzoneImu;
 import frc.robot.telemetry.Pigeon;
@@ -33,6 +37,7 @@ public class SubsystemManager {
   private OzoneImu imu;
   private SwerveDrivetrain drivetrain;
   private PowerDistribution pdp;
+  private intakeArm intakeArm;
   private Elevator elevator;
 
   /**
@@ -118,6 +123,12 @@ public class SubsystemManager {
     elevator = new Elevator();
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
+
+    intakeArm = new intakeArm();
+    intakeArm.init();
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new toggleClaw(intakeArm));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new armDown(intakeArm));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new armUp(intakeArm));
   }
   
   private void initBLUE() {}
