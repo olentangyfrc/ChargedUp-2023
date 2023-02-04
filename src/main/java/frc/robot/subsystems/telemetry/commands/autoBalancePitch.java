@@ -8,6 +8,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.SubsystemManager;
@@ -20,8 +22,12 @@ public class autoBalancePitch extends CommandBase {
   final double SPEED = .0668;
   final double TOLERANCE = 10.0;
   double pitchSpeed = 0;
+  double previousPitch = 0;
   double rollSpeed = 0;
   double pitch;
+
+  AnalogPotentiometer ultrasonic;
+  double distance = 0;
 
   /** Creates a new autoBalance. */
   public autoBalancePitch(SwerveDrivetrain drivetrain) {
@@ -39,19 +45,26 @@ public class autoBalancePitch extends CommandBase {
   @Override
   public void initialize() {
     pitch = pigeon.getPitch();
+    ultrasonic = new AnalogPotentiometer(4);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     pitch = pigeon.getPitch();
+    distance = ultrasonic.get();
+    SmartDashboard.putNumber("Ultrasonic Distance", distance);
 
-    SmartDashboard.putNumber("Bang Bang Output", bangBang(pitch, 1.5));
 
-    if (bangBang(pitch, TOLERANCE) != 0) pitchSpeed = SPEED * bangBang(pitch, TOLERANCE);
+    SmartDashboard.putNumber("Bang Bang Output", bangBang(pitch, TOLERANCE));
+
+    if (bangBang(pitch, TOLERANCE) != 0) {
+      pitchSpeed = SPEED * bangBang(pitch, TOLERANCE);
+    }
 
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(pitchSpeed, rollSpeed, 0);
     drivetrain.drive(chassisSpeeds, false);
+    previousPitch = pitch;
   }
 
   // Called once the command ends or is interrupted.
