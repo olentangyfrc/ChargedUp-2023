@@ -48,7 +48,7 @@ public class ApriltagDetection extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator = SubsystemManager.getInstance().getDrivetrain().getSwerveDrivePoseEstimator();
   
   public void init(){
-    apriltagVisionThreadProc();
+//     apriltagVisionThreadProc();
   }
 
   public void AddNetworktablesListener() { 
