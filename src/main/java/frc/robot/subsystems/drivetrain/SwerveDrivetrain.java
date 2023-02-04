@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.GenericEntry;
@@ -21,6 +20,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.drivetrain.commands.DriveCommand;
 import frc.robot.subsystems.drivetrain.modules.SwerveModule;
@@ -68,7 +68,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
     private Logger logger = Logger.getLogger("DrivetrainSubsystem");
     
     // Odometry
-    private SwerveDriveOdometry odometry;
+    private SwerveDrivePoseEstimator poseEstimator;
     private Field2d field = new Field2d();
     
     private ShuffleboardTab tab = Shuffleboard.getTab("Drive");
@@ -99,8 +99,9 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
             new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2) // BR
         );
 
-        odometry = new SwerveDriveOdometry(kinematics, SubsystemManager.getInstance().getImu().getRotation2d(), getModulePositions());
-
+        OzoneImu pigeon = SubsystemManager.getInstance().getImu();
+        
+        poseEstimator = new SwerveDrivePoseEstimator(kinematics, pigeon.getRotation2d(), getModulePositions(), new Pose2d(0,0,new Rotation2d()));
         // poseEstimator = new SwerveDrivePoseEstimator(new Rotation2d(), new Pose2d(), kinematics,
         //     new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.05, 0.05, Units.degreesToRadians(5)), 
         //     new MatBuilder<>(Nat.N1(), Nat.N1()).fill(Units.degreesToRadians(0.01)),
@@ -147,8 +148,8 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
     public void periodic() {
         // Run the drive command periodically
         field.setRobotPose(
-            odometry.getPoseMeters().getX(),
-            odometry.getPoseMeters().getY(),
+            poseEstimator.getEstimatedPosition().getX(),
+            poseEstimator.getEstimatedPosition().getY(),
             SubsystemManager.getInstance().getImu().getRotation2d()
         );
     }
@@ -190,11 +191,11 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_LINEAR_SPEED); // Normalize wheel speeds so we don't go faster than 100%
         
-        odometry.update(pigeon.getRotation2d(), getModulePositions());
+        poseEstimator.update(pigeon.getRotation2d(), getModulePositions());
         
         field.setRobotPose(
-            odometry.getPoseMeters().getX(),
-            odometry.getPoseMeters().getY(),
+            poseEstimator.getEstimatedPosition().getX(),
+            poseEstimator.getEstimatedPosition().getY(),
             pigeon.getRotation2d()
         );
 
@@ -303,19 +304,21 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
      * @return The estimated position of the bot.
      */
     public Pose2d getLocation() {
-        return new Pose2d(odometry.getPoseMeters().getTranslation(), SubsystemManager.getInstance().getImu().getRotation2d());
+        return new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), SubsystemManager.getInstance().getImu().getRotation2d());
     }
 
     public void resetLocation(Pose2d botLocation) {
-        odometry.resetPosition(botLocation.getRotation(), getModulePositions(), botLocation);
+        poseEstimator.resetPosition(botLocation.getRotation(), getModulePositions(), botLocation);
         SubsystemManager.getInstance().getImu().setReset(botLocation.getRotation());
     }
 
     /**
      * @return Returns PoseEstimator
      */
-    public SwerveDriveOdometry getSwerveDriveOdometry(){
-        return odometry;
+
+
+    public SwerveDrivePoseEstimator getSwerveDrivePoseEstimator(){
+        return poseEstimator;
     }
 
     public void enableBrakeMode() {

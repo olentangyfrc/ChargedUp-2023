@@ -18,6 +18,8 @@ import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
+import frc.robot.subsystems.ApriltagDetection;
+
 import frc.robot.subsystems.intakeArm.intakeArm;
 import frc.robot.subsystems.intakeArm.commands.armDown;
 import frc.robot.subsystems.intakeArm.commands.armUp;
@@ -37,6 +39,7 @@ public class SubsystemManager {
   private OzoneImu imu;
   private SwerveDrivetrain drivetrain;
   private PowerDistribution pdp;
+  private ApriltagDetection detector;
   private intakeArm intakeArm;
   private Elevator elevator;
 
@@ -119,6 +122,7 @@ public class SubsystemManager {
       new SwerveModuleSetupInfo(42, 17, 2, 28.87),
       new SwerveModuleSetupInfo(43, 15, 0, 267.34),
     }, 1 / 8.07);
+    detector = new ApriltagDetection();
 
     elevator = new Elevator();
 
@@ -195,6 +199,10 @@ public class SubsystemManager {
     return drivetrain;
   }
 
+  public ApriltagDetection getDetector(){
+    return detector;
+  }
+  
   public Elevator getElevator() {
     return elevator;
   }
