@@ -29,7 +29,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     SubsystemManager.getInstance().init();
     paths = new AutonPaths(SubsystemManager.getInstance().getDrivetrain());
-    Thread visionThread = new Thread(() -> SubsystemManager.getInstance().getDetector().apriltagVisionThreadProc());
+    Thread visionThread = new Thread(() -> SubsystemManager.getInstance().getDetector().init());
     visionThread.setDaemon(true);
     visionThread.start();
   }
