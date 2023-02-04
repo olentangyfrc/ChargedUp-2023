@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.server.PathPlannerServer;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.auton.AutonPaths;
@@ -17,7 +21,6 @@ import frc.robot.auton.AutonPaths;
  * project.
  */
 public class Robot extends TimedRobot {
-  private AutonPaths paths;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -25,8 +28,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    PathPlannerServer.startServer(5811);
+
     SubsystemManager.getInstance().init();
-    paths = new AutonPaths(SubsystemManager.getInstance().getDrivetrain());
+    SubsystemManager.getInstance().getDrivetrain().resetLocation(new Pose2d());
   }
 
   @Override
@@ -35,7 +40,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    paths.getTestTrajectoryCommand().schedule();
+    SubsystemManager.getInstance().getAutonPaths().getTestTrajectoryCommand().schedule();
   }
 
   @Override

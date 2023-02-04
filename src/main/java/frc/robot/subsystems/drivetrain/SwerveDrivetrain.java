@@ -81,7 +81,6 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
     private boolean isInBrakeMode = false;
     private boolean isFollowingPath = false;
 
-
     /**
      * Initialize the drivetrain subsystem
      * 
@@ -204,6 +203,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         backLeftModule.updateState(SwerveModuleState.optimize(states[2], backLeftModule.getAngle()));
         backRightModule.updateState(SwerveModuleState.optimize(states[3], backRightModule.getAngle()));
 
+
     }
 
     /**
@@ -316,6 +316,10 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
      */
     public SwerveDriveOdometry getSwerveDriveOdometry(){
         return odometry;
+    }
+
+    public SwerveDriveKinematics getKinematics() {
+        return kinematics;
     }
 
     public void enableBrakeMode() {

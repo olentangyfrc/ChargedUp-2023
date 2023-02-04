@@ -25,7 +25,7 @@ public class Elevator extends SubsystemBase {
   private WPI_TalonFX rightElevator = new WPI_TalonFX(11);
 
   private MotorControllerGroup elevatorMotors;
-  private PIDController elevatorPid = new PIDController(19.128, 0, 3.2599);
+  private PIDController elevatorPid = new PIDController(19.128, 0, 1);
   private DigitalInput elevatorLimitSwitch = new DigitalInput(0);
 
   private double targetPosition = 0;

@@ -16,8 +16,10 @@ public class SingleFalconDrivetrain extends SwerveDrivetrain {
     @Override
     public void initializeSwerveModules(SwerveModuleSetupInfo[] moduleInfo, double driveGearRatio) {
 
-        translationPidConstants = new PIDConstants(0.8, 0, 0);
-        rotationPidConstants = new PIDConstants(0.1, 0, 0);
+        // translationPidConstants = new PIDConstants(1.5, 0, 0);
+        // rotationPidConstants = new PIDConstants(0.3, 0, 0);
+        translationPidConstants = new PIDConstants(0.3, 0, 0);
+        rotationPidConstants = new PIDConstants(2, 0, 0);
                 
         // Initialize swerve modules
         frontLeftModule = new SingleFalconModule(
