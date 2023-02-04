@@ -11,6 +11,7 @@ import java.util.EnumSet;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
+import com.ctre.phoenix.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,6 +31,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoubleArrayTopic;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableEvent;
@@ -44,17 +46,22 @@ public class apriltag_detection extends SubsystemBase {
   String tagFamily = "tag16h5";
   NetworkTableInstance inst = NetworkTableInstance.getDefault();
   OzoneImu gyro = SubsystemManager.getInstance().getImu();
-  NetworkTableEntry Time;
+  DoubleArrayTopic bot_pose;
   SwerveDrivePoseEstimator poseEstimator = SubsystemManager.getInstance().getDrivetrain().getSwerveDrivePoseEstimator();
   
   public void init(){
     apriltagVisionThreadProc();
-    networktables_listener();
+
   }
 
   public void networktables_listener() { 
-    NetworkTableInstance.getDefault().addListener(Time, EnumSet.of(NetworkTableEvent.Kind.kValueAll), event -> { try {
-      networkTables(event);
+    NetworkTable LL = inst.getTable("SmartDashboard"); //delcares the networktables to the already intizialized instance
+    bot_pose = LL.getDoubleArrayTopic("botpose_wpiblue");
+    SmartDashboard.putNumber("bot_pose", NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpiblue").getDoubleArray(new double[6])[0]);
+    SmartDashboard.putBoolean("LL SEE", false);
+    inst.addListener(bot_pose, EnumSet.of(NetworkTableEvent.Kind.kTopic), event -> { try {
+      networkTables();
+      SmartDashboard.putBoolean("LL SEE", true);
     } catch (JsonProcessingException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -65,7 +72,6 @@ public class apriltag_detection extends SubsystemBase {
 
   public void apriltagVisionThreadProc() {
     AprilTagDetector detector = new AprilTagDetector();
-    
     detector.addFamily(tagFamily, 0);
 
     // Microsoft Lifecam Parameters:
@@ -110,7 +116,7 @@ public class apriltag_detection extends SubsystemBase {
         Matrix apriltag_6 = VecBuilder.fill(Units.inchesToMeters(40.45), Units.inchesToMeters(174.19), Units.inchesToMeters(18.22));
         
         Matrix position;
-
+        /* 
         if(detection.getId()==1){
           position =  apriltag_1.minus(final_vec);
           addVision(position, lastVisionTime);
@@ -124,7 +130,7 @@ public class apriltag_detection extends SubsystemBase {
           position =  apriltag_6.minus(final_vec);
           addVision(position, lastVisionTime);
         }
-        
+        */
       }
 
       if (detections.length == 0) {
@@ -160,7 +166,7 @@ public class apriltag_detection extends SubsystemBase {
     Matrix corrected_bot_oriented = camera_to_bot.times(corrected_vec);
 
 
-    Matrix trans2_vec = VecBuilder.fill(0.1016, -0.381, -0.1778); //Change this where we know the displacement of the camera to the center of the robot
+    Matrix trans2_vec = VecBuilder.fill(-0.09, -0.1302, -0.3683); //Change this where we know the displacement of the camera to the center of the robot
     
     Matrix out_vec = trans2_vec.plus(corrected_bot_oriented);
 
@@ -176,15 +182,16 @@ public class apriltag_detection extends SubsystemBase {
     Matrix final_vec = bot_to_field.times(out_vec);
     
 
+    SmartDashboard.putNumber("pos_x", final_vec.get(0,0));
 
     return final_vec;
 
   }
 
-  public void networkTables(NetworkTableEvent event) throws JsonMappingException, JsonProcessingException {
+  public void networkTables() throws JsonMappingException, JsonProcessingException {
     NetworkTable LimelightTable = inst.getTable("limelight");
     double[] LL_pose = LimelightTable.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
-
+    SmartDashboard.putNumber("test", 1);
 
     NetworkTableEntry jsonDumpNetworkTableEntry = LimelightTable.getEntry("json");
 
@@ -197,7 +204,6 @@ public class apriltag_detection extends SubsystemBase {
     } catch (JsonProcessingException e) {
       SmartDashboard.putString(jsonDump, jsonDump);
     }
-    
     addVision(VecBuilder.fill(LL_pose[0], LL_pose[1]), tsValue);
   }
 
@@ -205,6 +211,22 @@ public class apriltag_detection extends SubsystemBase {
     poseEstimator.addVisionMeasurement((new Pose2d(position.get(0, 0), position.get(1, 0), gyro.getRotation2d())), lastVisionTime);
   }
 
+  @Override
+  public void periodic(){
+    if(inst.getTable("limelight").getEntry("tv").getDouble(0) == 1.0){
+      try {
+        networkTables();
+        SmartDashboard.putBoolean("LL SEE", true);
+
+      } catch (JsonMappingException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (JsonProcessingException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+  }
 }
 
 

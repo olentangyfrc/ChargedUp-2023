@@ -101,7 +101,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
 
         OzoneImu pigeon = SubsystemManager.getInstance().getImu();
         
-        poseEstimator = new SwerveDrivePoseEstimator(kinematics, pigeon.getRotation2d(), getModulePositions(), getLocation());
+        poseEstimator = new SwerveDrivePoseEstimator(kinematics, pigeon.getRotation2d(), getModulePositions(), new Pose2d(0,0,new Rotation2d()));
         // poseEstimator = new SwerveDrivePoseEstimator(new Rotation2d(), new Pose2d(), kinematics,
         //     new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.05, 0.05, Units.degreesToRadians(5)), 
         //     new MatBuilder<>(Nat.N1(), Nat.N1()).fill(Units.degreesToRadians(0.01)),
