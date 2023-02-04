@@ -3,15 +3,11 @@
 
 package frc.robot.subsystems;
 
-import frc.robot.SubsystemManager;
-import frc.robot.telemetry.OzoneImu;
-
 import java.util.EnumSet;
 
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
-import com.ctre.phoenix.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,12 +20,12 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayTopic;
 import edu.wpi.first.networktables.NetworkTable;
@@ -39,35 +35,36 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.SubsystemManager;
+import frc.robot.telemetry.OzoneImu;
 
 //Things to do: Make sure vision works on charge station
 
-public class apriltag_detection extends SubsystemBase {
-  String tagFamily = "tag16h5";
-  NetworkTableInstance inst = NetworkTableInstance.getDefault();
-  OzoneImu gyro = SubsystemManager.getInstance().getImu();
-  DoubleArrayTopic bot_pose;
-  SwerveDrivePoseEstimator poseEstimator = SubsystemManager.getInstance().getDrivetrain().getSwerveDrivePoseEstimator();
+public class ApriltagDetection extends SubsystemBase {
+  private String tagFamily = "tag16h5";
+  private NetworkTableInstance inst = NetworkTableInstance.getDefault();
+  private OzoneImu gyro = SubsystemManager.getInstance().getImu();
+  private DoubleArrayTopic bot_pose;
+  private SwerveDrivePoseEstimator poseEstimator = SubsystemManager.getInstance().getDrivetrain().getSwerveDrivePoseEstimator();
   
   public void init(){
     apriltagVisionThreadProc();
-
   }
 
-  public void networktables_listener() { 
-    NetworkTable LL = inst.getTable("SmartDashboard"); //delcares the networktables to the already intizialized instance
-    bot_pose = LL.getDoubleArrayTopic("botpose_wpiblue");
+  public void AddNetworktablesListener() { 
+    NetworkTable table = inst.getTable("SmartDashboard"); //delcares the networktables to the already intizialized instance
+    bot_pose = table.getDoubleArrayTopic("botpose_wpiblue");
     SmartDashboard.putNumber("bot_pose", NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpiblue").getDoubleArray(new double[6])[0]);
     SmartDashboard.putBoolean("LL SEE", false);
-    inst.addListener(bot_pose, EnumSet.of(NetworkTableEvent.Kind.kTopic), event -> { try {
-      networkTables();
-      SmartDashboard.putBoolean("LL SEE", true);
-    } catch (JsonProcessingException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } } );
-   
-
+    inst.addListener(bot_pose, EnumSet.of(NetworkTableEvent.Kind.kTopic), event -> {
+      try {
+        networkTables();
+        SmartDashboard.putBoolean("LL SEE", true);
+      } catch (JsonProcessingException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    });
   }
 
   public void apriltagVisionThreadProc() {
@@ -181,11 +178,7 @@ public class apriltag_detection extends SubsystemBase {
         0, 0, 1);
     Matrix final_vec = bot_to_field.times(out_vec);
     
-
-    SmartDashboard.putNumber("pos_x", final_vec.get(0,0));
-
     return final_vec;
-
   }
 
   public void networkTables() throws JsonMappingException, JsonProcessingException {
