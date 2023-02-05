@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.telemetry.commands;
 
+import edu.wpi.first.hal.simulation.RoboRioDataJNI;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.PIDController;
@@ -19,15 +20,17 @@ import frc.robot.subsystems.telemetry.OzoneImu;
 public class autoBalancePitch extends CommandBase {
   SwerveDrivetrain drivetrain;
   OzoneImu pigeon;
-  final double SPEED = .0668;
-  final double TOLERANCE = 10.0;
+  final double SPEED = .01;
+  final double TOLERANCE = 2.0;
   double pitchSpeed = 0;
   double previousPitch = 0;
   double rollSpeed = 0;
   double pitch;
 
-  AnalogPotentiometer ultrasonic;
-  double distance = 0;
+  double PITCH_PID = 0;
+  double ROLL_PID = 0;
+
+  PIDController pid = new PIDController(0.0061, 0, 0);
 
   /** Creates a new autoBalance. */
   public autoBalancePitch(SwerveDrivetrain drivetrain) {
@@ -37,34 +40,38 @@ public class autoBalancePitch extends CommandBase {
     addRequirements(drivetrain);
   }
 
-  public double bangBang(double pitch, double tolerance) {
+  /*public double bangBang(double pitch, double tolerance) {
     return Math.signum(MathUtil.applyDeadband(pitch, tolerance));
   }
+  */
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     pitch = pigeon.getPitch();
-    ultrasonic = new AnalogPotentiometer(4);
+    pid.setTolerance(TOLERANCE);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     pitch = pigeon.getPitch();
-    distance = ultrasonic.get();
-    SmartDashboard.putNumber("Ultrasonic Distance", distance);
+    PITCH_PID = pid.calculate(pigeon.getPitch());
+    ROLL_PID = pid.calculate(pigeon.getRoll());
+    ChassisSpeeds speed = new ChassisSpeeds(pid.calculate(pigeon.getPitch()), pid.calculate(pigeon.getRoll()), 0);
+    drivetrain.drive(speed, false);
 
+    previousPitch = pitch;
 
-    SmartDashboard.putNumber("Bang Bang Output", bangBang(pitch, TOLERANCE));
+    SmartDashboard.putNumber("PID Pitch Output", PITCH_PID);
+    SmartDashboard.putNumber("PID Roll Output", ROLL_PID);
 
-    if (bangBang(pitch, TOLERANCE) != 0) {
+    //SmartDashboard.putNumber("Bang Bang Output", bangBang(pitch, TOLERANCE));
+
+    /*if (bangBang(pitch, TOLERANCE) != 0) {
       pitchSpeed = SPEED * bangBang(pitch, TOLERANCE);
     }
-
-    ChassisSpeeds chassisSpeeds = new ChassisSpeeds(pitchSpeed, rollSpeed, 0);
-    drivetrain.drive(chassisSpeeds, false);
-    previousPitch = pitch;
+    */
   }
 
   // Called once the command ends or is interrupted.
