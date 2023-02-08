@@ -1,8 +1,7 @@
-package frc.robot.subsystems.intakeArm.commands;
-
-import frc.robot.subsystems.intakeArm.intakeArm;
+package frc.robot.subsystems.prototypeone.intakeArm.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.subsystems.prototypeone.intakeArm.intakeArm;
 
 import java.util.logging.Logger;
 

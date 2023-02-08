@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intakeArm;
+package frc.robot.subsystems.prototypeone.intakeArm;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;

@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.prototypeone.elevator;
 
 import java.util.Map;
 
@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.elevator.commands.MoveElevator;
+import frc.robot.subsystems.prototypeone.elevator.commands.MoveElevator;
 
 public class Elevator extends SubsystemBase {
   public static final int MOTOR_TICKS_PER_ROTATION = 2048;

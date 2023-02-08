@@ -19,12 +19,15 @@ import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
 import frc.robot.subsystems.ApriltagDetection;
-
-import frc.robot.subsystems.intakeArm.intakeArm;
-import frc.robot.subsystems.intakeArm.commands.armDown;
-import frc.robot.subsystems.intakeArm.commands.armUp;
-import frc.robot.subsystems.intakeArm.commands.toggleClaw;
-import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.activeintake.ActiveIntake;
+import frc.robot.subsystems.activeintake.commands.ReverseIntake;
+import frc.robot.subsystems.activeintake.commands.StartIntake;
+import frc.robot.subsystems.activeintake.commands.StopIntake;
+import frc.robot.subsystems.prototypeone.elevator.Elevator;
+import frc.robot.subsystems.prototypeone.intakeArm.intakeArm;
+import frc.robot.subsystems.prototypeone.intakeArm.commands.armDown;
+import frc.robot.subsystems.prototypeone.intakeArm.commands.armUp;
+import frc.robot.subsystems.prototypeone.intakeArm.commands.toggleClaw;
 import frc.robot.telemetry.OzoneImu;
 import frc.robot.telemetry.Pigeon;
 import frc.robot.telemetry.Pigeon2;
@@ -43,6 +46,8 @@ public class SubsystemManager {
   private intakeArm intakeArm;
   private Elevator elevator;
 
+  private ActiveIntake activeIntake;
+
   /**
    * Map of known bot addresses and respective types
    */
@@ -54,7 +59,7 @@ public class SubsystemManager {
     "00:80:2F:28:64:38", BotType.RIO99,
     "00:80:2F:35:54:1E", BotType.CHARGED_UP_PROTO,
     "00:80:2F:17:D7:4B", BotType.RIO2,
-    "00:80:2F:27:04:C6", BotType.RIO3,
+    "00:80:2F:27:04:C6", BotType.CHARGED_UP_PROTO_2,
     "00:80:2F:27:1D:E9", BotType.BLUE
   );
 
@@ -105,11 +110,37 @@ public class SubsystemManager {
       case CHARGED_UP_PROTO:
         initCHARGED_UP_PROTO();
         break;
+      case CHARGED_UP_PROTO_2:
+        initCHARGED_UP_PROTO_2();
+        break;
       default:
         logger.info("Unrecognized bot");
       }
   }
   
+  private void initCHARGED_UP_PROTO_2() {
+    imu = new Pigeon2(2);
+    imu.reset();
+    
+    // Create and initialize all subsystems:
+    drivetrain = new SingleFalconDrivetrain();
+    drivetrain.init(new SwerveModuleSetupInfo[] {
+      new SwerveModuleSetupInfo(31, 14, 0, 59.85),
+      new SwerveModuleSetupInfo(30, 1, 3, 354.37),
+      new SwerveModuleSetupInfo(32, 9, 1, 48.9),
+      new SwerveModuleSetupInfo(33, 62, 2, 182.28),
+    }, 1 / 8.07);
+
+    activeIntake = new ActiveIntake(58, 3);
+
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new StartIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, new StopIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new ReverseIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton, new StopIntake(activeIntake));
+  }
+
+
   private void initCHARGED_UP_PROTO() {
     imu = new Pigeon2(5);
     imu.reset();
@@ -268,8 +299,8 @@ public class SubsystemManager {
     BLUE,
     RIO99,
     CHARGED_UP_PROTO,
+    CHARGED_UP_PROTO_2,
     RIO2, 
-    RIO3,
     UNRECOGNIZED,
   }
 }
