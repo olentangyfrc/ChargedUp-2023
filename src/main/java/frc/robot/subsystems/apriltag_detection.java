@@ -27,6 +27,7 @@ import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
@@ -204,11 +205,21 @@ public class apriltag_detection extends SubsystemBase {
     } catch (JsonProcessingException e) {
       SmartDashboard.putString(jsonDump, jsonDump);
     }
-    addVision(VecBuilder.fill(LL_pose[0], LL_pose[1]), tsValue);
+    Rotation2d LL_angle = new Rotation2d(LL_pose[6]);
+    addVision(VecBuilder.fill(LL_pose[0], LL_pose[1]), tsValue, LL_angle);
   }
 
-  private void addVision(Matrix position, double lastVisionTime){
-    poseEstimator.addVisionMeasurement((new Pose2d(position.get(0, 0), position.get(1, 0), gyro.getRotation2d())), lastVisionTime);
+  private void addVision(Matrix position, double lastVisionTime, Rotation2d angle){
+    if(position.get(0, 0) > 0 & position.get(1,0) > 0){
+      Pose2d robot_pose = (new Pose2d(position.get(0, 0), position.get(1, 0), angle));
+      if(poseEstimator.getEstimatedPosition().minus(robot_pose).getX() < 1 & poseEstimator.getEstimatedPosition().minus(robot_pose).getY() < 1){
+        if(poseEstimator.getEstimatedPosition().getRotation().minus(angle).getDegrees() < 10){
+          poseEstimator.addVisionMeasurement(robot_pose, lastVisionTime);
+        }
+      }
+
+    }
+  
   }
 
   @Override
