@@ -210,15 +210,7 @@ public class apriltag_detection extends SubsystemBase {
   }
 
   private void addVision(Matrix position, double lastVisionTime, Rotation2d angle){
-    if(position.get(0, 0) > 0 & position.get(1,0) > 0){
-      Pose2d robot_pose = (new Pose2d(position.get(0, 0), position.get(1, 0), angle));
-      if(poseEstimator.getEstimatedPosition().minus(robot_pose).getX() < 1 & poseEstimator.getEstimatedPosition().minus(robot_pose).getY() < 1){
-        if(poseEstimator.getEstimatedPosition().getRotation().minus(angle).getDegrees() < 10){
-          poseEstimator.addVisionMeasurement(robot_pose, lastVisionTime);
-        }
-      }
 
-    }
   
   }
 
