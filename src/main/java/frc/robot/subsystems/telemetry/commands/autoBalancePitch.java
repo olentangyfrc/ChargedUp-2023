@@ -20,7 +20,9 @@ import frc.robot.subsystems.telemetry.OzoneImu;
 public class autoBalancePitch extends CommandBase {
   SwerveDrivetrain drivetrain;
   OzoneImu pigeon;
-  final double SPEED = .01;
+  //safe speed: 0.01
+  final double SPEED = 0.01;
+  //safe tolernace = 2.0
   final double TOLERANCE = 2.0;
   double pitchSpeed = 0;
   double previousPitch = 0;
@@ -30,7 +32,8 @@ public class autoBalancePitch extends CommandBase {
   double PITCH_PID = 0;
   double ROLL_PID = 0;
 
-  PIDController pid = new PIDController(0.0061, 0, 0);
+  //safe p: 0.00585
+  PIDController pid = new PIDController(0.00585, 0, 0);
 
   /** Creates a new autoBalance. */
   public autoBalancePitch(SwerveDrivetrain drivetrain) {
