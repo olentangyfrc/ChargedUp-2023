@@ -7,7 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.auton.AutonPaths;
-import frc.robot.subsystems.apriltag_detection;
+import frc.robot.subsystems.ApriltagDetection;
 
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;

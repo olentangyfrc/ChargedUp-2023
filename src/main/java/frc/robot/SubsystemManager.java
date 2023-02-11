@@ -18,8 +18,13 @@ import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
-import frc.robot.subsystems.apriltag_detection;
+import frc.robot.subsystems.ApriltagDetection;
 
+import frc.robot.subsystems.intakeArm.intakeArm;
+import frc.robot.subsystems.intakeArm.commands.armDown;
+import frc.robot.subsystems.intakeArm.commands.armUp;
+import frc.robot.subsystems.intakeArm.commands.toggleClaw;
+import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.telemetry.OzoneImu;
 import frc.robot.telemetry.Pigeon;
 import frc.robot.telemetry.Pigeon2;
@@ -34,7 +39,9 @@ public class SubsystemManager {
   private OzoneImu imu;
   private SwerveDrivetrain drivetrain;
   private PowerDistribution pdp;
-  private apriltag_detection detector;
+  private ApriltagDetection detector;
+  private intakeArm intakeArm;
+  private Elevator elevator;
 
   /**
    * Map of known bot addresses and respective types
@@ -115,9 +122,17 @@ public class SubsystemManager {
       new SwerveModuleSetupInfo(42, 17, 2, 28.87),
       new SwerveModuleSetupInfo(43, 15, 0, 267.34),
     }, 1 / 8.07);
-    detector = new apriltag_detection();
+    detector = new ApriltagDetection();
+
+    elevator = new Elevator();
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
+
+    intakeArm = new intakeArm();
+    intakeArm.init();
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new toggleClaw(intakeArm));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new armDown(intakeArm));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new armUp(intakeArm));
   }
   
   private void initBLUE() {}
@@ -184,8 +199,12 @@ public class SubsystemManager {
     return drivetrain;
   }
 
-  public apriltag_detection getDetector(){
+  public ApriltagDetection getDetector(){
     return detector;
+  }
+  
+  public Elevator getElevator() {
+    return elevator;
   }
 
 
