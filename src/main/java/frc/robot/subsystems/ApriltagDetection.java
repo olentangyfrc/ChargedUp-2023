@@ -25,6 +25,7 @@ import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayTopic;
@@ -184,7 +185,7 @@ public class ApriltagDetection extends SubsystemBase {
   public void networkTables() throws JsonMappingException, JsonProcessingException {
     NetworkTable LimelightTable = inst.getTable("limelight");
     double[] LL_pose = LimelightTable.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
-    SmartDashboard.putNumber("test", 1);
+    SmartDashboard.putNumber("test", 12);
 
     NetworkTableEntry jsonDumpNetworkTableEntry = LimelightTable.getEntry("json");
 
@@ -197,20 +198,33 @@ public class ApriltagDetection extends SubsystemBase {
     } catch (JsonProcessingException e) {
       SmartDashboard.putString(jsonDump, jsonDump);
     }
-    addVision(VecBuilder.fill(LL_pose[0], LL_pose[1]), tsValue);
+    SmartDashboard.putNumberArray("posx", LL_pose);
+    addVision(VecBuilder.fill(LL_pose[0], LL_pose[1]), tsValue, new Rotation2d(LL_pose[5]));
   }
 
-  private void addVision(Matrix position, double lastVisionTime){
-    poseEstimator.addVisionMeasurement((new Pose2d(position.get(0, 0), position.get(1, 0), gyro.getRotation2d())), lastVisionTime);
+  private void addVision(Matrix position, double lastVisionTime, Rotation2d angle){
+    if((position.get(0, 0) > 0 )& (position.get(1,0) > 0)){
+      Pose2d robot_pose = (new Pose2d(position.get(0, 0), position.get(1, 0), angle));
+      SmartDashboard.putBoolean("In Field", true);
+      if(poseEstimator.getEstimatedPosition().minus(robot_pose).getX() < 4 & poseEstimator.getEstimatedPosition().minus(robot_pose).getY() < 4){
+        SmartDashboard.putBoolean("Next to Vision", true);
+        if(poseEstimator.getEstimatedPosition().getRotation().minus(angle).getDegrees() < 10){
+          SmartDashboard.putBoolean("Close to Gryo", true);
+          poseEstimator.addVisionMeasurement(robot_pose, lastVisionTime, VecBuilder.fill(1, 1, 1));
+        }
+      }
+    }
+
   }
 
   @Override
   public void periodic(){
+    SmartDashboard.putNumber("Saw Vision", inst.getTable("limelight").getEntry("tv").getDouble(0));
+
     if(inst.getTable("limelight").getEntry("tv").getDouble(0) == 1.0){
       try {
         networkTables();
-        SmartDashboard.putBoolean("LL SEE", true);
-
+        SmartDashboard.putBoolean("Saw Vision", true);
       } catch (JsonMappingException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
