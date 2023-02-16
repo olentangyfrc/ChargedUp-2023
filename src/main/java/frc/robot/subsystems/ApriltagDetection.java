@@ -3,10 +3,20 @@
 
 package frc.robot.subsystems;
 
+import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
 
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -25,16 +35,22 @@ import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayTopic;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import frc.robot.SubsystemManager;
 import frc.robot.telemetry.OzoneImu;
 
@@ -46,175 +62,81 @@ public class ApriltagDetection extends SubsystemBase {
   private OzoneImu gyro = SubsystemManager.getInstance().getImu();
   private DoubleArrayTopic bot_pose;
   private SwerveDrivePoseEstimator poseEstimator = SubsystemManager.getInstance().getDrivetrain().getSwerveDrivePoseEstimator();
-  
+  private PhotonCamera camera = new PhotonCamera("OV5647");
+
   public void init(){
 //     apriltagVisionThreadProc();
   }
 
-  public void AddNetworktablesListener() { 
-    NetworkTable table = inst.getTable("SmartDashboard"); //delcares the networktables to the already intizialized instance
-    bot_pose = table.getDoubleArrayTopic("botpose_wpiblue");
-    SmartDashboard.putNumber("bot_pose", NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpiblue").getDoubleArray(new double[6])[0]);
-    SmartDashboard.putBoolean("LL SEE", false);
-    inst.addListener(bot_pose, EnumSet.of(NetworkTableEvent.Kind.kTopic), event -> {
-      try {
-        networkTables();
-        SmartDashboard.putBoolean("LL SEE", true);
-      } catch (JsonProcessingException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+
+
+  public void photonvision(List<PhotonTrackedTarget> targets, PhotonPipelineResult result) throws IOException{
+    PhotonTrackedTarget[] targetArray = targets.toArray();
+    int counter = 0;
+    //Apritag area bigger than 5%
+    for(int i = 0; i < targetArray.length; i++){
+      if (((PhotonTrackedTarget) targetArray[i]).getArea() > 0.01){
+        counter++;
+      }else{
+        camera.takeOutputSnapshot();
       }
-    });
-  }
-
-  public void apriltagVisionThreadProc() {
-    AprilTagDetector detector = new AprilTagDetector();
-    detector.addFamily(tagFamily, 0);
-
-    // Microsoft Lifecam Parameters:
-    // https://www.chiefdelphi.com/t/wpilib-apriltagdetector-sample-code/421411/21
-    // Note: These parameters won't work with the tag family I've been testing with.
-    // However, they will work with the actual tag family that is being used.
-    AprilTagPoseEstimator.Config poseEstConfig =
-        new AprilTagPoseEstimator.Config(
-            0.1524, 699.3778103158814, 677.7161226393544, 345.6059345433618, 207.12741326228522);
-    AprilTagPoseEstimator estimator = new AprilTagPoseEstimator(poseEstConfig);
-
-    UsbCamera camera = CameraServer.startAutomaticCapture();
-    camera.setResolution(640, 480);
-    camera.setExposureManual(50);
-    camera.setExposureHoldCurrent();
-
-    CvSink cvSink = CameraServer.getVideo();
-    CvSource outputStream = CameraServer.putVideo("USB Camera", 640, 480);
-
-    Mat mat = new Mat();
-    Mat grayMat = new Mat();
-
-    while (!Thread.interrupted()) {
-      if (cvSink.grabFrame(mat) == 0) {
-        outputStream.notifyError(cvSink.getError());
-        continue;
+      //Save Images when Ambiguity is less than 5
+      SmartDashboard.putNumber("Ambiguity", ((PhotonTrackedTarget) targetArray[i]).getPoseAmbiguity());
+      if(((PhotonTrackedTarget) targetArray[i]).getPoseAmbiguity() < 5){
+        camera.takeOutputSnapshot();
       }
 
-      Imgproc.cvtColor(mat, grayMat, Imgproc.COLOR_RGB2GRAY);
-
-      AprilTagDetection[] detections = detector.detect(grayMat);
-
-      for (AprilTagDetection detection : detections) {
-        Transform3d pose = estimator.estimate(detection);
-        double lastVisionTime = Timer.getFPGATimestamp();
-        Matrix final_vec = transform(pose);
-
-
-        Matrix apriltag_1 = VecBuilder.fill(Units.inchesToMeters(610.77),Units.inchesToMeters(42.19),Units.inchesToMeters(18.22));
-        Matrix apriltag_8 = VecBuilder.fill( Units.inchesToMeters(40.45), Units.inchesToMeters(42.19), Units.inchesToMeters(18.22));
-        Matrix apriltag_7 = VecBuilder.fill( Units.inchesToMeters(40.45), Units.inchesToMeters(108.19), Units.inchesToMeters(18.22));
-        Matrix apriltag_6 = VecBuilder.fill(Units.inchesToMeters(40.45), Units.inchesToMeters(174.19), Units.inchesToMeters(18.22));
+    }
+    //if all tag area is above 5%
+    if (counter == targetArray.length){
+      SmartDashboard.putBoolean("Step 2", true);
+      if (result.getBestTarget().getArea() > 0.14){
+        SmartDashboard.putBoolean("Step 3", true);
+        String path = Filesystem.getDeployDirectory().toPath().resolve("aprilTagFieldLayout.json").toString();
+        AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(path);
+        //Cam to Robot
+        Transform3d robotToCam = new Transform3d(new Translation3d(0.11, -0.33, 0.335), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
         
-        Matrix position;
-        /* 
-        if(detection.getId()==1){
-          position =  apriltag_1.minus(final_vec);
-          addVision(position, lastVisionTime);
-        }else if (detection.getId()==8){
-          position =  apriltag_8.minus(final_vec);
-          addVision(position, lastVisionTime);
-        }else if (detection.getId()==7){
-          position =  apriltag_7.minus(final_vec);
-          addVision(position, lastVisionTime);
-        }else if (detection.getId()==6){
-          position =  apriltag_6.minus(final_vec);
-          addVision(position, lastVisionTime);
+        // Construct PhotonPoseEstimator
+        PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, camera, robotToCam);
+        Optional<EstimatedRobotPose> poseobject = photonPoseEstimator.update();
+        EstimatedRobotPose robotPose;
+        try {
+          robotPose = poseobject.get();
+                  //check if its on the ground
+          SmartDashboard.putNumber("pose_z", robotPose.estimatedPose.getZ());
+          if(-1 < robotPose.estimatedPose.getZ() && robotPose.estimatedPose.getZ() < 1){
+            SmartDashboard.putBoolean("Step 4", true);
+            addVision(robotPose.estimatedPose, robotPose.timestampSeconds);
+          }
+        } catch (Exception e) {
+          // TODO: handle exception
         }
-        */
+        
+
+
       }
-
-      if (detections.length == 0) {
-        System.out.println("Apriltag Not Detected");
-      }
-      
     }
-    detector.close();
+
   }
 
-  public Matrix transform(Transform3d pose){
-    Matrix in_vec = VecBuilder.fill(pose.getX(), pose.getY(), pose.getZ());
-
-    Matrix cv2_correction_mat = Matrix.mat(Nat.N3(), Nat.N3()).fill(
-      0, 0, 1,
-      -1, 0, 0,
-      0, -1, 0);
-
-      Matrix corrected_vec = cv2_correction_mat.times(in_vec);
-
-  
-
-    // Build our rotation matrix
-    double pitch = -32.25 * Math.PI / 180; //Change Angle
-    double c = Math.cos(pitch);
-    double s = Math.sin(pitch);
-    Matrix camera_to_bot = Matrix.mat(Nat.N3(), Nat.N3()).fill(
-        c, 0, s,
-        0, 1, 0,
-      -s, 0, c);
-
-    // Rotate
-    Matrix corrected_bot_oriented = camera_to_bot.times(corrected_vec);
-
-
-    Matrix trans2_vec = VecBuilder.fill(-0.09, -0.1302, -0.3683); //Change this where we know the displacement of the camera to the center of the robot
-    
-    Matrix out_vec = trans2_vec.plus(corrected_bot_oriented);
-
-
-    
-    double gyro_angle = SubsystemManager.getInstance().getImu().getAngle();
-    c = Math.cos(gyro_angle);
-    s = Math.sin(gyro_angle);
-    Matrix bot_to_field = Matrix.mat(Nat.N3(), Nat.N3()).fill(
-        c, -s, 0,
-        s, c, 0,
-        0, 0, 1);
-    Matrix final_vec = bot_to_field.times(out_vec);
-    
-    return final_vec;
-  }
-
-  public void networkTables() throws JsonMappingException, JsonProcessingException {
-    NetworkTable LimelightTable = inst.getTable("limelight");
-    double[] LL_pose = LimelightTable.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
-    SmartDashboard.putNumber("test", 1);
-
-    NetworkTableEntry jsonDumpNetworkTableEntry = LimelightTable.getEntry("json");
-
-    String jsonDump = jsonDumpNetworkTableEntry.getString("{}");  
-    double tsValue = 0;
-    try {
-      ObjectMapper mapper = new ObjectMapper();
-      JsonNode jsonNodeData = mapper.readTree(jsonDump);
-      tsValue = jsonNodeData.path("Results").path("tl").asDouble();
-    } catch (JsonProcessingException e) {
-      SmartDashboard.putString(jsonDump, jsonDump);
+  private void addVision(Pose3d position, double lastVisionTime){
+    //check it is in the field
+    if((position.getX() > 0) && (position.getY() > 0)){
+      SmartDashboard.putBoolean("In Field", true);
+      poseEstimator.addVisionMeasurement(position.toPose2d(), lastVisionTime, VecBuilder.fill(1, 1, 1));
+      //gyro.setReset(position.getRotation().toRotation2d());
     }
-    addVision(VecBuilder.fill(LL_pose[0], LL_pose[1]), tsValue);
-  }
-
-  private void addVision(Matrix position, double lastVisionTime){
-    poseEstimator.addVisionMeasurement((new Pose2d(position.get(0, 0), position.get(1, 0), gyro.getRotation2d())), lastVisionTime);
   }
 
   @Override
   public void periodic(){
-    if(inst.getTable("limelight").getEntry("tv").getDouble(0) == 1.0){
+    var result = camera.getLatestResult();
+    if(result.hasTargets()){
       try {
-        networkTables();
-        SmartDashboard.putBoolean("LL SEE", true);
-
-      } catch (JsonMappingException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (JsonProcessingException e) {
+        SmartDashboard.putBoolean("Step 1", true);
+        photonvision(result.getTargets(), result);
+      } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
