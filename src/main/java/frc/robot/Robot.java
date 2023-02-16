@@ -11,6 +11,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.auton.AutonPaths;
+import frc.robot.subsystems.ApriltagDetection;
+
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -32,7 +34,10 @@ public class Robot extends TimedRobot {
 
     SubsystemManager.getInstance().init();
     SubsystemManager.getInstance().getDrivetrain().resetLocation(new Pose2d(1.772, 1.149, Rotation2d.fromDegrees(0)));;
-
+    
+    Thread visionThread = new Thread(() -> SubsystemManager.getInstance().getDetector().init());
+    visionThread.setDaemon(true);
+    visionThread.start();
   }
 
   @Override
