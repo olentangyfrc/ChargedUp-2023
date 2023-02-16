@@ -71,7 +71,7 @@ public class ApriltagDetection extends SubsystemBase {
 
 
   public void photonvision(List<PhotonTrackedTarget> targets, PhotonPipelineResult result) throws IOException{
-    var targetArray = targets.toArray();
+    PhotonTrackedTarget[] targetArray = targets.toArray();
     int counter = 0;
     //Apritag area bigger than 5%
     for(int i = 0; i < targetArray.length; i++){
@@ -93,7 +93,7 @@ public class ApriltagDetection extends SubsystemBase {
       if (result.getBestTarget().getArea() > 0.14){
         SmartDashboard.putBoolean("Step 3", true);
         String path = Filesystem.getDeployDirectory().toPath().resolve("aprilTagFieldLayout.json").toString();
-        var aprilTagFieldLayout = new AprilTagFieldLayout(path);
+        AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(path);
         //Cam to Robot
         Transform3d robotToCam = new Transform3d(new Translation3d(0.11, -0.33, 0.335), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
         
