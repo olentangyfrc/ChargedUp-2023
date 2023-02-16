@@ -31,7 +31,8 @@ public class Robot extends TimedRobot {
     PathPlannerServer.startServer(5811);
 
     SubsystemManager.getInstance().init();
-    SubsystemManager.getInstance().getDrivetrain().resetLocation(new Pose2d());
+    SubsystemManager.getInstance().getDrivetrain().resetLocation(new Pose2d(1.772, 1.149, Rotation2d.fromDegrees(0)));;
+
   }
 
   @Override

@@ -11,9 +11,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.IO.ButtonActionType;
 import frc.robot.IO.ControllerButton;
+import frc.robot.auton.AutoDashboardManager;
+import frc.robot.auton.AutoNodeUtility;
 import frc.robot.auton.AutonPaths;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
@@ -44,6 +47,7 @@ public class SubsystemManager {
   private intakeArm intakeArm;
   private Elevator elevator;
   private AutonPaths paths;
+  private AutoDashboardManager autoDashboardManager;
 
   /**
    * Map of known bot addresses and respective types
@@ -129,6 +133,7 @@ public class SubsystemManager {
     }, 1 / 8.07);
 
     paths = new AutonPaths(drivetrain);
+    autoDashboardManager = new AutoDashboardManager();
 
     elevator = new Elevator();
 
@@ -142,7 +147,9 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new MoveElevator(elevator, Elevator.ELEVATOR_HIGH_POS));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new MoveElevator(elevator, 0));
 
-    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.Start, new InstantCommand(() -> paths.pathToPositionCommand(new Pose2d(1.85, 1.05, Rotation2d.fromDegrees(180))).schedule()));
+    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.Start, Commands.run(
+      () -> paths.pathToPositionCommand(AutoNodeUtility.getNodeDrivePosition(autoDashboardManager.getSelectedNode())).schedule()
+    ));
   }
   
   private void initBLUE() {}
@@ -190,7 +197,6 @@ public class SubsystemManager {
    * Initializes the RIO3 subsystems
    */
   public void initRIO3() {}
-  
 
   //---------------------------------------------------
   // Subsystem getter methods
@@ -217,6 +223,10 @@ public class SubsystemManager {
 
   public AutonPaths getAutonPaths() {
     return paths;
+  }
+
+  public AutoDashboardManager getAutoDashboardManager() {
+    return autoDashboardManager;
   }
 
 

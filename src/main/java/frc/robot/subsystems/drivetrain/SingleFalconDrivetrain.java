@@ -18,7 +18,7 @@ public class SingleFalconDrivetrain extends SwerveDrivetrain {
 
         // translationPidConstants = new PIDConstants(1.5, 0, 0);
         // rotationPidConstants = new PIDConstants(0.3, 0, 0);
-        translationPidConstants = new PIDConstants(0.3, 0, 0);
+        translationPidConstants = new PIDConstants(0.5, 0, 0);
         rotationPidConstants = new PIDConstants(2, 0, 0);
                 
         // Initialize swerve modules
