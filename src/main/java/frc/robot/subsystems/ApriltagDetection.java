@@ -4,6 +4,7 @@
 package frc.robot.subsystems;
 
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +46,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -68,39 +70,51 @@ public class ApriltagDetection extends SubsystemBase {
 
 
 
-  public void photonvision(List<PhotonTrackedTarget> targets) throws IOException{
+  public void photonvision(List<PhotonTrackedTarget> targets, PhotonPipelineResult result) throws IOException{
     var targetArray = targets.toArray();
     int counter = 0;
     //Apritag area bigger than 5%
     for(int i = 0; i < targetArray.length; i++){
-      if (((PhotonTrackedTarget) targetArray[i]).getArea() > 5){
+      if (((PhotonTrackedTarget) targetArray[i]).getArea() > 0.01){
         counter++;
       }else{
-        //camera.takeOutputSnapshot();
+        camera.takeOutputSnapshot();
       }
       //Save Images when Ambiguity is less than 5
       SmartDashboard.putNumber("Ambiguity", ((PhotonTrackedTarget) targetArray[i]).getPoseAmbiguity());
       if(((PhotonTrackedTarget) targetArray[i]).getPoseAmbiguity() < 5){
-        //camera.takeOutputSnapshot();
+        camera.takeOutputSnapshot();
       }
 
     }
     //if all tag area is above 5%
     if (counter == targetArray.length){
-      if (((PhotonPipelineResult) targets).getBestTarget().getArea() > 10){
-        var aprilTagFieldLayout = new AprilTagFieldLayout("aprilTagFieldLayout.JSON");
+      SmartDashboard.putBoolean("Step 2", true);
+      if (result.getBestTarget().getArea() > 0.14){
+        SmartDashboard.putBoolean("Step 3", true);
+        String path = Filesystem.getDeployDirectory().toPath().resolve("aprilTagFieldLayout.json").toString();
+        var aprilTagFieldLayout = new AprilTagFieldLayout(path);
         //Cam to Robot
-        Transform3d robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+        Transform3d robotToCam = new Transform3d(new Translation3d(0.11, -0.33, 0.335), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
         
         // Construct PhotonPoseEstimator
         PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, camera, robotToCam);
-        Optional<EstimatedRobotPose> result = photonPoseEstimator.update();
-        EstimatedRobotPose camPose = result.get();
-
-        //check if its on the ground
-        if(-1 < camPose.estimatedPose.getZ() && camPose.estimatedPose.getZ() < 1){
-          addVision(camPose.estimatedPose, camPose.timestampSeconds);
+        Optional<EstimatedRobotPose> poseobject = photonPoseEstimator.update();
+        EstimatedRobotPose robotPose;
+        try {
+          robotPose = poseobject.get();
+                  //check if its on the ground
+          SmartDashboard.putNumber("pose_z", robotPose.estimatedPose.getZ());
+          if(-1 < robotPose.estimatedPose.getZ() && robotPose.estimatedPose.getZ() < 1){
+            SmartDashboard.putBoolean("Step 4", true);
+            addVision(robotPose.estimatedPose, robotPose.timestampSeconds);
+          }
+        } catch (Exception e) {
+          // TODO: handle exception
         }
+        
+
+
       }
     }
 
@@ -111,7 +125,7 @@ public class ApriltagDetection extends SubsystemBase {
     if((position.getX() > 0) && (position.getY() > 0)){
       SmartDashboard.putBoolean("In Field", true);
       poseEstimator.addVisionMeasurement(position.toPose2d(), lastVisionTime, VecBuilder.fill(1, 1, 1));
-      gyro.setReset(position.getRotation().toRotation2d());
+      //gyro.setReset(position.getRotation().toRotation2d());
     }
   }
 
@@ -120,7 +134,8 @@ public class ApriltagDetection extends SubsystemBase {
     var result = camera.getLatestResult();
     if(result.hasTargets()){
       try {
-        photonvision(result.getTargets());
+        SmartDashboard.putBoolean("Step 1", true);
+        photonvision(result.getTargets(), result);
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
