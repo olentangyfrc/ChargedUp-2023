@@ -123,7 +123,7 @@ public class SubsystemManager {
       new SwerveModuleSetupInfo(43, 15, 0, 267.34),
     }, 1 / 8.07);
     detector = new ApriltagDetection();
-
+    detector.init();
     elevator = new Elevator();
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
