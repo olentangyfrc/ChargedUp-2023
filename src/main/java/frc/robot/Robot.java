@@ -33,7 +33,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     SubsystemManager.getInstance().init();
     paths = new AutonPaths(SubsystemManager.getInstance().getDrivetrain());
-    SmartDashboard.putData("Auto Balance", new autoBalancePitchGroup(new Rotation2d(0)));
+    SmartDashboard.putData("Auto Balance", new autoBalancePitchGroup(/*new Rotation2d(0)*/));
     SmartDashboard.putData("Reset Gyro", new resetGyro());
   }
 

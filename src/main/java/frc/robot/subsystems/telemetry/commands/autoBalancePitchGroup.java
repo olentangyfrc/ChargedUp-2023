@@ -17,9 +17,10 @@ import frc.robot.subsystems.drivetrain.commands.RotateToAngle;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class autoBalancePitchGroup extends SequentialCommandGroup {
   /** Creates a new autoBalancePitchGroup. */
-  public autoBalancePitchGroup(Rotation2d rotateAngle) {
+  public autoBalancePitchGroup(/*Rotation2d rotateAngle*/) {
     SwerveDrivetrain drivetrain = SubsystemManager.getInstance().getDrivetrain();
-    addCommands(new RotateToAngle(drivetrain, rotateAngle));
+    //addCommands(new RotateToAngle(drivetrain, rotateAngle));
+    addCommands(new driveUp(drivetrain));
     addCommands(new autoBalancePitch(drivetrain));
   }
 }

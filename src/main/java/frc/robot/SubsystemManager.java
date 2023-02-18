@@ -23,6 +23,9 @@ import frc.robot.subsystems.telemetry.OzoneImu;
 import frc.robot.subsystems.telemetry.Pigeon;
 import frc.robot.subsystems.telemetry.Pigeon2;
 import frc.robot.subsystems.telemetry.commands.autoBalancePitch;
+import frc.robot.subsystems.telemetry.commands.autoBalancePitchGroup;
+import frc.robot.subsystems.telemetry.commands.driveOverStation;
+import frc.robot.subsystems.telemetry.commands.driveUp;
 
 /**
  * This class instantiates and initializes all of the subsystems and stores references to them.
@@ -178,7 +181,9 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new EnableBrakeMode(drivetrain));
     IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RadialUp, new DisableBrakeMode(drivetrain));
 
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, new autoBalancePitch(drivetrain));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, new autoBalancePitchGroup());
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new driveUp(drivetrain));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new driveOverStation(drivetrain));
   }
 
   /**

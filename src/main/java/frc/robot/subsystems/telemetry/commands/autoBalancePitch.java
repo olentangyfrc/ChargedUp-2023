@@ -24,12 +24,13 @@ public class autoBalancePitch extends CommandBase {
   //safe speed: 0.01
   final double SPEED = 0.01;
   //safe tolernace = 2.0
-  final double TOLERANCE = 2.0;
+  final double TOLERANCE = 1.5;
   double pitchSpeed = 0;
   double previousPitch = 0;
   double rollSpeed = 0;
   double pitch;
 
+  //safe MAX_ERROR: 19
   static final double MAX_ERROR = 19;
   double PITCH_PID = 0;
   double ROLL_PID = 0;
@@ -37,9 +38,10 @@ public class autoBalancePitch extends CommandBase {
   boolean isPitchAtSetpoint = false;
   boolean isRollAtSetpoint = false;
 
-  //safe p: 0.00585
+  //safe p: 0.006
+  //safe d: 0.002269
   PIDController pidPitch = new PIDController(0.006, 0, 0.002269);
-  PIDController pidRoll = new PIDController(0.00585, 0, 0);
+  PIDController pidRoll = new PIDController(0.006, 0, 0.002269);
 
   /** Creates a new autoBalance. */
   public autoBalancePitch(SwerveDrivetrain drivetrain) {
