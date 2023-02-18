@@ -41,7 +41,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
 
     
     public static final double MAX_LINEAR_SPEED = 3; // Meters per second
-    public static final double MAX_LINEAR_ACCELERATION = 5; // Meters per second squared
+    public static final double MAX_LINEAR_ACCELERATION = 2.5; // Meters per second squared
     // public static final double MAX_LINEAR_SPEED = 6; // Meters per second
     // public static final double MAX_LINEAR_ACCELERATION = 12; // Meters per second squared
 

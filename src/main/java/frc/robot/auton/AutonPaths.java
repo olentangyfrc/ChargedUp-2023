@@ -13,6 +13,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -63,7 +64,24 @@ public class AutonPaths {
         return testTrajectoryCommand;
     }
 
-    public CommandBase pathToPositionCommand(Pose2d position) {
+    /**
+     * Get a command to follow a path to a position, assuming the drivetrain is not moving at the start.
+     * 
+     * @param position The position to drive to
+     * @return A command to drive to the given position.
+     */
+    public CommandBase pathToPositionCommand(Pose2d position)  {
+        return pathToPositionCommand(position, new ChassisSpeeds());
+    }
+
+    /**
+     * Get a command to follow a path to a position
+     * 
+     * @param position The position to drive to
+     * @param currentSpeeds The current speeds of the drivetrain.
+     * @return A command to drive to the given position.
+     */
+    public CommandBase pathToPositionCommand(Pose2d position, ChassisSpeeds currentSpeeds) {
         SwerveAutoBuilder builder = new SwerveAutoBuilder(
             drivetrain::getLocation,
             drivetrain::resetLocation,
@@ -80,7 +98,7 @@ public class AutonPaths {
         PathPlannerTrajectory trajectory = PathPlanner.generatePath(
             CONSTRAINTS,
             new PathPoint(drivetrain.getLocation().getTranslation(), offset.getAngle(), drivetrain.getLocation().getRotation()),
-            new PathPoint(position.getTranslation(), offset.getAngle(), drivetrain.getLocation().getRotation())
+            new PathPoint(position.getTranslation(), offset.getAngle(), position.getRotation())
         );
         System.out.println(offset.getAngle());
         displayPath(trajectory);

@@ -25,10 +25,10 @@ public class AutoNodeUtility {
     };
 
     public static Translation2d getRowPosition(int row) {
-        if(row < 1 || row > 9) {
+        if(row < 0 || row > 8) {
             return null;
         }
-        return ROW_POSITIONS[row];
+        return ROW_POSITIONS[8 - row];
     }
 
     public static int getRow(int node) {
