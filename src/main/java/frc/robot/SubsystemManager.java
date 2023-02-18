@@ -7,8 +7,6 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -18,20 +16,19 @@ import frc.robot.IO.ControllerButton;
 import frc.robot.auton.AutoDashboardManager;
 import frc.robot.auton.AutoNodeUtility;
 import frc.robot.auton.AutonPaths;
+import frc.robot.subsystems.ApriltagDetection;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
-import frc.robot.subsystems.ApriltagDetection;
-
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.commands.MoveElevator;
 import frc.robot.subsystems.intakeArm.intakeArm;
 import frc.robot.subsystems.intakeArm.commands.armDown;
 import frc.robot.subsystems.intakeArm.commands.armUp;
 import frc.robot.subsystems.intakeArm.commands.toggleClaw;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.commands.MoveElevator;
 import frc.robot.telemetry.OzoneImu;
 import frc.robot.telemetry.Pigeon;
 import frc.robot.telemetry.Pigeon2;
@@ -139,6 +136,7 @@ public class SubsystemManager {
     paths = new AutonPaths(drivetrain);
     autoDashboardManager = new AutoDashboardManager();
 
+    detector.init();
     elevator = new Elevator();
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
