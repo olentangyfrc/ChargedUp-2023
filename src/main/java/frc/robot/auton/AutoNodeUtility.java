@@ -14,14 +14,14 @@ import frc.robot.SubsystemManager;
 public class AutoNodeUtility {
     private static final Translation2d[] ROW_POSITIONS = {
         new Translation2d(1.9, 0.47),
-        new Translation2d(1.9, 1.02),
-        new Translation2d(1.9, 1.59),
-        new Translation2d(1.9, 2.16),
-        new Translation2d(1.9, 2.57),
-        new Translation2d(1.9, 3.26),
-        new Translation2d(1.9, 3.83),
+        new Translation2d(1.9, 1.05),
+        new Translation2d(1.9, 1.62),
+        new Translation2d(1.9, 2.19),
+        new Translation2d(1.9, 2.75),
+        new Translation2d(1.9, 3.30),
+        new Translation2d(1.9, 3.87),
         new Translation2d(1.9, 4.41),
-        new Translation2d(1.9, 4.94),
+        new Translation2d(1.9, 4.97),
     };
 
     public static Translation2d getRowPosition(int row) {
