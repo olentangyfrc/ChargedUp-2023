@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.SubsystemManager;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 
 public class AutonPaths {
@@ -93,15 +94,19 @@ public class AutonPaths {
             drivetrain
         );
 
-        Translation2d offset = position.getTranslation().minus(drivetrain.getLocation().getTranslation());
+        // Translation2d offset = position.getTranslation().minus(drivetrain.getLocation().getTranslation());
+        SwerveDrivetrain drivetrain = SubsystemManager.getInstance().getDrivetrain();
+
+        ChassisSpeeds speeds = drivetrain.getKinematics().toChassisSpeeds(drivetrain.getModuleStates());
+        
+        Rotation2d driveAngle = new Rotation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+        double speed = Math.sqrt(Math.pow(speeds.vxMetersPerSecond, 2) + Math.pow(speeds.vyMetersPerSecond, 2));
 
         PathPlannerTrajectory trajectory = PathPlanner.generatePath(
             CONSTRAINTS,
-            new PathPoint(drivetrain.getLocation().getTranslation(), offset.getAngle(), drivetrain.getLocation().getRotation()),
-            new PathPoint(position.getTranslation(), offset.getAngle(), position.getRotation())
+            new PathPoint(drivetrain.getLocation().getTranslation(), driveAngle.rotateBy(Rotation2d.fromDegrees(180)), drivetrain.getLocation().getRotation(), speed),
+            new PathPoint(position.getTranslation(), Rotation2d.fromDegrees(180), position.getRotation())
         );
-        System.out.println(offset.getAngle());
-        displayPath(trajectory);
         return wrapPathCommand(builder.followPath(trajectory));
     }
 

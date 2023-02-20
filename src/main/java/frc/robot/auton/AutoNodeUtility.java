@@ -13,7 +13,7 @@ import frc.robot.SubsystemManager;
 /** Add your docs here. */
 public class AutoNodeUtility {
     private static final Translation2d[] ROW_POSITIONS = {
-        new Translation2d(1.9, 0.47),
+        new Translation2d(1.9, 0.56),
         new Translation2d(1.9, 1.05),
         new Translation2d(1.9, 1.62),
         new Translation2d(1.9, 2.19),
