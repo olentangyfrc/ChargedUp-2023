@@ -59,7 +59,7 @@ public class SubsystemManager {
     "00:80:2F:28:64:38", BotType.RIO99,
     "00:80:2F:35:54:1E", BotType.CHARGED_UP_PROTO,
     "00:80:2F:17:D7:4B", BotType.RIO2,
-    "00:80:2F:27:04:C6", BotType.CHARGED_UP_PROTO_2,
+    "", BotType.CHARGED_UP_PROTO_2,
     "00:80:2F:27:1D:E9", BotType.BLUE
   );
 
@@ -119,25 +119,25 @@ public class SubsystemManager {
   }
   
   private void initCHARGED_UP_PROTO_2() {
-    imu = new Pigeon2(2);
+    imu = new Pigeon2(1);
     imu.reset();
     
     // Create and initialize all subsystems:
     drivetrain = new SingleFalconDrivetrain();
     drivetrain.init(new SwerveModuleSetupInfo[] {
-      new SwerveModuleSetupInfo(31, 14, 0, 59.85),
-      new SwerveModuleSetupInfo(30, 1, 3, 354.37),
-      new SwerveModuleSetupInfo(32, 9, 1, 48.9),
-      new SwerveModuleSetupInfo(33, 62, 2, 182.28),
+      new SwerveModuleSetupInfo(31, 15, 0, 260.77),
+      new SwerveModuleSetupInfo(30, 3, 2, 258.97),
+      new SwerveModuleSetupInfo(32, 14, 1, 41.8),
+      new SwerveModuleSetupInfo(33, 62, 3, 177.78),
     }, 1 / 8.07);
 
-    activeIntake = new ActiveIntake(58, 3);
+    // activeIntake = new ActiveIntake(58, 3);
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new StartIntake(activeIntake));
-    IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, new StopIntake(activeIntake));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new ReverseIntake(activeIntake));
-    IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton, new StopIntake(activeIntake));
+    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new StartIntake(activeIntake));
+    // IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, new StopIntake(activeIntake));
+    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new ReverseIntake(activeIntake));
+    // IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton, new StopIntake(activeIntake));
   }
 
 
