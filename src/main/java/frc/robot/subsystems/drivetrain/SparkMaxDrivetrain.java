@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.drivetrain;
 
-import java.util.Map;
-
 import com.pathplanner.lib.auto.PIDConstants;
 
 import frc.robot.subsystems.drivetrain.modules.CANSparkMaxModule;

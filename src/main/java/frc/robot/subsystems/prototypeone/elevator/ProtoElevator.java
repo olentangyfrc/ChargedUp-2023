@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.prototypeone.elevator;
 
-import java.util.Map;
-
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
@@ -17,7 +15,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.prototypeone.elevator.commands.MoveElevator;
 
-public class Elevator extends SubsystemBase {
+public class ProtoElevator extends SubsystemBase {
   public static final int MOTOR_TICKS_PER_ROTATION = 2048;
   public static final double GEAR_RATIO = 25;
 
@@ -36,7 +34,7 @@ public class Elevator extends SubsystemBase {
   public static final double ELEVATOR_HIGH_POS = 3.8;
 
   /** Creates a new Elevator. */
-  public Elevator() {
+  public ProtoElevator() {
   
     rightElevator.configFactoryDefault();
     leftElevator.configFactoryDefault();

@@ -7,16 +7,16 @@ package frc.robot.subsystems.prototypeone.elevator.commands;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.prototypeone.elevator.Elevator;
+import frc.robot.subsystems.prototypeone.elevator.ProtoElevator;
 
 public class MoveElevator extends CommandBase {
-  private Elevator elevator;
+  private ProtoElevator elevator;
   private double targetPosition;
 
   private GenericEntry elevatorPosition = Shuffleboard.getTab("Elevator").add("Elevator Target Position", 0).getEntry();
 
   /** Creates a new MoveElevator. */
-  public MoveElevator(Elevator elevator, double targetPosition) {
+  public MoveElevator(ProtoElevator elevator, double targetPosition) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.elevator = elevator;
     // this.targetPosition = targetPosition;

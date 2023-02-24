@@ -12,18 +12,20 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.IO.ButtonActionType;
 import frc.robot.IO.ControllerButton;
+import frc.robot.subsystems.ApriltagDetection;
+import frc.robot.subsystems.activeintake.ActiveIntake;
+import frc.robot.subsystems.activeintake.commands.ReverseIntake;
+import frc.robot.subsystems.activeintake.commands.StartIntake;
+import frc.robot.subsystems.activeintake.commands.StopIntake;
+import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
-import frc.robot.subsystems.ApriltagDetection;
-import frc.robot.subsystems.activeintake.ActiveIntake;
-import frc.robot.subsystems.activeintake.commands.ReverseIntake;
-import frc.robot.subsystems.activeintake.commands.StartIntake;
-import frc.robot.subsystems.activeintake.commands.StopIntake;
-import frc.robot.subsystems.prototypeone.elevator.Elevator;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.prototypeone.elevator.ProtoElevator;
 import frc.robot.subsystems.prototypeone.intakeArm.intakeArm;
 import frc.robot.subsystems.prototypeone.intakeArm.commands.armDown;
 import frc.robot.subsystems.prototypeone.intakeArm.commands.armUp;
@@ -44,9 +46,11 @@ public class SubsystemManager {
   private PowerDistribution pdp;
   private ApriltagDetection detector;
   private intakeArm intakeArm;
-  private Elevator elevator;
+  private ProtoElevator protoElevator;
 
   private ActiveIntake activeIntake;
+  private Claw claw;
+  private Elevator elevator;
 
   /**
    * Map of known bot addresses and respective types
@@ -131,13 +135,13 @@ public class SubsystemManager {
       new SwerveModuleSetupInfo(33, 62, 3, 177.78),
     }, 1 / 8.07);
 
-    // activeIntake = new ActiveIntake(58, 3);
+    // activeIntake = new ActiveIntake(1, 16);
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
-    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new StartIntake(activeIntake));
-    // IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, new StopIntake(activeIntake));
-    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new ReverseIntake(activeIntake));
-    // IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton, new StopIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new StartIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, new StopIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new ReverseIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton, new StopIntake(activeIntake));
   }
 
 
@@ -155,7 +159,7 @@ public class SubsystemManager {
     }, 1 / 8.07);
     detector = new ApriltagDetection();
 
-    elevator = new Elevator();
+    protoElevator = new ProtoElevator();
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
 
@@ -234,6 +238,14 @@ public class SubsystemManager {
     return detector;
   }
   
+  public ProtoElevator getProtoElevator() {
+    return protoElevator;
+  }
+
+  public Claw getClaw() {
+    return claw;
+  }
+
   public Elevator getElevator() {
     return elevator;
   }
