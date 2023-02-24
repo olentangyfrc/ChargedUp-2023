@@ -16,7 +16,7 @@ public class IO {
 
     private static final int XBOX_PORT = 0;
     // Deadzone for Xbox controller sticks
-    private static final double DEADZONE = 0.05;
+    private static final double DEADZONE = 0.02;
     // This value is used to turn an analog input into a digital one so that commands can be mapped to it.
     private static final double NOMINAL_ANALOG_VALUE = 0.5;
 

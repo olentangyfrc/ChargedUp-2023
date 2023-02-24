@@ -40,7 +40,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
 
     
     public static final double MAX_LINEAR_SPEED = 3; // Meters per second
-    public static final double MAX_LINEAR_ACCELERATION = 5; // Meters per second squared
+    public static final double MAX_LINEAR_ACCELERATION = 2.5; // Meters per second squared
     // public static final double MAX_LINEAR_SPEED = 6; // Meters per second
     // public static final double MAX_LINEAR_ACCELERATION = 12; // Meters per second squared
 
@@ -79,7 +79,6 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
 
     private boolean isInBrakeMode = false;
     private boolean isFollowingPath = false;
-
 
     /**
      * Initialize the drivetrain subsystem
@@ -204,6 +203,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         backLeftModule.updateState(SwerveModuleState.optimize(states[2], backLeftModule.getAngle()));
         backRightModule.updateState(SwerveModuleState.optimize(states[3], backRightModule.getAngle()));
 
+
     }
 
     /**
@@ -318,6 +318,10 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
 
     public SwerveDrivePoseEstimator getSwerveDrivePoseEstimator(){
         return poseEstimator;
+    }
+
+    public SwerveDriveKinematics getKinematics() {
+        return kinematics;
     }
 
     public void enableBrakeMode() {
