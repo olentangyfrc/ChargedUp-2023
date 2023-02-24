@@ -9,22 +9,26 @@ import java.util.logging.Logger;
 
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.IO.ButtonActionType;
 import frc.robot.IO.ControllerButton;
+import frc.robot.auton.AutoDashboardManager;
+import frc.robot.auton.AutoNodeUtility;
+import frc.robot.auton.AutonPaths;
+import frc.robot.subsystems.ApriltagDetection;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
-import frc.robot.subsystems.ApriltagDetection;
-
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.commands.MoveElevator;
 import frc.robot.subsystems.intakeArm.intakeArm;
 import frc.robot.subsystems.intakeArm.commands.armDown;
 import frc.robot.subsystems.intakeArm.commands.armUp;
 import frc.robot.subsystems.intakeArm.commands.toggleClaw;
-import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.telemetry.OzoneImu;
 import frc.robot.telemetry.Pigeon;
 import frc.robot.telemetry.Pigeon2;
@@ -42,6 +46,8 @@ public class SubsystemManager {
   private ApriltagDetection detector;
   private intakeArm intakeArm;
   private Elevator elevator;
+  private AutonPaths paths;
+  private AutoDashboardManager autoDashboardManager;
 
   /**
    * Map of known bot addresses and respective types
@@ -106,6 +112,9 @@ public class SubsystemManager {
         initCHARGED_UP_PROTO();
         break;
       default:
+        if(Robot.isSimulation()) {
+          initCHARGED_UP_PROTO();
+        }
         logger.info("Unrecognized bot");
       }
   }
@@ -123,6 +132,10 @@ public class SubsystemManager {
       new SwerveModuleSetupInfo(43, 15, 0, 267.34),
     }, 1 / 8.07);
     detector = new ApriltagDetection();
+
+    paths = new AutonPaths(drivetrain);
+    autoDashboardManager = new AutoDashboardManager();
+
     detector.init();
     elevator = new Elevator();
 
@@ -133,6 +146,12 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new toggleClaw(intakeArm));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new armDown(intakeArm));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new armUp(intakeArm));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new MoveElevator(elevator, Elevator.ELEVATOR_HIGH_POS));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new MoveElevator(elevator, 0));
+
+    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.Start, Commands.run(
+      () -> paths.pathToPositionCommand(AutoNodeUtility.getNodeDrivePosition(autoDashboardManager.getSelectedNode())).schedule()
+    ));
   }
   
   private void initBLUE() {}
@@ -152,6 +171,8 @@ public class SubsystemManager {
       new SwerveModuleSetupInfo(37, 36, 2, 319.5),
       new SwerveModuleSetupInfo(30, 31, 3, 159.65),
     }, 1 / 8.33);
+
+    paths = new AutonPaths(drivetrain);
     
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new EnableBrakeMode(drivetrain));
@@ -178,7 +199,6 @@ public class SubsystemManager {
    * Initializes the RIO3 subsystems
    */
   public void initRIO3() {}
-  
 
   //---------------------------------------------------
   // Subsystem getter methods
@@ -205,6 +225,14 @@ public class SubsystemManager {
   
   public Elevator getElevator() {
     return elevator;
+  }
+
+  public AutonPaths getAutonPaths() {
+    return paths;
+  }
+
+  public AutoDashboardManager getAutoDashboardManager() {
+    return autoDashboardManager;
   }
 
 

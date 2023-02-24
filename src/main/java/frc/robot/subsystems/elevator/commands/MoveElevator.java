@@ -4,16 +4,12 @@
 
 package frc.robot.subsystems.elevator.commands;
 
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.elevator.Elevator;
 
 public class MoveElevator extends CommandBase {
   private Elevator elevator;
   private double targetPosition;
-
-  private GenericEntry elevatorPosition = Shuffleboard.getTab("Elevator").add("Elevator Target Position", 0).getEntry();
 
   /** Creates a new MoveElevator. */
   public MoveElevator(Elevator elevator, double targetPosition) {
@@ -27,7 +23,6 @@ public class MoveElevator extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    targetPosition = elevatorPosition.getDouble(0);
     elevator.setTargetPosition(targetPosition);
   }
 
