@@ -2,6 +2,7 @@ package frc.robot.auton;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
@@ -12,9 +13,10 @@ import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -32,9 +34,20 @@ public class AutonPaths {
 
     private SwerveDrivetrain drivetrain;
 
+    private Map<AutoRoutine, CommandBase> routineMap;
+
+    private SendableChooser<AutoRoutine> autoChooser = new SendableChooser<AutoRoutine>();
+
     public AutonPaths(SwerveDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
+        routineMap = new HashMap<AutoRoutine, CommandBase>();
+        
         generatePaths();
+        // add paths to chooser here
+        for(AutoRoutine routine : AutoRoutine.values()) {
+            autoChooser.addOption(routine.name(), routine);
+        }
+        Shuffleboard.getTab("Auton").add("AutoChooser", autoChooser);
     }
 
     private void generatePaths() {
@@ -134,5 +147,30 @@ public class AutonPaths {
             }
             System.out.println(line);
         }
+    }
+
+    public CommandBase getRoutine(AutoRoutine routine) {
+        return routineMap.getOrDefault(routine, new InstantCommand());
+    }
+
+    public CommandBase getSelectedRoutine() {
+        return getRoutine(autoChooser.getSelected());
+    }
+
+    public static enum AutoRoutine {
+        // Upper routines
+        UPPER_ONE_PIECE,
+        UPPER_TWO_PIECE,
+        UPPER_ONE_PIECE_ENGAGE,
+        // Middle routines
+        MIDDLE_ENGAGE,
+        MIDDLE_GRAB_LEFT_PIECE_ENGAGE,
+        MIDDLE_GRAB_RIGHT_PIECE_ENGAGE,
+        MIDDLE_LEFT_PIECE_ENGAGE,
+        MIDDLE_RIGHT_PIECE_ENGAGE,
+        // Lower routines
+        LOWER_ONE_PIECE,
+        LOWER_TWO_PIECE,
+        LOWER_ONE_PIECE_ENGAGE
     }
 }
