@@ -2,6 +2,7 @@ package frc.robot.auton;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;

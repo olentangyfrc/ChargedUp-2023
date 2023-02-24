@@ -183,7 +183,7 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new toggleClaw(intakeArm));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new armDown(intakeArm));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new armUp(intakeArm));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new MoveElevator(elevator, Elevator.ELEVATOR_HIGH_POS));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new MoveElevator(elevator, ProtoElevator.ELEVATOR_HIGH_POS));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new MoveElevator(elevator, 0));
 
     IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.Start, Commands.run(
