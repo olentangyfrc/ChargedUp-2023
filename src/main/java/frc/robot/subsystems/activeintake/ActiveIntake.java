@@ -28,7 +28,7 @@ public class ActiveIntake extends SubsystemBase {
   public ActiveIntake(int upperMotorCAN, int lowerMotorCAN, int forwardPneumaticChannel, int reversePneumaticChannel) {
     upperMotor = new CANSparkMax(upperMotorCAN, MotorType.kBrushless);
     lowerMotor = new CANSparkMax(lowerMotorCAN, MotorType.kBrushless);
-    intakeSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, forwardPneumaticChannel, reversePneumaticChannel);
+    intakeSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, forwardPneumaticChannel, reversePneumaticChannel);
 
     upperMotor.restoreFactoryDefaults();
     lowerMotor.restoreFactoryDefaults();

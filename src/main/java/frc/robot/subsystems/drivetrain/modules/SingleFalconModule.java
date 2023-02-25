@@ -44,6 +44,8 @@ public class SingleFalconModule extends SwerveModule {
         angleMotor = new CANSparkMax(angleMotorChannel, MotorType.kBrushless);
         driveMotor = new WPI_TalonFX(driveMotorChannel);
 
+        angleMotor.restoreFactoryDefaults();
+
         angleMotor.setInverted(true);
 
         driveMotor.configFactoryDefault();
