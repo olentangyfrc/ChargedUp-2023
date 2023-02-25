@@ -33,9 +33,6 @@ public class ActiveIntake extends SubsystemBase {
     upperMotor.restoreFactoryDefaults();
     lowerMotor.restoreFactoryDefaults();
 
-    upperMotor.setIdleMode(IdleMode.kCoast);
-    lowerMotor.setIdleMode(IdleMode.kCoast);
-
     upperMotor.setInverted(true);
     lowerMotor.setInverted(false);
   }
