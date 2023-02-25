@@ -8,9 +8,14 @@ import com.pathplanner.lib.server.PathPlannerServer;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.auton.AutonPaths;
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.IO.ButtonActionType;
+import frc.robot.IO.ControllerButton;
 
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;
@@ -28,21 +33,21 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   @Override
+
   public void robotInit() {
     PathPlannerServer.startServer(5811);
 
     SubsystemManager.getInstance().init();
     SubsystemManager.getInstance().getDrivetrain().resetLocation(new Pose2d(1.772, 1.149, Rotation2d.fromDegrees(0)));;
     
-    Thread visionThread = new Thread(() -> SubsystemManager.getInstance().getDetector().init());
-    visionThread.setDaemon(true);
-    visionThread.start();
+    // Thread visionThread = new Thread(() -> SubsystemManager.getInstance().getDetector().init());
+    // visionThread.setDaemon(true);
+    // visionThread.start();
   }
 
   @Override
   public void robotPeriodic() {
   }
-
   @Override
   public void autonomousInit() {
     SubsystemManager.getInstance().getAutonPaths().getTestTrajectoryCommand().schedule();

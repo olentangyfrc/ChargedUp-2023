@@ -18,6 +18,8 @@ import frc.robot.auton.AutoNodeUtility;
 import frc.robot.auton.AutonPaths;
 import frc.robot.subsystems.ApriltagDetection;
 import frc.robot.subsystems.activeintake.ActiveIntake;
+import frc.robot.subsystems.activeintake.commands.DeployIntake;
+import frc.robot.subsystems.activeintake.commands.RetractIntake;
 import frc.robot.subsystems.activeintake.commands.ReverseIntake;
 import frc.robot.subsystems.activeintake.commands.StartIntake;
 import frc.robot.subsystems.activeintake.commands.StopIntake;
@@ -145,13 +147,18 @@ public class SubsystemManager {
       new SwerveModuleSetupInfo(33, 62, 3, 177.78),
     }, 1 / 8.07);
 
-    // activeIntake = new ActiveIntake(1, 16);
+    claw = new Claw(61, 0, 1, 2, 3);
+    activeIntake = new ActiveIntake(1, 16, 4, 5);
+
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new StartIntake(activeIntake));
     IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, new StopIntake(activeIntake));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new ReverseIntake(activeIntake));
     IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton, new StopIntake(activeIntake));
+
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new DeployIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new RetractIntake(activeIntake));
   }
 
 

@@ -5,6 +5,7 @@
 package frc.robot.subsystems.activeintake;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -32,12 +33,16 @@ public class ActiveIntake extends SubsystemBase {
     upperMotor.restoreFactoryDefaults();
     lowerMotor.restoreFactoryDefaults();
 
+    upperMotor.setIdleMode(IdleMode.kCoast);
+    lowerMotor.setIdleMode(IdleMode.kCoast);
+
     upperMotor.setInverted(true);
     lowerMotor.setInverted(false);
   }
 
   public void setUpperMotor(double speed) {
     upperMotor.set(speed);
+    System.out.println("SET UPPER MOTOR");
   }
 
   public void setLowerMotor(double speed) {
