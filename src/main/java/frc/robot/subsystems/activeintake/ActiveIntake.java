@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -22,6 +23,8 @@ public class ActiveIntake extends SubsystemBase {
 
   private DoubleSolenoid intakeSolenoid;
 
+  private DigitalInput beamBreaker;
+
   // TODO: add beam breaks
 
   /** Creates a new ActiveIntake. */
@@ -29,6 +32,8 @@ public class ActiveIntake extends SubsystemBase {
     upperMotor = new CANSparkMax(upperMotorCAN, MotorType.kBrushless);
     lowerMotor = new CANSparkMax(lowerMotorCAN, MotorType.kBrushless);
     intakeSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, forwardPneumaticChannel, reversePneumaticChannel);
+
+    beamBreaker = new DigitalInput(5);
 
     upperMotor.restoreFactoryDefaults();
     lowerMotor.restoreFactoryDefaults();
@@ -38,12 +43,22 @@ public class ActiveIntake extends SubsystemBase {
   }
 
   public void setUpperMotor(double speed) {
-    upperMotor.set(speed);
+    if(!(beamBreaker.get())){
+      upperMotor.set(speed);
+    }
+    else{
+      upperMotor.stopMotor();
+    }
     System.out.println("SET UPPER MOTOR");
   }
 
   public void setLowerMotor(double speed) {
-    lowerMotor.set(speed);
+    if(!(beamBreaker.get())){
+      lowerMotor.set(speed);
+    }
+    else{
+      lowerMotor.stopMotor();
+    } 
   }
 
   public void deploy() {
