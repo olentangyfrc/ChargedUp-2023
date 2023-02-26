@@ -142,13 +142,13 @@ public class SubsystemManager {
     drivetrain = new SingleFalconDrivetrain();
     drivetrain.init(new SwerveModuleSetupInfo[] {
       new SwerveModuleSetupInfo(31, 15, 0, 260.77),
-      new SwerveModuleSetupInfo(30, 3, 2, 258.97),
+      new SwerveModuleSetupInfo(30, 6, 2, 258.97),
       new SwerveModuleSetupInfo(32, 62, 1, 41.8),
-      new SwerveModuleSetupInfo(33, 6, 3, 177.78),
+      new SwerveModuleSetupInfo(33, 14, 3, 177.78),
     }, 1 / 8.07);
 
     claw = new Claw(61, 0, 1, 2, 3);
-    activeIntake = new ActiveIntake(5, 16, 4, 5);
+    activeIntake = new ActiveIntake(5, 9, 4, 5);
 
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
