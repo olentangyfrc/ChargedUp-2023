@@ -38,8 +38,8 @@ public class Claw extends SubsystemBase {
     wristMotor.setInverted(true);
     wristMotor.getEncoder().setPosition(0);
 
-    upperSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, upperForwardChannel, upperReverseChannel);
-    lowerSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, lowerForwardChannel, lowerReverseChannel);
+    upperSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, upperForwardChannel, upperReverseChannel);
+    lowerSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, lowerForwardChannel, lowerReverseChannel);
 
     wristController.setTolerance(WRIST_ANGLE_TOLERANCE);
 
