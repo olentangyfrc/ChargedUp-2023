@@ -33,7 +33,7 @@ public class ActiveIntake extends SubsystemBase {
     lowerMotor = new CANSparkMax(lowerMotorCAN, MotorType.kBrushless);
     intakeSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, forwardPneumaticChannel, reversePneumaticChannel);
 
-    beamBreaker = new DigitalInput(5);
+    beamBreaker = new DigitalInput(6);
 
     upperMotor.restoreFactoryDefaults();
     lowerMotor.restoreFactoryDefaults();
@@ -43,7 +43,7 @@ public class ActiveIntake extends SubsystemBase {
   }
 
   public void setUpperMotor(double speed) {
-    if(!(beamBreaker.get())){
+    if(beamBreaker.get()){
       upperMotor.set(speed);
     }
     else{
@@ -53,7 +53,7 @@ public class ActiveIntake extends SubsystemBase {
   }
 
   public void setLowerMotor(double speed) {
-    if(!(beamBreaker.get())){
+    if(beamBreaker.get()){
       lowerMotor.set(speed);
     }
     else{
