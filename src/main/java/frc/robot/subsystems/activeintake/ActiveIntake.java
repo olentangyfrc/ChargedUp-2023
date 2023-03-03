@@ -12,7 +12,10 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.claw.Claw;
+import frc.robot.subsystems.claw.commands.GrabGamePiece;
 
 public class ActiveIntake extends SubsystemBase {
   public static final double UPPER_MOTOR_SPEED = 1;
@@ -25,7 +28,9 @@ public class ActiveIntake extends SubsystemBase {
 
   private DigitalInput beamBreaker;
 
-  // TODO: add beam breaks
+  private boolean isGamePieceHeld;
+
+  private Claw claw;
 
   /** Creates a new ActiveIntake. */
   public ActiveIntake(int upperMotorCAN, int lowerMotorCAN, int forwardPneumaticChannel, int reversePneumaticChannel) {
@@ -40,25 +45,34 @@ public class ActiveIntake extends SubsystemBase {
 
     upperMotor.setInverted(true);
     lowerMotor.setInverted(false);
+
+    claw = new Claw(61, 0, 1, 2, 3);
+
+    isGamePieceHeld = false;
+  }
+
+  @Override
+  public void periodic(){
+    if(doesRobotHaveGamePiece()){
+      Timer.delay(1);
+      if(doesRobotHaveGamePiece()){
+        isGamePieceHeld = true;
+        new GrabGamePiece(claw);
+      }
+    }else {
+      setUpperMotor(UPPER_MOTOR_SPEED);
+      setLowerMotor(LOWER_MOTOR_SPEED);
+    }
   }
 
   public void setUpperMotor(double speed) {
-    if(beamBreaker.get()){
-      upperMotor.set(speed);
-    }
-    else{
-      upperMotor.stopMotor();
-    }
+    upperMotor.set(speed);
     System.out.println("SET UPPER MOTOR");
   }
 
   public void setLowerMotor(double speed) {
-    if(beamBreaker.get()){
-      lowerMotor.set(speed);
-    }
-    else{
-      lowerMotor.stopMotor();
-    } 
+    lowerMotor.set(speed);
+    System.out.println("SET LOWER MOTOR");
   }
 
   public void deploy() {
@@ -71,5 +85,15 @@ public class ActiveIntake extends SubsystemBase {
 
   public boolean isDeployed() {
     return intakeSolenoid.get() == Value.kForward;
+  }
+
+  public boolean doesRobotHaveGamePiece(){
+    if(!(beamBreaker.get())){
+      isGamePieceHeld = true;
+    }
+    else{
+      isGamePieceHeld = false;
+    }
+    return isGamePieceHeld;
   }
 }
