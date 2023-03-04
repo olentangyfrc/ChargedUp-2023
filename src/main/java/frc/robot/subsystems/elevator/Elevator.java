@@ -38,7 +38,7 @@ public class Elevator extends SubsystemBase {
   private WPI_TalonFX elevatorMotor;
 
   // private PIDController elevatorController = new PIDController(6, 0, 0); // TODO: Get actual values
-  private PIDController elevatorController = new PIDController(6, 0, 0);
+  private PIDController elevatorController = new PIDController(4, 0, 0.03);
   // private PIDController elevatorController = new PIDController(10.94, 0, 1.0937); // TODO: Get actual values
   private ElevatorFeedforward elevatorFF = new ElevatorFeedforward(0.32249, 0.20783, 0.56769, 0.040178);
 
@@ -98,6 +98,7 @@ public class Elevator extends SubsystemBase {
         double pidControl = elevatorController.calculate(clampedMeasurement, targetPosition);
         // System.out.println(pidControl);
         // elevatorMotor.setVoltage(Math.copySign(Math.min(1, pidControl), pidControl));
+        // elevatorMotor.setVoltage(pidControl);
         System.out.println("PID output: " + pidControl);
         // System.out.println("Elevator Error" + elevatorController.getPositionError());
         System.out.println("Setpoint: " + elevatorController.getSetpoint());
