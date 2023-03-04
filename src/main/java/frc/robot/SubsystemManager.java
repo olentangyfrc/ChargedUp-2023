@@ -21,10 +21,12 @@ import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
 import frc.robot.subsystems.ApriltagDetection;
 
 import frc.robot.subsystems.intakeArm.intakeArm;
+import frc.robot.subsystems.intakeArm.commands.PlaceItem;
 import frc.robot.subsystems.intakeArm.commands.armDown;
 import frc.robot.subsystems.intakeArm.commands.armUp;
 import frc.robot.subsystems.intakeArm.commands.toggleClaw;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.commands.MoveElevator;
 import frc.robot.telemetry.OzoneImu;
 import frc.robot.telemetry.Pigeon;
 import frc.robot.telemetry.Pigeon2;
@@ -130,6 +132,7 @@ public class SubsystemManager {
 
     intakeArm = new intakeArm();
     intakeArm.init();
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new PlaceItem("Cone", "High"));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new toggleClaw(intakeArm));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new armDown(intakeArm));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new armUp(intakeArm));
@@ -189,6 +192,10 @@ public class SubsystemManager {
    */
   public PowerDistribution getPdp() {
     return pdp;
+  }
+
+  public intakeArm getIntakeArm() {
+    return intakeArm;
   }
 
   public OzoneImu getImu() {

@@ -13,8 +13,6 @@ public class MoveElevator extends CommandBase {
   private Elevator elevator;
   private double targetPosition;
 
-  private GenericEntry elevatorPosition = Shuffleboard.getTab("Elevator").add("Elevator Target Position", 0).getEntry();
-
   /** Creates a new MoveElevator. */
   public MoveElevator(Elevator elevator, double targetPosition) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -27,7 +25,6 @@ public class MoveElevator extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    targetPosition = elevatorPosition.getDouble(0);
     elevator.setTargetPosition(targetPosition);
   }
 

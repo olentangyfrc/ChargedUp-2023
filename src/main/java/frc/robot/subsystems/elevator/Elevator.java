@@ -25,11 +25,11 @@ public class Elevator extends SubsystemBase {
   private WPI_TalonFX rightElevator = new WPI_TalonFX(11);
 
   private MotorControllerGroup elevatorMotors;
-  private PIDController elevatorPid = new PIDController(19.128, 0, 3.2599);
+  private PIDController elevatorPid = new PIDController(19.128, 0, 1);
   private DigitalInput elevatorLimitSwitch = new DigitalInput(0);
 
   private double targetPosition = 0;
-  public static final double POSITION_TOLERANCE = 0.01;
+  public static final double POSITION_TOLERANCE = 0.1;
   private static final double MAX_ERROR = 0.3;
 
   // Elevator position for scoring (unit is rotations)
@@ -53,6 +53,7 @@ public class Elevator extends SubsystemBase {
     Shuffleboard.getTab("Elevator").addBoolean("Limit Switch", this::getLimitSwitch);
     Shuffleboard.getTab("Elevator").add(new MoveElevator(this, 0));
     Shuffleboard.getTab("Elevator").add(elevatorPid);
+    Shuffleboard.getTab("Elevator").addBoolean("Is Finished", this::isAtTargetPosition);
   }
 
   @Override
