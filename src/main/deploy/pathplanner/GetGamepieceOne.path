@@ -73,5 +73,24 @@
   "maxVelocity": 3.0,
   "maxAcceleration": 2.5,
   "isReversed": null,
-  "markers": []
+  "markers": [
+    {
+      "position": 0.46545454545454795,
+      "names": [
+        "DeployIntake"
+      ]
+    },
+    {
+      "position": 1.2218181818181462,
+      "names": [
+        "RetractIntake"
+      ]
+    },
+    {
+      "position": 1.5563636363636426,
+      "names": [
+        "PrepElevator"
+      ]
+    }
+  ]
 }

@@ -7,6 +7,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,6 +25,10 @@ import frc.robot.subsystems.activeintake.commands.ReverseIntake;
 import frc.robot.subsystems.activeintake.commands.StartIntake;
 import frc.robot.subsystems.activeintake.commands.StopIntake;
 import frc.robot.subsystems.claw.Claw;
+import frc.robot.subsystems.claw.ClawPitch;
+import frc.robot.subsystems.claw.Claw.ClawPosition;
+import frc.robot.subsystems.claw.commands.RotateClaw;
+import frc.robot.subsystems.claw.commands.SetClawPosition;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
@@ -31,7 +36,11 @@ import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.commands.DeployElevator;
+import frc.robot.subsystems.elevator.commands.ManualElevatorForward;
+import frc.robot.subsystems.elevator.commands.ManualElevatorReverse;
 import frc.robot.subsystems.elevator.commands.MoveElevator;
+import frc.robot.subsystems.elevator.commands.RetractElevator;
 import frc.robot.subsystems.prototypeone.elevator.ProtoElevator;
 import frc.robot.subsystems.prototypeone.intakeArm.intakeArm;
 import frc.robot.subsystems.prototypeone.intakeArm.commands.armDown;
@@ -57,6 +66,7 @@ public class SubsystemManager {
 
   private ActiveIntake activeIntake;
   private Claw claw;
+  private ClawPitch clawPitch;
   private Elevator elevator;
   private AutonPaths paths;
   private AutoDashboardManager autoDashboardManager;
@@ -128,7 +138,7 @@ public class SubsystemManager {
         break;
       default:
         if(Robot.isSimulation()) {
-          initCHARGED_UP_PROTO();
+          initCHARGED_UP_PROTO_2();
         }
         logger.info("Unrecognized bot");
       }
@@ -141,14 +151,16 @@ public class SubsystemManager {
     // Create and initialize all subsystems:
     drivetrain = new SingleFalconDrivetrain();
     drivetrain.init(new SwerveModuleSetupInfo[] {
-      new SwerveModuleSetupInfo(31, 15, 0, 260.77),
-      new SwerveModuleSetupInfo(30, 6, 2, 258.97),
-      new SwerveModuleSetupInfo(32, 62, 1, 41.8),
-      new SwerveModuleSetupInfo(33, 14, 3, 177.78),
+      new SwerveModuleSetupInfo(31, 15, 0, 262.17),
+      new SwerveModuleSetupInfo(30, 6, 2, 261.21),
+      new SwerveModuleSetupInfo(32, 62, 1, 43.76),
+      new SwerveModuleSetupInfo(33, 14, 3, 179.23),
     }, 1 / 8.07);
 
     claw = new Claw(61, 0, 1, 2, 3);
+    clawPitch = new ClawPitch(7);
     activeIntake = new ActiveIntake(5, 9, 4, 5);
+    elevator = new Elevator(42, 6, 7);
 
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
@@ -159,6 +171,16 @@ public class SubsystemManager {
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new DeployIntake(activeIntake));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new RetractIntake(activeIntake));
+
+    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.A, new ManualElevatorForward(elevator));
+    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.B, new ManualElevatorReverse(elevator));
+
+    
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new SetClawPosition(claw, ClawPosition.CLOSED));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown, new SetClawPosition(claw, ClawPosition.OPEN));
+
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight, new DeployElevator(elevator));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft, new RetractElevator(elevator));
   }
 
 

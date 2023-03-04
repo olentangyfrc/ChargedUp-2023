@@ -2,12 +2,12 @@
   "waypoints": [
     {
       "anchorPoint": {
-        "x": 1.8892709968016221,
+        "x": 1.9,
         "y": 4.974424214183664
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.771006403639055,
+        "x": 4.781735406837433,
         "y": 4.7457150549108515
       },
       "holonomicAngle": 0,
@@ -98,5 +98,24 @@
   "maxVelocity": 3.0,
   "maxAcceleration": 2.5,
   "isReversed": null,
-  "markers": []
+  "markers": [
+    {
+      "position": 0.7200000000000024,
+      "names": [
+        "DeployIntake"
+      ]
+    },
+    {
+      "position": 1.3309090909090895,
+      "names": [
+        "RetractIntake"
+      ]
+    },
+    {
+      "position": 2.050909090909037,
+      "names": [
+        "PrepElevator"
+      ]
+    }
+  ]
 }

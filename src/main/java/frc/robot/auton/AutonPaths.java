@@ -15,43 +15,26 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory.State;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 
+// TODO: Separate Auto routines into another class
 public class AutonPaths {
     private static final PathConstraints CONSTRAINTS = new PathConstraints(SwerveDrivetrain.MAX_LINEAR_SPEED, SwerveDrivetrain.MAX_LINEAR_ACCELERATION);
 
-    private PathPlannerTrajectory testTrajectory = PathPlanner.loadPath("test path", CONSTRAINTS);
-
-
-    private CommandBase testTrajectoryCommand;
-
     private SwerveDrivetrain drivetrain;
 
-    private Map<AutoRoutine, CommandBase> routineMap;
+    private Map<AutoTrajectory, PathPlannerTrajectory> trajectoryMap;
 
-    private SendableChooser<AutoRoutine> autoChooser = new SendableChooser<AutoRoutine>();
+    private SwerveAutoBuilder builder;
 
     public AutonPaths(SwerveDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
-        routineMap = new HashMap<AutoRoutine, CommandBase>();
-        
-        generatePaths();
-        // add paths to chooser here
-        for(AutoRoutine routine : AutoRoutine.values()) {
-            autoChooser.addOption(routine.name(), routine);
-        }
-        Shuffleboard.getTab("Auton").add("AutoChooser", autoChooser);
-    }
 
-    private void generatePaths() {
-        SwerveAutoBuilder builder = new SwerveAutoBuilder(
+        builder = new SwerveAutoBuilder(
             drivetrain::getLocation,
             drivetrain::resetLocation,
             drivetrain.translationPidConstants,
@@ -61,7 +44,18 @@ public class AutonPaths {
             true,
             drivetrain
         );
-        testTrajectoryCommand = Commands.sequence(new InstantCommand(() -> drivetrain.resetLocation(testTrajectory.getInitialHolonomicPose())), wrapPathCommand(builder.followPath(testTrajectory)));
+        
+        generatePaths();
+    }
+
+    private void generatePaths() {
+        for(AutoTrajectory trajectory : AutoTrajectory.values()) {
+            trajectoryMap.put(trajectory, PathPlanner.loadPath(trajectory.name(), CONSTRAINTS));
+        }
+    }
+
+    public CommandBase followTrajectoryCommand(PathPlannerTrajectory trajectory) {
+        return wrapPathCommand(builder.followPathWithEvents(trajectory));
     }
 
     /**
@@ -74,10 +68,10 @@ public class AutonPaths {
         return (new InstantCommand(() -> drivetrain.setIsFollowingPath(true))).andThen(command).andThen(() -> drivetrain.setIsFollowingPath(false));
     }
 
-    public CommandBase getTestTrajectoryCommand() {
-        return testTrajectoryCommand;
+    public PathPlannerTrajectory getTrajectory(AutoTrajectory trajectory) {
+        return trajectoryMap.getOrDefault(trajectory, null);
     }
-
+    
     /**
      * Get a command to follow a path to a position, assuming the drivetrain is not moving at the start.
      * 
@@ -123,6 +117,19 @@ public class AutonPaths {
         return wrapPathCommand(builder.followPath(trajectory));
     }
 
+    
+
+    public static enum AutoTrajectory {
+        GetGamepieceOne,
+        GetGamepieceTwo,
+        GetGamepieceThree,
+        GetGamepieceFour,
+        
+        TopToChargingStation,
+        MiddleToChargingStation,
+        BottomToChargingStation
+    }
+
     public static void displayPath(PathPlannerTrajectory trajectory) {
         int fieldWidth = 5, fieldHeight = 5;
         int resolution = 10; // Pixels per meter
@@ -130,7 +137,7 @@ public class AutonPaths {
         for(int y = 0; y < grid.length; y++) {
             Arrays.fill(grid[y], '-');
         }
-
+    
         for(State state : trajectory.getStates()) {
             int y = (int) MathUtil.clamp(Math.round(state.poseMeters.getY() * resolution), 0, fieldHeight * resolution - 1);
             int x = (int) MathUtil.clamp(Math.round(state.poseMeters.getX() * resolution), 0, fieldWidth * resolution - 1);
@@ -138,8 +145,8 @@ public class AutonPaths {
                 grid[y][x] = state.equals(trajectory.getInitialState())? 'S' : state.equals(trajectory.getEndState())? 'E' : 'O';
             }
         }
-
-
+    
+    
         for(int y = grid.length - 1; y >= 0; y--) {
             String line = "";
             for(int x = 0; x < grid[y].length; x++) {
@@ -147,30 +154,5 @@ public class AutonPaths {
             }
             System.out.println(line);
         }
-    }
-
-    public CommandBase getRoutine(AutoRoutine routine) {
-        return routineMap.getOrDefault(routine, new InstantCommand());
-    }
-
-    public CommandBase getSelectedRoutine() {
-        return getRoutine(autoChooser.getSelected());
-    }
-
-    public static enum AutoRoutine {
-        // Upper routines
-        UPPER_ONE_PIECE,
-        UPPER_TWO_PIECE,
-        UPPER_ONE_PIECE_ENGAGE,
-        // Middle routines
-        MIDDLE_ENGAGE,
-        MIDDLE_GRAB_LEFT_PIECE_ENGAGE,
-        MIDDLE_GRAB_RIGHT_PIECE_ENGAGE,
-        MIDDLE_LEFT_PIECE_ENGAGE,
-        MIDDLE_RIGHT_PIECE_ENGAGE,
-        // Lower routines
-        LOWER_ONE_PIECE,
-        LOWER_TWO_PIECE,
-        LOWER_ONE_PIECE_ENGAGE
     }
 }

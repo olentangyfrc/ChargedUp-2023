@@ -38,27 +38,17 @@ public class ActiveIntake extends SubsystemBase {
     upperMotor.restoreFactoryDefaults();
     lowerMotor.restoreFactoryDefaults();
 
-    upperMotor.setInverted(true);
+    upperMotor.setInverted(false);
     lowerMotor.setInverted(false);
   }
 
   public void setUpperMotor(double speed) {
-    if(!(beamBreaker.get())){
-      upperMotor.set(speed);
-    }
-    else{
-      upperMotor.stopMotor();
-    }
-    System.out.println("SET UPPER MOTOR");
+    upperMotor.set(speed);
+    // System.out.println("SET UPPER MOTOR");
   }
 
   public void setLowerMotor(double speed) {
-    if(!(beamBreaker.get())){
-      lowerMotor.set(speed);
-    }
-    else{
-      lowerMotor.stopMotor();
-    } 
+    lowerMotor.set(speed);
   }
 
   public void deploy() {

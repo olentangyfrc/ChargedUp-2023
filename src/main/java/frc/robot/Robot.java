@@ -50,7 +50,6 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void autonomousInit() {
-    SubsystemManager.getInstance().getAutonPaths().getTestTrajectoryCommand().schedule();
   }
 
   @Override

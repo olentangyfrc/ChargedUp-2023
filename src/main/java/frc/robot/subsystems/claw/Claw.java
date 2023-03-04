@@ -50,9 +50,9 @@ public class Claw extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double targetRadians = targetWristAngle.getRadians();
-    double clampedCurrentAngle = MathUtil.clamp(getWristAngle().getRadians(), targetRadians - MAX_WRIST_ERROR, targetRadians + MAX_WRIST_ERROR);
-    wristMotor.setVoltage(wristController.calculate(clampedCurrentAngle));
+    // double targetRadians = targetWristAngle.getRadians();
+    // double clampedCurrentAngle = MathUtil.clamp(getWristAngle().getRadians(), targetRadians - MAX_WRIST_ERROR, targetRadians + MAX_WRIST_ERROR);
+    // wristMotor.setVoltage(-wristController.calculate(clampedCurrentAngle));
   }
 
   public void setTargetWristAngle(Rotation2d angle) {
