@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.SubsystemManager;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.commands.GrabGamePiece;
 
@@ -28,7 +29,10 @@ public class ActiveIntake extends SubsystemBase {
 
   private DigitalInput beamBreaker;
 
-  private boolean isGamePieceHeld;
+  private boolean isClawHoldingGamePiece;
+  private boolean isGamePieceInActiveIntake;
+
+  private double startTimer;
 
   private Claw claw;
 
@@ -46,21 +50,20 @@ public class ActiveIntake extends SubsystemBase {
     upperMotor.setInverted(true);
     lowerMotor.setInverted(false);
 
-    claw = new Claw(61, 0, 1, 2, 3);
-
-    isGamePieceHeld = false;
+    isGamePieceInActiveIntake = false;
   }
 
   @Override
   public void periodic(){
-    if(doesRobotHaveGamePiece()){
-      Timer.delay(1);
-      if(doesRobotHaveGamePiece()){
-        isGamePieceHeld = true;
-        new GrabGamePiece(claw);
+    if(isBeamBroken()) {
+      startTimer = Timer.getFPGATimestamp();
+      if(isBeamBroken() && Timer.getFPGATimestamp() - startTimer >= 1000) {
+        isGamePieceInActiveIntake = true;
+        new GrabGamePiece(SubsystemManager.getInstance().getClaw());
+        isClawHoldingGamePiece = true;
       }
-    }else {
-      setUpperMotor(UPPER_MOTOR_SPEED);
+    }
+    else {
       setLowerMotor(LOWER_MOTOR_SPEED);
     }
   }
@@ -87,13 +90,7 @@ public class ActiveIntake extends SubsystemBase {
     return intakeSolenoid.get() == Value.kForward;
   }
 
-  public boolean doesRobotHaveGamePiece(){
-    if(!(beamBreaker.get())){
-      isGamePieceHeld = true;
-    }
-    else{
-      isGamePieceHeld = false;
-    }
-    return isGamePieceHeld;
+  public boolean isBeamBroken(){
+    return !(beamBreaker.get());
   }
 }

@@ -163,6 +163,7 @@ public class SubsystemManager {
 
 
   private void initCHARGED_UP_PROTO() {
+
     imu = new Pigeon2(5);
     imu.reset();
     
@@ -277,6 +278,10 @@ public class SubsystemManager {
 
   public Elevator getElevator() {
     return elevator;
+  }
+
+  public ActiveIntake getActiveIntake() {
+    return activeIntake;
   }
 
   public AutonPaths getAutonPaths() {
