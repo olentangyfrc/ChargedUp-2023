@@ -20,10 +20,9 @@ public class ClawPitch extends SubsystemBase {
 
   private CANSparkMax pitchMotor;
 
-  private PIDController pitchController = new PIDController(0.12789, 0, 0.023561);
+  private PIDController pitchController = new PIDController(0.12853, 0, 0.023545);
 
   private Rotation2d targetPitch = new Rotation2d();
-
 
   /** Creates a new ClawPitch. */
   public ClawPitch(int motorCanId) {
@@ -44,11 +43,10 @@ public class ClawPitch extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // double targetDegrees = targetPitch.getDegrees();
-    // double targetDegrees = setPitch.getDouble(0);
+    double targetDegrees = setPitch.getDouble(0);
 
-    // // This method will be called once per scheduler run
-    // double clampedError = MathUtil.clamp(getPitch().getDegrees(), targetDegrees - MAX_ERROR, targetDegrees + MAX_ERROR);
-    // pitchMotor.setVoltage(pitchController.calculate(clampedError, targetDegrees));
+    // This method will be called once per scheduler run
+    double clampedError = MathUtil.clamp(getPitch().getDegrees(), targetDegrees - MAX_ERROR, targetDegrees + MAX_ERROR);
+    pitchMotor.setVoltage(pitchController.calculate(clampedError, targetDegrees));
   }
 }
