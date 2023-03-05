@@ -39,6 +39,14 @@ public class ClawPitch extends SubsystemBase {
     return Rotation2d.fromRotations(pitchMotor.getEncoder().getPosition() / GEAR_RATIO);
   }
 
+  public void setTargetPitch(Rotation2d pitch) {
+    targetPitch = pitch;
+  }
+
+  public boolean isPitchAtAngle() {
+    return Math.abs(getPitch().getDegrees() - targetPitch.getDegrees()) < MAX_ERROR;
+  }
+
   private GenericEntry setPitch = Shuffleboard.getTab("Claw").add("Set Pitch", 0).getEntry();
 
   @Override
