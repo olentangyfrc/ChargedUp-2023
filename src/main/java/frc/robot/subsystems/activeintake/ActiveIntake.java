@@ -55,7 +55,7 @@ public class ActiveIntake extends SubsystemBase {
 
   @Override
   public void periodic(){
-    if(isBeamBroken()) {
+    /*if(isBeamBroken()) {
       startTimer = Timer.getFPGATimestamp();
       if(isBeamBroken() && Timer.getFPGATimestamp() - startTimer >= 1000) {
         isGamePieceInActiveIntake = true;
@@ -66,6 +66,7 @@ public class ActiveIntake extends SubsystemBase {
     else {
       setLowerMotor(LOWER_MOTOR_SPEED);
     }
+    */
   }
 
   public void setUpperMotor(double speed) {

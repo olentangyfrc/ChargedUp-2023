@@ -7,6 +7,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,6 +25,7 @@ import frc.robot.subsystems.activeintake.commands.ReverseIntake;
 import frc.robot.subsystems.activeintake.commands.StartIntake;
 import frc.robot.subsystems.activeintake.commands.StopIntake;
 import frc.robot.subsystems.claw.Claw;
+import frc.robot.subsystems.claw.commands.RotateClawToAngle;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
@@ -159,6 +161,8 @@ public class SubsystemManager {
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new DeployIntake(activeIntake));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new RetractIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, new RotateClawToAngle(claw, new Rotation2d(Math.PI)));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new RotateClawToAngle(claw, new Rotation2d(0)));
   }
 
 
