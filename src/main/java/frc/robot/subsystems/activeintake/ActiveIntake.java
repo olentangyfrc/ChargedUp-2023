@@ -5,7 +5,6 @@
 package frc.robot.subsystems.activeintake;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -13,6 +12,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.claw.Claw;
 
 public class ActiveIntake extends SubsystemBase {
   public static final double UPPER_MOTOR_SPEED = 1;
@@ -25,7 +25,12 @@ public class ActiveIntake extends SubsystemBase {
 
   private DigitalInput beamBreaker;
 
-  // TODO: add beam breaks
+  private boolean isClawHoldingGamePiece;
+  private boolean isGamePieceInActiveIntake;
+
+  private double startTimer;
+
+  private Claw claw;
 
   /** Creates a new ActiveIntake. */
   public ActiveIntake(int upperMotorCAN, int lowerMotorCAN, int forwardPneumaticChannel, int reversePneumaticChannel) {
@@ -40,6 +45,24 @@ public class ActiveIntake extends SubsystemBase {
 
     upperMotor.setInverted(false);
     lowerMotor.setInverted(false);
+
+    isGamePieceInActiveIntake = false;
+  }
+
+  @Override
+  public void periodic(){
+    /*if(isBeamBroken()) {
+      startTimer = Timer.getFPGATimestamp();
+      if(isBeamBroken() && Timer.getFPGATimestamp() - startTimer >= 1000) {
+        isGamePieceInActiveIntake = true;
+        new GrabGamePiece(SubsystemManager.getInstance().getClaw());
+        isClawHoldingGamePiece = true;
+      }
+    }
+    else {
+      setLowerMotor(LOWER_MOTOR_SPEED);
+    }
+    */
   }
 
   public void setUpperMotor(double speed) {
@@ -61,5 +84,9 @@ public class ActiveIntake extends SubsystemBase {
 
   public boolean isDeployed() {
     return intakeSolenoid.get() == Value.kForward;
+  }
+
+  public boolean isBeamBroken(){
+    return !(beamBreaker.get());
   }
 }

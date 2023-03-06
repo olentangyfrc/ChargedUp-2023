@@ -7,7 +7,6 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -25,9 +24,8 @@ import frc.robot.subsystems.activeintake.commands.ReverseIntake;
 import frc.robot.subsystems.activeintake.commands.StartIntake;
 import frc.robot.subsystems.activeintake.commands.StopIntake;
 import frc.robot.subsystems.claw.Claw;
-import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.claw.Claw.ClawPosition;
-import frc.robot.subsystems.claw.commands.RotateClaw;
+import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.claw.commands.SetClawPosition;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
@@ -185,6 +183,7 @@ public class SubsystemManager {
 
 
   private void initCHARGED_UP_PROTO() {
+
     imu = new Pigeon2(5);
     imu.reset();
     
@@ -299,6 +298,10 @@ public class SubsystemManager {
 
   public Elevator getElevator() {
     return elevator;
+  }
+
+  public ActiveIntake getActiveIntake() {
+    return activeIntake;
   }
 
   public AutonPaths getAutonPaths() {
