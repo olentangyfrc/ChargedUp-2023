@@ -7,7 +7,6 @@ package frc.robot.subsystems.claw.commands;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.claw.Claw;
-import frc.robot.subsystems.claw.Claw.ClawPosition;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -24,18 +23,11 @@ public class RotateClawToAngle extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    claw.rotateClawToAngle(targetAngle);
+    claw.setTargetClawAngle(targetAngle);
   }
 
   @Override
-  public void execute() {
-
-  }
-
-  @Override
-  public void end(boolean interrupted) {
-    System.out.println("ending rotating");
-    
+  public void end(boolean interrupted) {    
     claw.stopWristMotor();
   }
 

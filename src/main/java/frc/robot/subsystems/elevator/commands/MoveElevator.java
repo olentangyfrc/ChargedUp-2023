@@ -31,7 +31,7 @@ public class MoveElevator extends CommandBase {
     if(positionPreset != null) {
       elevator.setTargetPosition(positionPreset);
     } else {
-      elevator.setTargetPosition(position);
+      elevator.goToPosition(position);
     }
   }
 

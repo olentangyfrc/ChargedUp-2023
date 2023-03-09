@@ -28,6 +28,6 @@ public class RotateClawPitch extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return claw.isPitchAtAngle();
+    return claw.isAtPitch();
   }
 }

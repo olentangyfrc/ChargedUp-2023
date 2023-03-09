@@ -11,8 +11,11 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.SubsystemManager;
 import frc.robot.subsystems.claw.Claw;
+import frc.robot.subsystems.claw.commands.GrabGamePiece;
 
 public class ActiveIntake extends SubsystemBase {
   public static final double UPPER_MOTOR_SPEED = 1;
@@ -25,10 +28,12 @@ public class ActiveIntake extends SubsystemBase {
 
   private DigitalInput beamBreaker;
 
-  private boolean isClawHoldingGamePiece;
-  private boolean isGamePieceInActiveIntake;
+  private static final double GRAB_WAIT_TIME = 0.3;
+  private boolean isClawHoldingGamePiece = false;
+  private boolean isWaiting = false;
 
-  private double startTimer;
+
+  private double startTimer = Timer.getFPGATimestamp();
 
   private Claw claw;
 
@@ -45,24 +50,44 @@ public class ActiveIntake extends SubsystemBase {
 
     upperMotor.setInverted(false);
     lowerMotor.setInverted(false);
+  }
 
-    isGamePieceInActiveIntake = false;
+  public boolean isClawHoldingGamePiece() {
+    return isClawHoldingGamePiece;
+  }
+
+  public void setClawHoldingGamePiece(boolean isClawHoldingGamePiece) {
+    this.isClawHoldingGamePiece = isClawHoldingGamePiece;
   }
 
   @Override
   public void periodic(){
-    /*if(isBeamBroken()) {
-      startTimer = Timer.getFPGATimestamp();
-      if(isBeamBroken() && Timer.getFPGATimestamp() - startTimer >= 1000) {
-        isGamePieceInActiveIntake = true;
-        new GrabGamePiece(SubsystemManager.getInstance().getClaw());
-        isClawHoldingGamePiece = true;
+    if(isBeamBroken()) {
+      if(!isWaiting) {
+        startTimer = Timer.getFPGATimestamp();
+        isWaiting = true;
+      } else {
+        if(Timer.getFPGATimestamp() - startTimer >= GRAB_WAIT_TIME) {
+
+          (new GrabGamePiece(
+            SubsystemManager.getInstance().getClaw(),
+            SubsystemManager.getInstance().getClawPitch(),
+            SubsystemManager.getInstance().getElevator()
+          )).schedule();
+          
+          isClawHoldingGamePiece = true;
+        }
       }
+    } else {
+      isWaiting = false;
     }
-    else {
-      setLowerMotor(LOWER_MOTOR_SPEED);
+
+    if(isClawHoldingGamePiece) {
+      lowerMotor.stopMotor();
+    } else {
+      lowerMotor.set(LOWER_MOTOR_SPEED);
     }
-    */
+    
   }
 
   public void setUpperMotor(double speed) {

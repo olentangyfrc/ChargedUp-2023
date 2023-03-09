@@ -5,6 +5,7 @@
 package frc.robot.subsystems.claw;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
@@ -14,20 +15,22 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.claw.commands.RotateClawToAngle;
 
 public class Claw extends SubsystemBase {
   // Wrist
   private static final double WRIST_GEAR_RATIO = 90;
   private static final double MAX_WRIST_ERROR = 0.7854;
-  private static final double WRIST_ANGLE_TOLERANCE = 0.05;
-  private CANSparkMax wristMotor;
-  private PIDController wristController = new PIDController(0.5, 0, 0); // TODO: Find the actual values!!!
-  // TODO: Determine how to get the wrist's angle
+  private static final double WRIST_ANGLE_TOLERANCE = 0.03;
 
-  private Rotation2d startingWristAngle = new Rotation2d(0);
-  private Rotation2d scoringWristAngle = new Rotation2d(-Math.PI);
-  private double targetRadians;
+  private CANSparkMax wristMotor;
+
+  // private PIDController wristController = new PIDController(0.5, 0, 0);
+  private PIDController wristController = new PIDController(6, 0, 1.14807);
+
+  private Rotation2d targetWristAngle = new Rotation2d(Math.PI);
 
   private DoubleSolenoid upperSolenoid;
   private DoubleSolenoid lowerSolenoid;
@@ -37,6 +40,7 @@ public class Claw extends SubsystemBase {
     wristMotor = new CANSparkMax(wristCanId, MotorType.kBrushless);
     wristMotor.restoreFactoryDefaults();
     wristMotor.setInverted(true);
+    wristMotor.setIdleMode(IdleMode.kBrake);
     wristMotor.getEncoder().setPosition(0);
 
     upperSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, upperForwardChannel, upperReverseChannel);
@@ -45,16 +49,25 @@ public class Claw extends SubsystemBase {
     wristController.setTolerance(WRIST_ANGLE_TOLERANCE);
     wristMotor.getEncoder().setPosition(0);
 
-    Shuffleboard.getTab(getName()).addNumber("Claw position", () -> getWristAngleInRadians().getDegrees());
-    Shuffleboard.getTab(getName()).addNumber("Current Radians", () -> getWristAngleInRadians().getRadians());
-    Shuffleboard.getTab(getName()).addNumber("Target Radians", () -> targetRadians);
+    setTargetClawAngle(new Rotation2d());
+
+    Shuffleboard.getTab(getName()).addNumber("Claw position", () -> getWristAngle().getDegrees());
+    Shuffleboard.getTab(getName()).addNumber("Current Radians", () -> getWristAngle().getRadians());
+    Shuffleboard.getTab(getName()).addNumber("Target Radians", () -> targetWristAngle.getRadians());
+    Shuffleboard.getTab(getName()).add("Forwards", new RotateClawToAngle(this, Rotation2d.fromDegrees(0)));
+    Shuffleboard.getTab(getName()).add("Reverse", new RotateClawToAngle(this, Rotation2d.fromDegrees(180)));
   }
 
   @Override
   public void periodic() {
-    // double targetRadians = targetWristAngle.getRadians();
-    // double clampedCurrentAngle = MathUtil.clamp(getWristAngle().getRadians(), targetRadians - MAX_WRIST_ERROR, targetRadians + MAX_WRIST_ERROR);
-    // wristMotor.setVoltage(-wristController.calculate(clampedCurrentAngle));
+    double targetRadians = targetWristAngle.getRadians();
+    double clampedCurrentAngle = MathUtil.clamp(getWristAngle().getRadians(), targetRadians - MAX_WRIST_ERROR, targetRadians + MAX_WRIST_ERROR);
+    SmartDashboard.putNumber("Clamped angle", clampedCurrentAngle);
+    double pidOutput = wristController.calculate(clampedCurrentAngle, targetRadians);
+
+    if(!wristController.atSetpoint()) {
+      wristMotor.setVoltage(pidOutput);
+    }
   }
 
   public void stopWristMotor() {
@@ -65,36 +78,9 @@ public class Claw extends SubsystemBase {
     return wristController.atSetpoint();
   }
 
-  public void rotateClawToAngle(Rotation2d targetAngle) {
-    targetRadians = targetAngle.getRadians();
-    wristController.setSetpoint(targetRadians);
-    double clampedCurrentAngle = MathUtil.clamp(getWristAngleInRadians().getRadians(), targetRadians - MAX_WRIST_ERROR, targetRadians + MAX_WRIST_ERROR);
-    Shuffleboard.getTab(getName()).addNumber("PID Output", () -> wristController.calculate(clampedCurrentAngle));
-    if(!wristController.atSetpoint()) {
-      wristMotor.setVoltage(wristController.calculate(clampedCurrentAngle));
-    }
-    else{
-      stopWristMotor();
-    }
-    Shuffleboard.getTab(getName()).addNumber("PID Error", () -> wristController.getPositionError());
-  }
-
-  public boolean isClawAtScore() {
-    if(getWristAngleInRadians().getRadians() <= -targetRadians) {
-      return false;
-    }
-    else{
-      return true;
-    }
-  }
-
-  public boolean isClawAtStart() {
-    if(getWristAngleInRadians().getRadians() >= -targetRadians) {
-      return false;
-    }
-    else{
-      return true;
-    }
+  public void setTargetClawAngle(Rotation2d targetAngle) {
+    targetWristAngle = targetAngle;
+    wristController.setSetpoint(targetAngle.getRadians());
   }
 
   public void setClawPosition(ClawPosition position) {
@@ -122,13 +108,12 @@ public class Claw extends SubsystemBase {
     }
   }
 
-  // TODO
   /**
    * Get the wrist's current angle on the interval [0, 2pi) radians
    * 
    * @return
    */
-  public Rotation2d getWristAngleInRadians() {
+  public Rotation2d getWristAngle() {
     return Rotation2d.fromRotations(wristMotor.getEncoder().getPosition() / WRIST_GEAR_RATIO);
   }
 
