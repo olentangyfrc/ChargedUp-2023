@@ -38,7 +38,7 @@ public class ApriltagDetection extends SubsystemBase {
   private Optional<EstimatedRobotPose>  poseobject;
   private EstimatedRobotPose robotPose;
 
-  Transform3d robotToCam = new Transform3d(new Translation3d(0.115, -0.345, 0.335), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+  Transform3d robotToCam = new Transform3d(new Translation3d(-0.25, 0.315, 0.33), new Rotation3d(0,67.38,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
 
 
   public void init(){

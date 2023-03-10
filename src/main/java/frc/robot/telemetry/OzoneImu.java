@@ -18,6 +18,10 @@ public abstract class OzoneImu {
     public abstract double getRoll();
     public abstract void reset();
 
+    public abstract void resetPitch();
+
+    public abstract void resetRoll();
+
     public abstract void setReset(Rotation2d angle);
 
     /**

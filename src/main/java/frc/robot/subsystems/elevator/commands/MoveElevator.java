@@ -6,29 +6,34 @@ package frc.robot.subsystems.elevator.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 
 public class MoveElevator extends CommandBase {
   private Elevator elevator;
-  private double targetPosition;
+  private ElevatorPosition positionPreset;
+  private double position;
 
   /** Creates a new MoveElevator. */
-  public MoveElevator(Elevator elevator, double targetPosition) {
-    // Use addRequirements() here to declare subsystem dependencies.
+  public MoveElevator(Elevator elevator, double position) {
     this.elevator = elevator;
-    // this.targetPosition = targetPosition;
-    this.targetPosition = targetPosition;
-    addRequirements(elevator);
+    this.position = position;
+  }
+
+  /** Creates a new MoveElevator. */
+  public MoveElevator(Elevator elevator, ElevatorPosition position) {
+    this.elevator = elevator;
+    this.positionPreset = position;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    elevator.setTargetPosition(targetPosition);
+    if(positionPreset != null) {
+      elevator.setTargetPosition(positionPreset);
+    } else {
+      elevator.goToPosition(position);
+    }
   }
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override

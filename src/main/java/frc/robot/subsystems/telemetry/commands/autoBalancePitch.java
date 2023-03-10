@@ -15,16 +15,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
-import frc.robot.subsystems.telemetry.OzoneImu;
+import frc.robot.telemetry.OzoneImu;
 import pabeles.concurrency.IntOperatorTask.Max;
 
 public class autoBalancePitch extends CommandBase {
   SwerveDrivetrain drivetrain;
-  OzoneImu pigeon;
+  private OzoneImu pigeon;
   //safe speed: 0.01
   final double SPEED = 0.01;
   //safe tolernace = 2.0
-  final double TOLERANCE = 1.5;
+  final double TOLERANCE = 0.09;
   double pitchSpeed = 0;
   double previousPitch = 0;
   double rollSpeed = 0;
@@ -36,7 +36,7 @@ public class autoBalancePitch extends CommandBase {
   double ROLL_PID = 0;
 
   boolean isPitchAtSetpoint = false;
-  boolean isRollAtSetpoint = false;
+  //boolean isRollAtSetpoint = false;
 
   //safe p: 0.006
   //safe d: 0.002269
@@ -71,9 +71,9 @@ public class autoBalancePitch extends CommandBase {
   public void execute() {
     pitch = pigeon.getPitch();
     PITCH_PID = pidPitch.calculate(MathUtil.clamp(pigeon.getPitch(), pidPitch.getSetpoint() - MAX_ERROR, pidPitch.getSetpoint() + MAX_ERROR));
-    ROLL_PID = pidRoll.calculate(MathUtil.clamp(pigeon.getRoll(), pidRoll.getSetpoint() - MAX_ERROR, pidRoll.getSetpoint() + MAX_ERROR));
+    //ROLL_PID = pidRoll.calculate(MathUtil.clamp(pigeon.getRoll(), pidRoll.getSetpoint() - MAX_ERROR, pidRoll.getSetpoint() + MAX_ERROR));
     ChassisSpeeds speed = new ChassisSpeeds(PITCH_PID, ROLL_PID, 0);
-    if(!(pidPitch.atSetpoint() && pidRoll.atSetpoint())) {
+    if(!(isPitchAtSetpoint /*&& pidRoll.atSetpoint()*/)) {
       drivetrain.drive(speed, false);
     }
     else{
@@ -84,12 +84,12 @@ public class autoBalancePitch extends CommandBase {
     previousPitch = pitch;
 
     isPitchAtSetpoint = pidPitch.atSetpoint();
-    isRollAtSetpoint = pidRoll.atSetpoint();
+    //isRollAtSetpoint = pidRoll.atSetpoint();
 
     SmartDashboard.putNumber("PID Pitch Output", PITCH_PID);
     SmartDashboard.putNumber("PID Roll Output", ROLL_PID);
-    SmartDashboard.putBoolean("Is Pitch Ar Setpoint", isPitchAtSetpoint);
-    SmartDashboard.putBoolean("Is Roll At Setpoint", isRollAtSetpoint);
+    SmartDashboard.putBoolean("Is Pitch At Setpoint", isPitchAtSetpoint);
+    // SmartDashboard.putBoolean("Is Roll At Setpoint", isRollAtSetpoint);
 
     //SmartDashboard.putNumber("Bang Bang Output", bangBang(pitch, TOLERANCE));
 

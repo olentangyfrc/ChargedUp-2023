@@ -11,12 +11,23 @@ import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.IO.ButtonActionType;
 import frc.robot.IO.ControllerButton;
 import frc.robot.auton.AutoDashboardManager;
 import frc.robot.auton.AutoNodeUtility;
 import frc.robot.auton.AutonPaths;
 import frc.robot.subsystems.ApriltagDetection;
+import frc.robot.subsystems.activeintake.ActiveIntake;
+import frc.robot.subsystems.activeintake.commands.DeployIntake;
+import frc.robot.subsystems.activeintake.commands.RetractIntake;
+import frc.robot.subsystems.activeintake.commands.ReverseIntake;
+import frc.robot.subsystems.activeintake.commands.StartIntake;
+import frc.robot.subsystems.activeintake.commands.StopIntake;
+import frc.robot.subsystems.claw.Claw;
+import frc.robot.subsystems.claw.Claw.ClawPosition;
+import frc.robot.subsystems.claw.ClawPitch;
+import frc.robot.subsystems.claw.commands.SetClawPosition;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
@@ -24,12 +35,10 @@ import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.commands.ManualElevatorForward;
+import frc.robot.subsystems.elevator.commands.ManualElevatorReverse;
 import frc.robot.subsystems.elevator.commands.MoveElevator;
-import frc.robot.subsystems.intakeArm.intakeArm;
-import frc.robot.subsystems.intakeArm.commands.PlaceItem;
-import frc.robot.subsystems.intakeArm.commands.armDown;
-import frc.robot.subsystems.intakeArm.commands.armUp;
-import frc.robot.subsystems.intakeArm.commands.toggleClaw;
+import frc.robot.subsystems.telemetry.commands.autoBalancePitch;
 import frc.robot.subsystems.telemetry.commands.autoBalancePitchGroup;
 import frc.robot.subsystems.telemetry.commands.driveOverStation;
 import frc.robot.subsystems.telemetry.commands.driveUp;
@@ -48,7 +57,10 @@ public class SubsystemManager {
   private SwerveDrivetrain drivetrain;
   private PowerDistribution pdp;
   private ApriltagDetection detector;
-  private intakeArm intakeArm;
+
+  private ActiveIntake activeIntake;
+  private Claw claw;
+  private ClawPitch clawPitch;
   private Elevator elevator;
   private AutonPaths paths;
   private AutoDashboardManager autoDashboardManager;
@@ -64,7 +76,7 @@ public class SubsystemManager {
     "00:80:2F:28:64:38", BotType.RIO99,
     "00:80:2F:35:54:1E", BotType.CHARGED_UP_PROTO,
     "00:80:2F:17:D7:4B", BotType.RIO2,
-    "00:80:2F:27:04:C6", BotType.RIO3,
+    "", BotType.CHARGED_UP_PROTO_2,
     "00:80:2F:27:1D:E9", BotType.BLUE
   );
 
@@ -112,51 +124,56 @@ public class SubsystemManager {
       case RIO99:
         initRIO99();
         break;
-      case CHARGED_UP_PROTO:
-        initCHARGED_UP_PROTO();
+      case CHARGED_UP_PROTO_2:
+        initCHARGED_UP_PROTO_2();
         break;
       default:
         if(Robot.isSimulation()) {
-          initCHARGED_UP_PROTO();
+          initCHARGED_UP_PROTO_2();
         }
         logger.info("Unrecognized bot");
       }
   }
   
-  private void initCHARGED_UP_PROTO() {
-    imu = new Pigeon2(5);
+  private void initCHARGED_UP_PROTO_2() {
+    imu = new Pigeon2(1);
     imu.reset();
     
     // Create and initialize all subsystems:
-    drivetrain = new SingleFalconDrivetrain();
-    drivetrain.init(new SwerveModuleSetupInfo[] {
-      new SwerveModuleSetupInfo(41, 59, 1, 331.6),
-      new SwerveModuleSetupInfo(40, 8, 3, 28.39),
-      new SwerveModuleSetupInfo(42, 17, 2, 28.87),
-      new SwerveModuleSetupInfo(43, 15, 0, 267.34),
-    }, 1 / 8.07);
-    detector = new ApriltagDetection();
+     drivetrain = new SingleFalconDrivetrain();
+     drivetrain.init(new SwerveModuleSetupInfo[] {
+       new SwerveModuleSetupInfo(31, 15, 0, 261.52),
+       new SwerveModuleSetupInfo(30, 6, 2, 328.8),
+       new SwerveModuleSetupInfo(32, 62, 1, 41.36),
+       new SwerveModuleSetupInfo(33, 14, 3, 180.48),
+     }, 1 / 8.07);
 
-    paths = new AutonPaths(drivetrain);
-    autoDashboardManager = new AutoDashboardManager();
+    claw = new Claw(61, 0, 1, 2, 3);
+    clawPitch = new ClawPitch(7);
+    activeIntake = new ActiveIntake(5, 9, 4, 5);
+    elevator = new Elevator(42, 6, 7);
 
-    detector.init();
-    elevator = new Elevator();
 
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new ParallelCommandGroup(new InstantCommand(imu::reset), new InstantCommand(imu::resetPitch), new InstantCommand(imu::resetRoll)));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new StartIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, new StopIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new ReverseIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton, new StopIntake(activeIntake));
 
-    intakeArm = new intakeArm();
-    intakeArm.init();
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new PlaceItem("Cone", "High"));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new toggleClaw(intakeArm));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new armDown(intakeArm));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new armUp(intakeArm));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new MoveElevator(elevator, Elevator.ELEVATOR_HIGH_POS));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new MoveElevator(elevator, 0));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new DeployIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new RetractIntake(activeIntake));
 
-    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.Start, Commands.run(
-      () -> paths.pathToPositionCommand(AutoNodeUtility.getNodeDrivePosition(autoDashboardManager.getSelectedNode())).schedule()
-    ));
+    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.A, new ManualElevatorForward(elevator));
+    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.B, new ManualElevatorReverse(elevator));
+
+    
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new SetClawPosition(claw, ClawPosition.CLOSED));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown, new SetClawPosition(claw, ClawPosition.OPEN));
+
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new autoBalancePitchGroup());
+
+    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight, new DeployElevator(elevator));
+    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft, new RetractElevator(elevator));
   }
   
   private void initBLUE() {}
@@ -220,10 +237,6 @@ public class SubsystemManager {
     return pdp;
   }
 
-  public intakeArm getIntakeArm() {
-    return intakeArm;
-  }
-
   public OzoneImu getImu() {
     return imu;
   }
@@ -236,8 +249,21 @@ public class SubsystemManager {
     return detector;
   }
   
+
+  public Claw getClaw() {
+    return claw;
+  }
+
+  public ClawPitch getClawPitch() {
+    return clawPitch;
+  }
+
   public Elevator getElevator() {
     return elevator;
+  }
+
+  public ActiveIntake getActiveIntake() {
+    return activeIntake;
   }
 
   public AutonPaths getAutonPaths() {
@@ -309,8 +335,8 @@ public class SubsystemManager {
     BLUE,
     RIO99,
     CHARGED_UP_PROTO,
+    CHARGED_UP_PROTO_2,
     RIO2, 
-    RIO3,
     UNRECOGNIZED,
   }
 }

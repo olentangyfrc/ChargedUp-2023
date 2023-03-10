@@ -15,13 +15,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
-import frc.robot.subsystems.telemetry.OzoneImu;
+import frc.robot.telemetry.OzoneImu;
 import pabeles.concurrency.IntOperatorTask.Max;
 import edu.wpi.first.wpilibj.Timer;
 
 public class driveOverStation extends CommandBase {
   SwerveDrivetrain drivetrain;
-  OzoneImu pigeon;
+  private OzoneImu pigeon;
 
   public static final double TIME_TO_DRIVE = 3.2;
   private double startTime;

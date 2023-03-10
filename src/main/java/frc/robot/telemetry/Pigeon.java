@@ -48,6 +48,10 @@ public class Pigeon extends OzoneImu {
         pitchOffset = pigeon.getPitch();
     }
 
+    public void resetRoll() {
+        rollOffset = pigeon.getRoll();
+    }
+
     /**
      * Enter gyro calibration mode.
      * <p>

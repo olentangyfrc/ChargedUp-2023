@@ -6,6 +6,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 public class Pigeon2 extends OzoneImu {
     private WPI_Pigeon2 imu;
+
+    private double pitchOffset = 0;
+    private double rollOffset = 0;
     
     public Pigeon2(int deviceID) {
         this.imu = new WPI_Pigeon2(deviceID);
@@ -27,12 +30,12 @@ public class Pigeon2 extends OzoneImu {
         // if (imu.getPitch() >= offset && imu.getPitch() < 0) {
         //     return 0;
         // }
-        return imu.getPitch();
+        return (imu.getRoll() % 360) - pitchOffset;
     }
 
     @Override
     public double getRoll() {
-        return imu.getRoll();
+        return imu.getPitch() - rollOffset;
     }
 
     @Override
@@ -44,5 +47,15 @@ public class Pigeon2 extends OzoneImu {
     @Override
     public void reset() {
         imu.reset();
+    }
+
+    @Override
+    public void resetPitch() {
+        pitchOffset = getPitch();
+    }
+
+    @Override
+    public void resetRoll() {
+        rollOffset = getRoll();
     }
 }

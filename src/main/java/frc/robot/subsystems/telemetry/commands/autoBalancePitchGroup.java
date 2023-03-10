@@ -20,7 +20,7 @@ public class autoBalancePitchGroup extends SequentialCommandGroup {
   public autoBalancePitchGroup(/*Rotation2d rotateAngle*/) {
     SwerveDrivetrain drivetrain = SubsystemManager.getInstance().getDrivetrain();
     //addCommands(new RotateToAngle(drivetrain, rotateAngle));
-    addCommands(new driveUp(drivetrain));
+    //addCommands(new driveUp(drivetrain));
     addCommands(new autoBalancePitch(drivetrain));
   }
 }
