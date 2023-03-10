@@ -4,15 +4,19 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.server.PathPlannerServer;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.auton.AutonPaths;
-import frc.robot.subsystems.telemetry.Pigeon;
 import frc.robot.subsystems.telemetry.commands.autoBalancePitch;
 import frc.robot.subsystems.telemetry.commands.autoBalancePitchGroup;
 import frc.robot.subsystems.telemetry.commands.resetGyro;
+import frc.robot.subsystems.ApriltagDetection;
+
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -23,7 +27,6 @@ import frc.robot.subsystems.telemetry.commands.resetGyro;
  * project.
  */
 public class Robot extends TimedRobot {
-  private AutonPaths paths;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -31,10 +34,17 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    PathPlannerServer.startServer(5811);
+
     SubsystemManager.getInstance().init();
-    paths = new AutonPaths(SubsystemManager.getInstance().getDrivetrain());
+    //paths = new AutonPaths(SubsystemManager.getInstance().getDrivetrain());
     SmartDashboard.putData("Auto Balance", new autoBalancePitchGroup(/*new Rotation2d(0)*/));
     SmartDashboard.putData("Reset Gyro", new resetGyro());
+    SubsystemManager.getInstance().getDrivetrain().resetLocation(new Pose2d(1.772, 1.149, Rotation2d.fromDegrees(0)));;
+    
+    Thread visionThread = new Thread(() -> SubsystemManager.getInstance().getDetector().init());
+    visionThread.setDaemon(true);
+    visionThread.start();
   }
 
   @Override
@@ -43,7 +53,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    paths.getTestTrajectoryCommand().schedule();
+    SubsystemManager.getInstance().getAutonPaths().getTestTrajectoryCommand().schedule();
   }
 
   @Override

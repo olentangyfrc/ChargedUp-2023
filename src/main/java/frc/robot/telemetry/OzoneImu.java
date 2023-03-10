@@ -1,4 +1,4 @@
-package frc.robot.subsystems.telemetry;
+package frc.robot.telemetry;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;

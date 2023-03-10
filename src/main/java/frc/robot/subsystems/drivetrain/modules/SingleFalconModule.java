@@ -22,16 +22,25 @@ import edu.wpi.first.wpilibj.AnalogInput;
  * 
  */
 public class SingleFalconModule extends SwerveModule {
-    private static final double DRIVE_GEAR_RATIO = 1 / 8.25;
     private static final double DRIVE_TICKS_PER_REVOLUTION = 2048;
 
+    private double driveGearRatio;
 
     private WPI_TalonFX driveMotor;
     private CANSparkMax angleMotor;
 
     private AnalogInput angleEncoder;
 
-    public SingleFalconModule(int angleMotorChannel, int driveMotorChannel, int angleEncoderChannel, double angleOffset, double maxSpeed) {
+    /**
+     * Initialize a swerve module on the given ports
+     * 
+     * @param angleMotorChannel CAN port for the angle motor
+     * @param driveMotorChannel CAN port for the drive motor
+     * @param angleEncoderChannel Analog port for the angle encoder
+     * @param driveGearRatio The number of times the actual wheel rotates for each rotation of the drive motor.
+     * @param angleOffset The angle in degrees by which to offset the angle of the wheel.
+     */
+    public SingleFalconModule(int angleMotorChannel, int driveMotorChannel, int angleEncoderChannel, double angleOffset, double driveGearRatio, double maxSpeed) {
         angleMotor = new CANSparkMax(angleMotorChannel, MotorType.kBrushless);
         driveMotor = new WPI_TalonFX(driveMotorChannel);
 
@@ -55,6 +64,7 @@ public class SingleFalconModule extends SwerveModule {
         velocityConversionOffset = 0.7;
         this.maxSpeed = maxSpeed;
         this.angleOffset = angleOffset;
+        this.driveGearRatio = driveGearRatio;
     }
 
     /**
@@ -92,7 +102,7 @@ public class SingleFalconModule extends SwerveModule {
      */
     @Override
     public double getVelocity() {
-        return driveMotor.getSelectedSensorVelocity(0) * DRIVE_GEAR_RATIO / DRIVE_TICKS_PER_REVOLUTION * WHEEL_RADIUS * 2 * Math.PI * 10; // Multiply by 10 due to sample rate
+        return driveMotor.getSelectedSensorVelocity(0) * driveGearRatio / DRIVE_TICKS_PER_REVOLUTION * WHEEL_RADIUS * 2 * Math.PI * 10; // Multiply by 10 due to sample rate
     }
 
     @Override
@@ -129,7 +139,7 @@ public class SingleFalconModule extends SwerveModule {
 
     @Override
     public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(driveMotor.getSelectedSensorPosition() * DRIVE_GEAR_RATIO / DRIVE_TICKS_PER_REVOLUTION * WHEEL_RADIUS * 2 * Math.PI, getAngle());
+        return new SwerveModulePosition(driveMotor.getSelectedSensorPosition() * driveGearRatio / DRIVE_TICKS_PER_REVOLUTION * WHEEL_RADIUS * 2 * Math.PI, getAngle());
     }
     
 }

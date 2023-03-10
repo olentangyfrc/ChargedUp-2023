@@ -17,8 +17,6 @@ import edu.wpi.first.wpilibj.AnalogInput;
  * A swerve module using two CANSparkMax motor controllers and an encoder on analog input.
  */
 public class CANSparkMaxModule extends SwerveModule {
-    private static final double DRIVE_GEAR_RATIO = 1 / 8.25;
-
     // Motors (Make sure these are set to percent output mode)
     private CANSparkMax angleMotor;
     private CANSparkMax driveMotor;
@@ -33,9 +31,10 @@ public class CANSparkMaxModule extends SwerveModule {
      * @param angleMotorChannel CAN port for the angle motor
      * @param driveMotorChannel CAN port for the drive motor
      * @param angleEncoderChannel Analog port for the angle encoder
+     * @param driveGearRatio The number of times the actual wheel rotates for each rotation of the drive motor.
      * @param angleOffset The angle in degrees by which to offset the angle of the wheel.
      */
-    public CANSparkMaxModule(int angleMotorChannel, int driveMotorChannel, int angleEncoderChannel, double angleOffset, double maxSpeed) {
+    public CANSparkMaxModule(int angleMotorChannel, int driveMotorChannel, int angleEncoderChannel, double angleOffset, double driveGearRatio, double maxSpeed) {
         angleMotor = new CANSparkMax(angleMotorChannel, MotorType.kBrushless);
         driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
 
@@ -49,10 +48,10 @@ public class CANSparkMaxModule extends SwerveModule {
         driveEncoder = driveMotor.getEncoder();
 
         // Set the position conversion factor to the circumference of the wheel.
-        driveEncoder.setPositionConversionFactor(DRIVE_GEAR_RATIO * 2 * WHEEL_RADIUS * Math.PI);
+        driveEncoder.setPositionConversionFactor(driveGearRatio * 2 * WHEEL_RADIUS * Math.PI);
 
         // Set the velocity conversion factor to the circumference of the wheel
-        driveEncoder.setVelocityConversionFactor(DRIVE_GEAR_RATIO * 2 * WHEEL_RADIUS * Math.PI);
+        driveEncoder.setVelocityConversionFactor(driveGearRatio * 2 * WHEEL_RADIUS * Math.PI);
 
         velocityFactorPID = new PIDController(0.01, 0, 0);
         velocityFactorPID.setSetpoint(0); // We want the error to be 0

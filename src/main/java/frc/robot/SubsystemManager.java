@@ -4,28 +4,38 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.IO.ButtonActionType;
 import frc.robot.IO.ControllerButton;
+import frc.robot.auton.AutoDashboardManager;
+import frc.robot.auton.AutoNodeUtility;
+import frc.robot.auton.AutonPaths;
+import frc.robot.subsystems.ApriltagDetection;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
-import frc.robot.subsystems.telemetry.OzoneImu;
-import frc.robot.subsystems.telemetry.Pigeon;
-import frc.robot.subsystems.telemetry.Pigeon2;
-import frc.robot.subsystems.telemetry.commands.autoBalancePitch;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.commands.MoveElevator;
+import frc.robot.subsystems.intakeArm.intakeArm;
+import frc.robot.subsystems.intakeArm.commands.PlaceItem;
+import frc.robot.subsystems.intakeArm.commands.armDown;
+import frc.robot.subsystems.intakeArm.commands.armUp;
+import frc.robot.subsystems.intakeArm.commands.toggleClaw;
 import frc.robot.subsystems.telemetry.commands.autoBalancePitchGroup;
 import frc.robot.subsystems.telemetry.commands.driveOverStation;
 import frc.robot.subsystems.telemetry.commands.driveUp;
+import frc.robot.telemetry.OzoneImu;
+import frc.robot.telemetry.Pigeon;
+import frc.robot.telemetry.Pigeon2;
 
 /**
  * This class instantiates and initializes all of the subsystems and stores references to them.
@@ -37,6 +47,11 @@ public class SubsystemManager {
   private OzoneImu imu;
   private SwerveDrivetrain drivetrain;
   private PowerDistribution pdp;
+  private ApriltagDetection detector;
+  private intakeArm intakeArm;
+  private Elevator elevator;
+  private AutonPaths paths;
+  private AutoDashboardManager autoDashboardManager;
 
   /**
    * Map of known bot addresses and respective types
@@ -101,6 +116,9 @@ public class SubsystemManager {
         initCHARGED_UP_PROTO();
         break;
       default:
+        if(Robot.isSimulation()) {
+          initCHARGED_UP_PROTO();
+        }
         logger.info("Unrecognized bot");
       }
   }
@@ -109,35 +127,36 @@ public class SubsystemManager {
     imu = new Pigeon2(5);
     imu.reset();
     
-    HashMap<String, Integer> portAssignments = new HashMap<String, Integer>();
-    portAssignments.put("FL.SwerveMotor", 59);
-    portAssignments.put("FL.DriveMotor", 41);
-    portAssignments.put("FL.Encoder", 1);
-    
-
-    portAssignments.put("FR.SwerveMotor", 8);
-    portAssignments.put("FR.DriveMotor", 40);
-    portAssignments.put("FR.Encoder", 3);
-
-    portAssignments.put("BL.SwerveMotor", 17);
-    portAssignments.put("BL.DriveMotor", 42);
-    portAssignments.put("BL.Encoder", 2);
-    
-    portAssignments.put("BR.SwerveMotor", 15);
-    portAssignments.put("BR.DriveMotor", 43);
-    portAssignments.put("BR.Encoder", 0);
-    
-    HashMap<String, Double> wheelOffsets = new HashMap<String, Double>();
-    wheelOffsets.put("FL", 184.0);
-    wheelOffsets.put("FR", 161.87);
-    wheelOffsets.put("BL", 13.87);
-    wheelOffsets.put("BR", 307.1);
-    
     // Create and initialize all subsystems:
     drivetrain = new SingleFalconDrivetrain();
-    drivetrain.init(portAssignments, wheelOffsets);
+    drivetrain.init(new SwerveModuleSetupInfo[] {
+      new SwerveModuleSetupInfo(41, 59, 1, 331.6),
+      new SwerveModuleSetupInfo(40, 8, 3, 28.39),
+      new SwerveModuleSetupInfo(42, 17, 2, 28.87),
+      new SwerveModuleSetupInfo(43, 15, 0, 267.34),
+    }, 1 / 8.07);
+    detector = new ApriltagDetection();
+
+    paths = new AutonPaths(drivetrain);
+    autoDashboardManager = new AutoDashboardManager();
+
+    detector.init();
+    elevator = new Elevator();
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
+
+    intakeArm = new intakeArm();
+    intakeArm.init();
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new PlaceItem("Cone", "High"));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new toggleClaw(intakeArm));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new armDown(intakeArm));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new armUp(intakeArm));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new MoveElevator(elevator, Elevator.ELEVATOR_HIGH_POS));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new MoveElevator(elevator, 0));
+
+    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.Start, Commands.run(
+      () -> paths.pathToPositionCommand(AutoNodeUtility.getNodeDrivePosition(autoDashboardManager.getSelectedNode())).schedule()
+    ));
   }
   
   private void initBLUE() {}
@@ -149,33 +168,16 @@ public class SubsystemManager {
   public void initCOVID() {
     imu = new Pigeon(21);
     imu.reset();
-    
-    HashMap<String, Integer> portAssignments = new HashMap<String, Integer>();
-    portAssignments.put("FL.SwerveMotor", 35);
-    portAssignments.put("FL.DriveMotor", 34);
-    portAssignments.put("FL.Encoder", 0);
-    
-    
-    portAssignments.put("FR.SwerveMotor", 32);
-    portAssignments.put("FR.DriveMotor", 33);
-    portAssignments.put("FR.Encoder", 1);
-
-    portAssignments.put("BL.SwerveMotor", 36);
-    portAssignments.put("BL.DriveMotor", 37);
-    portAssignments.put("BL.Encoder", 2);
-
-    portAssignments.put("BR.SwerveMotor", 31);
-    portAssignments.put("BR.DriveMotor", 30);
-    portAssignments.put("BR.Encoder", 3);
-    
-    HashMap<String, Double> wheelOffsets = new HashMap<String, Double>();
-    wheelOffsets.put("FL", 22.4);
-    wheelOffsets.put("FR", 147.75);
-    wheelOffsets.put("BL", 319.5);
-    wheelOffsets.put("BR", 159.65);
 
     drivetrain = new SparkMaxDrivetrain();
-    drivetrain.init(portAssignments, wheelOffsets);
+    drivetrain.init(new SwerveModuleSetupInfo[] {
+      new SwerveModuleSetupInfo(34, 35, 0, 22.4),
+      new SwerveModuleSetupInfo(33, 32, 1, 147.75),
+      new SwerveModuleSetupInfo(37, 36, 2, 319.5),
+      new SwerveModuleSetupInfo(30, 31, 3, 159.65),
+    }, 1 / 8.33);
+
+    paths = new AutonPaths(drivetrain);
     
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new EnableBrakeMode(drivetrain));
@@ -206,7 +208,6 @@ public class SubsystemManager {
    * Initializes the RIO3 subsystems
    */
   public void initRIO3() {}
-  
 
   //---------------------------------------------------
   // Subsystem getter methods
@@ -219,12 +220,32 @@ public class SubsystemManager {
     return pdp;
   }
 
+  public intakeArm getIntakeArm() {
+    return intakeArm;
+  }
+
   public OzoneImu getImu() {
     return imu;
   }
 
   public SwerveDrivetrain getDrivetrain() {
     return drivetrain;
+  }
+
+  public ApriltagDetection getDetector(){
+    return detector;
+  }
+  
+  public Elevator getElevator() {
+    return elevator;
+  }
+
+  public AutonPaths getAutonPaths() {
+    return paths;
+  }
+
+  public AutoDashboardManager getAutoDashboardManager() {
+    return autoDashboardManager;
   }
 
 
