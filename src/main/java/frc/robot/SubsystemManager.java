@@ -7,7 +7,6 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -25,9 +24,8 @@ import frc.robot.subsystems.activeintake.commands.ReverseIntake;
 import frc.robot.subsystems.activeintake.commands.StartIntake;
 import frc.robot.subsystems.activeintake.commands.StopIntake;
 import frc.robot.subsystems.claw.Claw;
-import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.claw.Claw.ClawPosition;
-import frc.robot.subsystems.claw.commands.RotateClaw;
+import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.claw.commands.SetClawPosition;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
@@ -151,10 +149,10 @@ public class SubsystemManager {
     // Create and initialize all subsystems:
     drivetrain = new SingleFalconDrivetrain();
     drivetrain.init(new SwerveModuleSetupInfo[] {
-      new SwerveModuleSetupInfo(31, 15, 0, 262.17),
-      new SwerveModuleSetupInfo(30, 6, 2, 261.21),
-      new SwerveModuleSetupInfo(32, 62, 1, 43.76),
-      new SwerveModuleSetupInfo(33, 14, 3, 179.23),
+      new SwerveModuleSetupInfo(31, 15, 0, 261.52),
+      new SwerveModuleSetupInfo(30, 6, 2, 328.8),
+      new SwerveModuleSetupInfo(32, 62, 1, 41.36),
+      new SwerveModuleSetupInfo(33, 14, 3, 180.48),
     }, 1 / 8.07);
 
     claw = new Claw(61, 0, 1, 2, 3);
@@ -177,7 +175,8 @@ public class SubsystemManager {
 
     
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new SetClawPosition(claw, ClawPosition.CLOSED));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown, new SetClawPosition(claw, ClawPosition.OPEN));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown, new SetClawPosition(claw, ClawPosition.LOWER_LATCH));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new SetClawPosition(claw, ClawPosition.OPEN));
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight, new DeployElevator(elevator));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft, new RetractElevator(elevator));
@@ -185,6 +184,7 @@ public class SubsystemManager {
 
 
   private void initCHARGED_UP_PROTO() {
+
     imu = new Pigeon2(5);
     imu.reset();
     
@@ -297,8 +297,16 @@ public class SubsystemManager {
     return claw;
   }
 
+  public ClawPitch getClawPitch() {
+    return clawPitch;
+  }
+
   public Elevator getElevator() {
     return elevator;
+  }
+
+  public ActiveIntake getActiveIntake() {
+    return activeIntake;
   }
 
   public AutonPaths getAutonPaths() {

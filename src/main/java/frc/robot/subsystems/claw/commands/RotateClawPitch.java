@@ -7,26 +7,28 @@ package frc.robot.subsystems.claw.commands;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.claw.Claw;
+import frc.robot.subsystems.claw.ClawPitch;
 
-public class RotateClaw extends CommandBase {
-  private Claw claw;
-  private Rotation2d wristAngle;
+public class RotateClawPitch extends CommandBase {
+  private ClawPitch claw;
+  private Rotation2d pitchAngle;
 
-  /** Creates a new RotateClaw. */
-  public RotateClaw(Claw claw, Rotation2d wristAngle) {
+  /** Creates a new RotateClawPitch. */
+  public RotateClawPitch(ClawPitch claw, Rotation2d pitchAngle) {
     this.claw = claw;
-    this.wristAngle = wristAngle;
+    this.pitchAngle = pitchAngle;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    claw.setTargetWristAngle(wristAngle);
+    claw.setTargetPitch(pitchAngle);
+    System.out.println("PITCH FINISHED");
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return claw.isWristAtAngle();
+    return claw.isAtPitch();
   }
 }
