@@ -41,15 +41,14 @@ public class Claw extends SubsystemBase {
     wristMotor.restoreFactoryDefaults();
     wristMotor.setInverted(true);
     wristMotor.setIdleMode(IdleMode.kBrake);
-    wristMotor.getEncoder().setPosition(0);
 
     upperSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, upperForwardChannel, upperReverseChannel);
     lowerSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, lowerForwardChannel, lowerReverseChannel);
 
     wristController.setTolerance(WRIST_ANGLE_TOLERANCE);
-    wristMotor.getEncoder().setPosition(0);
+    wristMotor.getEncoder().setPosition((180.0 / 360) * WRIST_GEAR_RATIO);
 
-    setTargetClawAngle(new Rotation2d());
+    setTargetClawAngle(Rotation2d.fromDegrees(180));
 
     Shuffleboard.getTab(getName()).addNumber("Claw position", () -> getWristAngle().getDegrees());
     Shuffleboard.getTab(getName()).addNumber("Current Radians", () -> getWristAngle().getRadians());

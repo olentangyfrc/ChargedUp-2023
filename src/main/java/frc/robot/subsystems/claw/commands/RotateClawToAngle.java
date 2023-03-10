@@ -27,7 +27,8 @@ public class RotateClawToAngle extends InstantCommand {
   }
 
   @Override
-  public void end(boolean interrupted) {    
+  public void end(boolean interrupted) { 
+    System.out.println("CLAW ANGLE FINISHED");   
     claw.stopWristMotor();
   }
 

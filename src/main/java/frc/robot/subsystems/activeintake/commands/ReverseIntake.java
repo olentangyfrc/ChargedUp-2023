@@ -21,6 +21,7 @@ public class ReverseIntake extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    intake.setForceBelts(true);
     intake.setUpperMotor(-ActiveIntake.UPPER_MOTOR_SPEED);
     intake.setLowerMotor(-ActiveIntake.LOWER_MOTOR_SPEED);
   }

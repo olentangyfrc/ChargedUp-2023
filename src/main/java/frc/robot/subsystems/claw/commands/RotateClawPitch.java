@@ -23,6 +23,7 @@ public class RotateClawPitch extends CommandBase {
   @Override
   public void initialize() {
     claw.setTargetPitch(pitchAngle);
+    System.out.println("PITCH FINISHED");
   }
 
   // Returns true when the command should end.

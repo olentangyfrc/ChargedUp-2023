@@ -5,6 +5,7 @@
 package frc.robot.subsystems.claw.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.SubsystemManager;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.Claw.ClawPosition;
 
@@ -24,5 +25,16 @@ public class SetClawPosition extends InstantCommand {
   @Override
   public void initialize() {
     claw.setClawPosition(clawPosition);
+    if(clawPosition == ClawPosition.LOWER_LATCH || clawPosition == ClawPosition.UPPER_LATCH || clawPosition == ClawPosition.OPEN) {
+      if(SubsystemManager.getInstance().getActiveIntake() != null) {
+        SubsystemManager.getInstance().getActiveIntake().setClawHoldingGamePiece(false);
+      }
+    }
+  }
+  
+  @Override
+  public void end(boolean interrupted) {
+    System.out.println("Claw position set");
+
   }
 }

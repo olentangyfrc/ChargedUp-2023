@@ -147,13 +147,13 @@ public class SubsystemManager {
     imu.reset();
     
     // Create and initialize all subsystems:
-    // drivetrain = new SingleFalconDrivetrain();
-    // drivetrain.init(new SwerveModuleSetupInfo[] {
-    //   new SwerveModuleSetupInfo(31, 15, 0, 262.17),
-    //   new SwerveModuleSetupInfo(30, 6, 2, 261.21),
-    //   new SwerveModuleSetupInfo(32, 62, 1, 43.76),
-    //   new SwerveModuleSetupInfo(33, 14, 3, 179.23),
-    // }, 1 / 8.07);
+    drivetrain = new SingleFalconDrivetrain();
+    drivetrain.init(new SwerveModuleSetupInfo[] {
+      new SwerveModuleSetupInfo(31, 15, 0, 261.52),
+      new SwerveModuleSetupInfo(30, 6, 2, 328.8),
+      new SwerveModuleSetupInfo(32, 62, 1, 41.36),
+      new SwerveModuleSetupInfo(33, 14, 3, 180.48),
+    }, 1 / 8.07);
 
     claw = new Claw(61, 0, 1, 2, 3);
     clawPitch = new ClawPitch(7);
@@ -161,7 +161,7 @@ public class SubsystemManager {
     elevator = new Elevator(42, 6, 7);
 
 
-    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new StartIntake(activeIntake));
     IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, new StopIntake(activeIntake));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new ReverseIntake(activeIntake));
@@ -175,10 +175,11 @@ public class SubsystemManager {
 
     
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new SetClawPosition(claw, ClawPosition.CLOSED));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown, new SetClawPosition(claw, ClawPosition.OPEN));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown, new SetClawPosition(claw, ClawPosition.LOWER_LATCH));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new SetClawPosition(claw, ClawPosition.OPEN));
 
-    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight, new DeployElevator(elevator));
-    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft, new RetractElevator(elevator));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight, new DeployElevator(elevator));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft, new RetractElevator(elevator));
   }
 
 

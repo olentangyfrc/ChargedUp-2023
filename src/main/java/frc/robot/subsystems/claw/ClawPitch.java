@@ -13,12 +13,14 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.claw.commands.RotateClawPitch;
 
 public class ClawPitch extends SubsystemBase {
   private static final double GEAR_RATIO = 100;
   private static final double MAX_ERROR = 45; // Pitch error will be clamped to [-MAX_ERROR, MAX_ERROR] in degrees.
-  private static final double PITCH_TOLERANCE = 0.5;
+  private static final double PITCH_TOLERANCE = 1;
 
   private CANSparkMax pitchMotor;
 
@@ -34,13 +36,21 @@ public class ClawPitch extends SubsystemBase {
     pitchMotor.setInverted(true);
     pitchMotor.setIdleMode(IdleMode.kBrake);
 
-    pitchMotor.getEncoder().setPosition(0);
-
     pitchController.setTolerance(PITCH_TOLERANCE);
 
-    setTargetPitch(Rotation2d.fromDegrees(45));
+    // pitchMotor.getEncoder().setPosition((115.0 / 360) * GEAR_RATIO);
+
+    setTargetPitch(getPitch());
 
     Shuffleboard.getTab("Claw").addNumber("Pitch", () -> getPitch().getDegrees());
+    Shuffleboard.getTab("Claw").add("Pitch Forwards", new RotateClawPitch(this, Rotation2d.fromDegrees(0)));
+    Shuffleboard.getTab("Claw").add("Pitch Back", new RotateClawPitch(this, Rotation2d.fromDegrees(115)));
+    Shuffleboard.getTab("Claw").add("Reset pitch", Commands.runOnce(() -> {
+      pitchMotor.getEncoder().setPosition((115.0 / 360) * GEAR_RATIO);
+      setTargetPitch(Rotation2d.fromDegrees(115));
+    }));
+    // Shuffleboard.getTab("Claw").addNumber("Pitch", () -> getPitch().getDegrees());
+    // Shuffleboard.getTab("Claw").addNumber("Pitch", () -> getPitch().getDegrees());
   }
 
   public Rotation2d getPitch() {
@@ -48,7 +58,7 @@ public class ClawPitch extends SubsystemBase {
   }
 
   public boolean isAtPitch() {
-    return pitchController.atSetpoint();
+    return Math.abs(getPitch().getDegrees() - targetPitch.getDegrees()) <= PITCH_TOLERANCE;
   }
 
   public void setTargetPitch(Rotation2d pitch) {

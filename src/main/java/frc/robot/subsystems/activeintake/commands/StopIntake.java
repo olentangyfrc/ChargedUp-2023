@@ -21,6 +21,7 @@ public class StopIntake extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    intake.setForceBelts(false);
     intake.setUpperMotor(0);
     intake.setLowerMotor(0);
   }

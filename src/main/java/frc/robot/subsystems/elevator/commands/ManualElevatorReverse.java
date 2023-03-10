@@ -31,7 +31,7 @@ public class ManualElevatorReverse extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     e.setElevatorSpeed(0);
-    e.goToPosition(e.getPosition());
+    e.setElevatorSetpoint(e.getPosition());
     e.setManualControl(false);
   }
 

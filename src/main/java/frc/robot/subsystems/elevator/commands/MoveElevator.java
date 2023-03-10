@@ -4,11 +4,15 @@
 
 package frc.robot.subsystems.elevator.commands;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 
 public class MoveElevator extends CommandBase {
+  private static final double MINIMUM_DURATION = 0.3;
+
+  private double startTime;
   private Elevator elevator;
   private ElevatorPosition positionPreset;
   private double position;
@@ -28,16 +32,23 @@ public class MoveElevator extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    startTime = Timer.getFPGATimestamp();
+    System.out.println("MoveElevator.initialize()");
     if(positionPreset != null) {
-      elevator.setTargetPosition(positionPreset);
+      elevator.goToPosition(positionPreset);
     } else {
       elevator.goToPosition(position);
     }
   }
 
+  @Override
+  public void end(boolean interrupted) {
+    System.out.println("ELEVATOR FINISHED");
+  }
+
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return elevator.isAtTargetPosition();
+    return Math.abs(elevator.getPosition() - elevator.getGoalPosition()) <= Elevator.POSITION_TOLERANCE;
   }
 }
