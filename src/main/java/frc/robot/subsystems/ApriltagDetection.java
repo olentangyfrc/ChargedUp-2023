@@ -30,7 +30,7 @@ import frc.robot.SubsystemManager;
 
 public class ApriltagDetection extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator = SubsystemManager.getInstance().getDrivetrain().getSwerveDrivePoseEstimator();
-  private PhotonCamera camera = new PhotonCamera("OV5647");
+  private PhotonCamera camera = new PhotonCamera("OV567");
   private String path = Filesystem.getDeployDirectory().toPath().resolve("aprilTagFieldLayout.json").toString();
   private AprilTagFieldLayout aprilTagFieldLayout;
   private PhotonTrackedTarget[] targetArray;
@@ -38,7 +38,7 @@ public class ApriltagDetection extends SubsystemBase {
   private Optional<EstimatedRobotPose>  poseobject;
   private EstimatedRobotPose robotPose;
 
-  Transform3d robotToCam = new Transform3d(new Translation3d(-0.25, 0.315, 0.33), new Rotation3d(0,67.38,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+  Transform3d robotToCam = new Transform3d(new Translation3d(-0.25, 0.315, 0.33), new Rotation3d(-4, 21.5,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
 
 
   public void init(){
@@ -83,7 +83,10 @@ public class ApriltagDetection extends SubsystemBase {
           robotPose = poseobject.get();
                   //check if its on the ground
           SmartDashboard.putNumber("pose_z", robotPose.estimatedPose.getZ());
-          if(-1 < robotPose.estimatedPose.getZ() && robotPose.estimatedPose.getZ() < 1){
+          SmartDashboard.putNumber("pose_x", robotPose.estimatedPose.getX());
+          SmartDashboard.putNumber("pose_y", robotPose.estimatedPose.getY());
+
+          if(-0.5 < robotPose.estimatedPose.getZ() && robotPose.estimatedPose.getZ() < 0.5){
             SmartDashboard.putBoolean("Step 4", true);
             addVision(robotPose.estimatedPose, robotPose.timestampSeconds);
           }
@@ -102,7 +105,7 @@ public class ApriltagDetection extends SubsystemBase {
     //check it is in the field
     if((position.getX() > 0) && (position.getY() > 0)){
       SmartDashboard.putBoolean("In Field", true);
-      poseEstimator.addVisionMeasurement(position.toPose2d(), lastVisionTime, VecBuilder.fill(1, 1, 1));
+      //poseEstimator.addVisionMeasurement(position.toPose2d(), lastVisionTime, VecBuilder.fill(0, 0, 0));
       //gyro.setReset(position.getRotation().toRotation2d());
     }
   }

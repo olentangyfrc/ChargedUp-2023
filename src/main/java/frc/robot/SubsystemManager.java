@@ -164,6 +164,9 @@ public class SubsystemManager {
     activeIntake = new ActiveIntake(5, 9, 5, 4);
     elevator = new Elevator(42, 6, 7);
 
+    detector = new ApriltagDetection();
+    detector.init();
+
     Shuffleboard.getTab("Command Groups").add("Score middle", new ScoreMiddle(elevator, claw, clawPitch, activeIntake));
     Shuffleboard.getTab("Command Groups").add("Score High", new ScoreHigh(elevator, claw, clawPitch, activeIntake));
 

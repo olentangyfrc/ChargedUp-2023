@@ -38,12 +38,12 @@ public class Elevator extends SubsystemBase {
   public static final double MAX_VELOCITY = 10;
   public static final double MAX_ACCEL = 6;
 
-  private static final double CORRECTION_MAX_VOLTS = 3; // Max voltage for small corrections in position when there
+  private static final double CORRECTION_MAX_VOLTS = 4; // Max voltage for small corrections in position when there
                                                         // isn't a motion profile.
 
   // These are in elevator motor rotations.
   public static final double POSITION_TOLERANCE = 0.06;
-  private static final double MAX_ERROR = 0.4;
+  private static final double MAX_ERROR = 0.9;
 
   private static final double MAG_SWITCH_HEIGHT = 1.825;
 
@@ -71,9 +71,9 @@ public class Elevator extends SubsystemBase {
       ElevatorPosition.GROUND, 0.0,
       ElevatorPosition.GRAB_CONE, 0.86,
       ElevatorPosition.GRAB_CUBE, 1.0,
-      ElevatorPosition.LOW, 2.155078125,
+      ElevatorPosition.LOW, 1.825,
       ElevatorPosition.MIDDLE, 3.66,
-      ElevatorPosition.HIGH, 5.66328125);
+      ElevatorPosition.HIGH, 5.96328125);
 
   // These are only for development purposes
   private GenericEntry entry = Shuffleboard.getTab(getName()).add("Set pos", 0).getEntry();
@@ -112,9 +112,8 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     // TODO: REMEMBER TO TAKE THIS OUT!!!!!
     // Re-zero our position when we pass the magnetic switch
-    if (!magSwitch.get()) {
-      elevatorMotor.setSelectedSensorPosition(MAG_SWITCH_HEIGHT *
-          MOTOR_TICKS_PER_ROTATION * GEAR_RATIO);
+    if (!magSwitch.get() && currentProfile == null) {
+      elevatorMotor.setSelectedSensorPosition(MAG_SWITCH_HEIGHT * MOTOR_TICKS_PER_ROTATION * GEAR_RATIO);
     }
     if (!isManualControl) {
       // If we have a profile, update our target position.
@@ -128,6 +127,9 @@ public class Elevator extends SubsystemBase {
       }
 
       if (!isAtTargetPosition()) {
+        if(currentProfile == null) {
+
+        }
         double clampedMeasurement = MathUtil.clamp(getPosition(), elevatorController.getSetpoint() - MAX_ERROR,
             elevatorController.getSetpoint() + MAX_ERROR);
         double pidControl = elevatorController.calculate(clampedMeasurement);
@@ -218,11 +220,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public double getGoalPosition() {
-    if (currentProfile == null) {
-      return Double.NaN;
-    } else {
-      return goalPosition;
-    }
+    return goalPosition;
   }
 
   public double getVelocity() {

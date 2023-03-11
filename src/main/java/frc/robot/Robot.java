@@ -12,10 +12,13 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.IO.ButtonActionType;
 import frc.robot.IO.ControllerButton;
+import frc.robot.auton.AutoRoutineManager;
+import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;
@@ -27,6 +30,8 @@ import frc.robot.IO.ControllerButton;
  * project.
  */
 public class Robot extends TimedRobot {
+  private CommandBase autoCommand;
+  private AutoRoutineManager routineManager;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -37,7 +42,9 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     PathPlannerServer.startServer(5811);
 
-    SubsystemManager.getInstance().init();
+    SubsystemManager sm = SubsystemManager.getInstance();
+    sm.init();
+    routineManager = new AutoRoutineManager(sm.getDrivetrain(), sm.getActiveIntake(), sm.getClaw(), sm.getClawPitch(), sm.getElevator());
     // SubsystemManager.getInstance().getDrivetrain().resetLocation(new Pose2d(1.772, 1.149, Rotation2d.fromDegrees(0)));    
   }
 
@@ -46,6 +53,8 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void autonomousInit() {
+    autoCommand = routineManager.getSelectedRoutine();
+    autoCommand.schedule();
   }
 
   @Override
@@ -54,7 +63,12 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    if(autoCommand != null) {
+      autoCommand.cancel();
+    }
+    (new DisableBrakeMode(SubsystemManager.getInstance().getDrivetrain())).schedule();
+  }
 
   @Override
   public void teleopPeriodic() {

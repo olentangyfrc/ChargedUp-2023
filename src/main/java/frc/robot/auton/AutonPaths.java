@@ -34,6 +34,8 @@ public class AutonPaths {
     public AutonPaths(SwerveDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
 
+        trajectoryMap = new HashMap<AutoTrajectory, PathPlannerTrajectory>();
+
         builder = new SwerveAutoBuilder(
             drivetrain::getLocation,
             drivetrain::resetLocation,
@@ -55,7 +57,7 @@ public class AutonPaths {
     }
 
     public CommandBase followTrajectoryCommand(PathPlannerTrajectory trajectory) {
-        return wrapPathCommand(builder.followPathWithEvents(trajectory));
+        return (new InstantCommand(() -> drivetrain.resetLocation(trajectory.getInitialPose()))).andThen(wrapPathCommand(builder.followPathWithEvents(trajectory)));
     }
 
     /**
@@ -65,7 +67,9 @@ public class AutonPaths {
      * @return The wrapped command.
      */
     public CommandBase wrapPathCommand(Command command) {
-        return (new InstantCommand(() -> drivetrain.setIsFollowingPath(true))).andThen(command).andThen(() -> drivetrain.setIsFollowingPath(false));
+        return (new InstantCommand(() -> {
+            drivetrain.setIsFollowingPath(true);
+        })).andThen(command).andThen(() -> drivetrain.setIsFollowingPath(false));
     }
 
     public PathPlannerTrajectory getTrajectory(AutoTrajectory trajectory) {
@@ -127,7 +131,10 @@ public class AutonPaths {
         
         TopToChargingStation,
         MiddleToChargingStation,
-        BottomToChargingStation
+        BottomToChargingStation,
+
+        TopTaxi,
+        OnChargingStation
     }
 
     public static void displayPath(PathPlannerTrajectory trajectory) {
