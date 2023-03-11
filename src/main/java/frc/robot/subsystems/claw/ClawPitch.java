@@ -20,7 +20,7 @@ import frc.robot.subsystems.claw.commands.RotateClawPitch;
 public class ClawPitch extends SubsystemBase {
   private static final double GEAR_RATIO = 100;
   private static final double MAX_ERROR = 45; // Pitch error will be clamped to [-MAX_ERROR, MAX_ERROR] in degrees.
-  private static final double PITCH_TOLERANCE = 1;
+  private static final double PITCH_TOLERANCE = 3;
 
   private CANSparkMax pitchMotor;
 
@@ -49,8 +49,11 @@ public class ClawPitch extends SubsystemBase {
       pitchMotor.getEncoder().setPosition((115.0 / 360) * GEAR_RATIO);
       setTargetPitch(Rotation2d.fromDegrees(115));
     }));
-    // Shuffleboard.getTab("Claw").addNumber("Pitch", () -> getPitch().getDegrees());
-    // Shuffleboard.getTab("Claw").addNumber("Pitch", () -> getPitch().getDegrees());
+    Shuffleboard.getTab("Command Groups").addBoolean("ClawPitch At Setpoint", () -> isAtPitch());
+    // Shuffleboard.getTab("Claw").addNumber("Pitch", () ->
+    // getPitch().getDegrees());
+    // Shuffleboard.getTab("Claw").addNumber("Pitch", () ->
+    // getPitch().getDegrees());
   }
 
   public Rotation2d getPitch() {
@@ -73,7 +76,7 @@ public class ClawPitch extends SubsystemBase {
     // This method will be called once per scheduler run
     double clampedError = MathUtil.clamp(getPitch().getDegrees(), targetDegrees - MAX_ERROR, targetDegrees + MAX_ERROR);
     double pidOutput = pitchController.calculate(clampedError, targetDegrees);
-    if(!pitchController.atSetpoint()){
+    if (!pitchController.atSetpoint()) {
       pitchMotor.setVoltage(pidOutput);
     }
   }

@@ -4,13 +4,17 @@
 
 package frc.robot.subsystems.elevator.commands;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.activeintake.ActiveIntake;
 import frc.robot.subsystems.activeintake.commands.DeployIntake;
 import frc.robot.subsystems.claw.Claw;
+import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.claw.Claw.ClawPosition;
+import frc.robot.subsystems.claw.commands.RotateClawPitch;
+import frc.robot.subsystems.claw.commands.RotateClawToAngle;
 import frc.robot.subsystems.claw.commands.SetClawPosition;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
@@ -20,18 +24,23 @@ import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ScoreMiddle extends SequentialCommandGroup {
   /** Creates a new ScoreMiddle. */
-  public ScoreMiddle(Elevator e, Claw c, ActiveIntake ai) {
+  public ScoreMiddle(Elevator e, Claw c, ClawPitch cp, ActiveIntake ai) {
     addCommands(
         new DeployIntake(ai),
-        new WaitCommand(.25),
+        // new WaitCommand(.25),
+        new RotateClawToAngle(c, Rotation2d.fromDegrees(180)),
+        new RotateClawPitch(cp, Rotation2d.fromDegrees(115)),
         new ParallelCommandGroup(
             new MoveElevator(e, ElevatorPosition.MIDDLE),
-            new DeployElevator(e)),
+            new SequentialCommandGroup(
+                new WaitCommand(.25),
+                new DeployElevator(e))),
         new WaitCommand(1.5),
-        new SetClawPosition(c, ClawPosition.OPEN),
-        new WaitCommand(.25),
         new ParallelCommandGroup(
-            new MoveElevator(e, ElevatorPosition.GROUND),
-            new RetractElevator(e)));
+            new SetClawPosition(c, ClawPosition.LOWER_LATCH),
+            new MoveElevator(e, ElevatorPosition.LOW),
+            new SequentialCommandGroup(
+                new WaitCommand(.25),
+                new RetractElevator(e))));
   }
 }

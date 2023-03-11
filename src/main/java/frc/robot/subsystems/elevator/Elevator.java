@@ -38,13 +38,14 @@ public class Elevator extends SubsystemBase {
   public static final double MAX_VELOCITY = 10;
   public static final double MAX_ACCEL = 6;
 
-  private static final double CORRECTION_MAX_VOLTS = 3; // Max voltage for small corrections in position when there isn't a motion profile.
+  private static final double CORRECTION_MAX_VOLTS = 3; // Max voltage for small corrections in position when there
+                                                        // isn't a motion profile.
 
   // These are in elevator motor rotations.
-  public static final double POSITION_TOLERANCE = 0.05;
+  public static final double POSITION_TOLERANCE = 0.06;
   private static final double MAX_ERROR = 0.4;
 
-  private static final double MAG_SWITCH_HEIGHT = 2.2;
+  private static final double MAG_SWITCH_HEIGHT = 1.825;
 
   // DEVICES
   private WPI_TalonFX elevatorMotor;
@@ -52,7 +53,8 @@ public class Elevator extends SubsystemBase {
   private DigitalInput magSwitch = new DigitalInput(7);
 
   // CONTROL LOGIC
-  // private PIDController elevatorController = new PIDController(6, 0, 0); // TODO: Get actual values
+  // private PIDController elevatorController = new PIDController(6, 0, 0); //
+  // TODO: Get actual values
   private PIDController elevatorController = new PIDController(17, 0, 0.02);
   private double goalPosition = 0;
   // private PIDController elevatorController = new PIDController(5.2, 0, 0.02);
@@ -61,20 +63,18 @@ public class Elevator extends SubsystemBase {
   private TrapezoidProfile currentProfile = null;
 
   private double profileStartTime = 0;
-  
+
   private boolean isManualControl = false;
   public static final double MANUAL_SPEED = 0.2;
 
-
   private static final Map<ElevatorPosition, Double> positionValues = Map.of(
-    ElevatorPosition.GROUND, 0.0,
-    ElevatorPosition.GRAB_CONE, 0.86,
-    ElevatorPosition.GRAB_CUBE, 1.0,
-    ElevatorPosition.LOW, 2.155078125,
-    ElevatorPosition.MIDDLE, 5.1099609375,
-    ElevatorPosition.HIGH, 5.66328125
-  );
-  
+      ElevatorPosition.GROUND, 0.0,
+      ElevatorPosition.GRAB_CONE, 0.86,
+      ElevatorPosition.GRAB_CUBE, 1.0,
+      ElevatorPosition.LOW, 2.155078125,
+      ElevatorPosition.MIDDLE, 3.66,
+      ElevatorPosition.HIGH, 5.66328125);
+
   // These are only for development purposes
   private GenericEntry entry = Shuffleboard.getTab(getName()).add("Set pos", 0).getEntry();
 
@@ -86,51 +86,54 @@ public class Elevator extends SubsystemBase {
 
     elevatorMotor.configFactoryDefault();
 
-
     elevatorMotor.setNeutralMode(NeutralMode.Brake);
 
     elevatorController.setTolerance(POSITION_TOLERANCE);
-    
-    resetPosition(0);
+
+    // resetPosition(0);
     elevatorController.setSetpoint(getPosition());
 
     elevatorSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, solenoidForward, solenoidReverse);
 
     Shuffleboard.getTab(getName()).addNumber("Elevator position", this::getPosition);
     Shuffleboard.getTab(getName()).addNumber("Elevator target position", elevatorController::getSetpoint);
-    Shuffleboard.getTab(getName()).addNumber("Elevator velocity", () -> elevatorMotor.getSelectedSensorVelocity() / MOTOR_TICKS_PER_ROTATION / GEAR_RATIO);
+    Shuffleboard.getTab(getName()).addNumber("Elevator velocity",
+        () -> elevatorMotor.getSelectedSensorVelocity() / MOTOR_TICKS_PER_ROTATION / GEAR_RATIO);
     Shuffleboard.getTab(getName()).addBoolean("Mag switch", magSwitch::get);
     Shuffleboard.getTab(getName()).add("Move elevator", moveElevator);
     Shuffleboard.getTab(getName()).add("Zero Elevator", Commands.runOnce(() -> {
       resetPosition(0);
       setElevatorSetpoint(0);
     }));
+    Shuffleboard.getTab("Command Groups").addBoolean("Elevator at Setpoint", () -> isAtTargetPosition());
   }
 
   @Override
   public void periodic() {
     // TODO: REMEMBER TO TAKE THIS OUT!!!!!
     // Re-zero our position when we pass the magnetic switch
-    if(!magSwitch.get()) {
-      // elevatorMotor.setSelectedSensorPosition(MAG_SWITCH_HEIGHT * MOTOR_TICKS_PER_ROTATION * GEAR_RATIO);
+    if (!magSwitch.get()) {
+      elevatorMotor.setSelectedSensorPosition(MAG_SWITCH_HEIGHT *
+          MOTOR_TICKS_PER_ROTATION * GEAR_RATIO);
     }
-    if(!isManualControl) {
+    if (!isManualControl) {
       // If we have a profile, update our target position.
-      if(currentProfile != null) {
+      if (currentProfile != null) {
         double time = Timer.getFPGATimestamp() - profileStartTime;
-        if(currentProfile.isFinished(time)) {
+        if (currentProfile.isFinished(time)) {
           currentProfile = null;
         } else {
           elevatorController.setSetpoint(currentProfile.calculate(time).position);
         }
       }
 
-      if(!isAtTargetPosition()) {
-        double clampedMeasurement = MathUtil.clamp(getPosition(), elevatorController.getSetpoint() - MAX_ERROR, elevatorController.getSetpoint() + MAX_ERROR);
+      if (!isAtTargetPosition()) {
+        double clampedMeasurement = MathUtil.clamp(getPosition(), elevatorController.getSetpoint() - MAX_ERROR,
+            elevatorController.getSetpoint() + MAX_ERROR);
         double pidControl = elevatorController.calculate(clampedMeasurement);
 
         // Limit the output voltage when there isn't a motion profile.
-        if(currentProfile == null) {
+        if (currentProfile == null) {
           pidControl = MathUtil.clamp(pidControl, -CORRECTION_MAX_VOLTS, CORRECTION_MAX_VOLTS);
         }
 
@@ -176,17 +179,20 @@ public class Elevator extends SubsystemBase {
   }
 
   /**
-   * Set the target position of the elevator. This will not run if the robot is disabled.
+   * Set the target position of the elevator. This will not run if the robot is
+   * disabled.
    * 
    * @param position The position to go to
-   * @return True if the position is set, false if the position is not set (This will only happen if the robot is disabled). 
+   * @return True if the position is set, false if the position is not set (This
+   *         will only happen if the robot is disabled).
    */
   public boolean goToPosition(double position) {
-    if(DriverStation.isDisabled()) {
+    if (DriverStation.isDisabled()) {
       return false;
     }
 
-    currentProfile = new TrapezoidProfile(profileConstraints, new State(position, 0), new State(getPosition(), getVelocity()));
+    currentProfile = new TrapezoidProfile(profileConstraints, new State(position, 0),
+        new State(getPosition(), getVelocity()));
     goalPosition = position;
     profileStartTime = Timer.getFPGATimestamp();
     elevatorController.setSetpoint(currentProfile.calculate(0).position);
@@ -212,7 +218,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public double getGoalPosition() {
-    if(currentProfile == null) {
+    if (currentProfile == null) {
       return Double.NaN;
     } else {
       return goalPosition;

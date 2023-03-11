@@ -23,7 +23,7 @@ public class Claw extends SubsystemBase {
   // Wrist
   private static final double WRIST_GEAR_RATIO = 90;
   private static final double MAX_WRIST_ERROR = 0.7854;
-  private static final double WRIST_ANGLE_TOLERANCE = 0.03;
+  private static final double WRIST_ANGLE_TOLERANCE = 0.0349;
 
   private CANSparkMax wristMotor;
 
@@ -36,7 +36,8 @@ public class Claw extends SubsystemBase {
   private DoubleSolenoid lowerSolenoid;
 
   /** Creates a new Claw. */
-  public Claw(int wristCanId, int upperForwardChannel, int upperReverseChannel, int lowerForwardChannel, int lowerReverseChannel) {
+  public Claw(int wristCanId, int upperForwardChannel, int upperReverseChannel, int lowerForwardChannel,
+      int lowerReverseChannel) {
     wristMotor = new CANSparkMax(wristCanId, MotorType.kBrushless);
     wristMotor.restoreFactoryDefaults();
     wristMotor.setInverted(true);
@@ -55,16 +56,18 @@ public class Claw extends SubsystemBase {
     Shuffleboard.getTab(getName()).addNumber("Target Radians", () -> targetWristAngle.getRadians());
     Shuffleboard.getTab(getName()).add("Forwards", new RotateClawToAngle(this, Rotation2d.fromDegrees(0)));
     Shuffleboard.getTab(getName()).add("Reverse", new RotateClawToAngle(this, Rotation2d.fromDegrees(180)));
+    Shuffleboard.getTab("Command Groups").addBoolean("Claw At Setpoint", () -> isWristAtAngle());
   }
 
   @Override
   public void periodic() {
     double targetRadians = targetWristAngle.getRadians();
-    double clampedCurrentAngle = MathUtil.clamp(getWristAngle().getRadians(), targetRadians - MAX_WRIST_ERROR, targetRadians + MAX_WRIST_ERROR);
+    double clampedCurrentAngle = MathUtil.clamp(getWristAngle().getRadians(), targetRadians - MAX_WRIST_ERROR,
+        targetRadians + MAX_WRIST_ERROR);
     SmartDashboard.putNumber("Clamped angle", clampedCurrentAngle);
     double pidOutput = wristController.calculate(clampedCurrentAngle, targetRadians);
 
-    if(!wristController.atSetpoint()) {
+    if (!wristController.atSetpoint()) {
       wristMotor.setVoltage(pidOutput);
     }
   }
@@ -83,7 +86,7 @@ public class Claw extends SubsystemBase {
   }
 
   public void setClawPosition(ClawPosition position) {
-    switch(position) {
+    switch (position) {
       case OPEN:
         upperSolenoid.set(Value.kReverse);
         lowerSolenoid.set(Value.kReverse);
