@@ -73,7 +73,7 @@ public class Elevator extends SubsystemBase {
       ElevatorPosition.GRAB_CUBE, 1.0,
       ElevatorPosition.LOW, 1.825,
       ElevatorPosition.MIDDLE, 3.66,
-      ElevatorPosition.HIGH, 5.96328125);
+      ElevatorPosition.HIGH, 6.02);
 
   // These are only for development purposes
   private GenericEntry entry = Shuffleboard.getTab(getName()).add("Set pos", 0).getEntry();
@@ -91,6 +91,7 @@ public class Elevator extends SubsystemBase {
     elevatorController.setTolerance(POSITION_TOLERANCE);
 
     // resetPosition(0);
+
     elevatorController.setSetpoint(getPosition());
 
     elevatorSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, solenoidForward, solenoidReverse);
@@ -109,6 +110,8 @@ public class Elevator extends SubsystemBase {
   }
 
   @Override
+
+
   public void periodic() {
     // TODO: REMEMBER TO TAKE THIS OUT!!!!!
     // Re-zero our position when we pass the magnetic switch
@@ -126,10 +129,8 @@ public class Elevator extends SubsystemBase {
         }
       }
 
-      if (!isAtTargetPosition()) {
-        if(currentProfile == null) {
-
-        }
+      if (true || !isAtTargetPosition()) {
+        // System.out.println("ABC!!!");
         double clampedMeasurement = MathUtil.clamp(getPosition(), elevatorController.getSetpoint() - MAX_ERROR,
             elevatorController.getSetpoint() + MAX_ERROR);
         double pidControl = elevatorController.calculate(clampedMeasurement);

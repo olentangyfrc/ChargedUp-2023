@@ -3,9 +3,10 @@ package frc.robot;
 import java.util.Map;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -15,11 +16,15 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class IO {
 
     private static final int XBOX_PORT = 0;
+    public static final int LEFT_BUTTON_BOX_PORT = 3;
+    public static final int RIGHT_BUTTON_BOX_PORT = 4;
     // Deadzone for Xbox controller sticks
     private static final double DEADZONE = 0.02;
     // This value is used to turn an analog input into a digital one so that commands can be mapped to it.
     private static final double NOMINAL_ANALOG_VALUE = 0.5;
 
+    private GenericHID leftButtonBox;
+    private GenericHID rightButtonBox;
 
     private CommandXboxController xbox;
 
@@ -58,6 +63,9 @@ public class IO {
      */
     public void init(){
         xbox = new CommandXboxController(XBOX_PORT);
+
+        leftButtonBox = new GenericHID(LEFT_BUTTON_BOX_PORT);
+        rightButtonBox = new GenericHID(RIGHT_BUTTON_BOX_PORT);
         initializeCustomButtons();
         customButtons = Map.of(
             11,rightTriggerButton,
@@ -83,6 +91,10 @@ public class IO {
     public double filter(double input){
         double x = Math.copySign(Math.pow(input, 2), input); // Square input
         return MathUtil.applyDeadband(x, DEADZONE); // Apply deadzone and return
+    }
+
+    public boolean getRightStick() {
+        return xbox.rightStick().getAsBoolean();
     }
     
     /**
@@ -161,6 +173,48 @@ public class IO {
     }
 
     /**
+     * Bind a button to the button box.
+     * <p>
+     * Do not look at this code as an example! It is repetitive, but competition is in a week.
+     * 
+     * @param command The command to assign
+     * @param buttonBoxButton The button to assign to.
+     * @param type The type of action
+     */
+    public void bindButtonBox(CommandBase command, StickButton buttonBoxButton, ButtonActionType type) {
+        GenericHID buttonBoxSide;
+        int buttonNum;
+
+        if(buttonBoxButton.ordinal() <= 10) {
+            buttonBoxSide = leftButtonBox;
+            buttonNum = buttonBoxButton.ordinal() + 1;
+        } else {
+            buttonBoxSide = rightButtonBox;
+            buttonNum = buttonBoxButton.ordinal() - 10;
+        }
+
+        JoystickButton button = new JoystickButton(buttonBoxSide, buttonNum);
+
+        switch(type) {
+            case TOGGLE_WHEN_PRESSED:
+                button.toggleOnTrue(command);
+                break;
+            case WHEN_HELD:
+                button.whileTrue(command);
+                break;
+            case WHEN_PRESSED:
+                button.onTrue(command);
+                break;
+            case WHEN_RELEASED:
+                button.onFalse(command);
+                break;
+            case WHILE_HELD:
+                button.whileTrue(new RepeatCommand(command));
+                break;
+        }
+    }
+
+    /**
      * Initialize the custom buttons
      */
     public void initializeCustomButtons(){
@@ -215,6 +269,34 @@ public class IO {
      */
     public double getRightY(){
         return filter(-xbox.getRightY());
+    }
+
+    /**
+     * The joystick buttons
+     */
+    public enum StickButton {
+        LEFT_1,
+        LEFT_2,
+        LEFT_3,
+        LEFT_4,
+        LEFT_5,
+        LEFT_6,
+        LEFT_7,
+        LEFT_8,
+        LEFT_9,
+        LEFT_10,
+        LEFT_11,
+        RIGHT_1,
+        RIGHT_2,
+        RIGHT_3,
+        RIGHT_4,
+        RIGHT_5,
+        RIGHT_6,
+        RIGHT_7,
+        RIGHT_8,
+        RIGHT_9,
+        RIGHT_10,
+        RIGHT_11,
     }
 }
 

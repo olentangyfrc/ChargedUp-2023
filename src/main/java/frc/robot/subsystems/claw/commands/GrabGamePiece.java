@@ -23,7 +23,10 @@ public class GrabGamePiece extends SequentialCommandGroup {
                             new RotateClawPitch(clawPitch, Rotation2d.fromDegrees(0)))
                         ),
                 new MoveElevator(elevator, (isCone ? ElevatorPosition.GRAB_CONE : ElevatorPosition.GRAB_CUBE)),
-                new SetClawPosition(claw, ClawPosition.CLOSED));
+                new SetClawPosition(claw, ClawPosition.CLOSED),
+                new WaitCommand(0.3),
+                new MoveElevator(elevator, ElevatorPosition.LOW)
+        );
     }
 
 }

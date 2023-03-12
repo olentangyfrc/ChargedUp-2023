@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.pathplanner.lib.server.PathPlannerServer;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -45,6 +46,8 @@ public class Robot extends TimedRobot {
     SubsystemManager sm = SubsystemManager.getInstance();
     sm.init();
     routineManager = new AutoRoutineManager(sm.getDrivetrain(), sm.getActiveIntake(), sm.getClaw(), sm.getClawPitch(), sm.getElevator());
+
+    CameraServer.startAutomaticCapture();
     // SubsystemManager.getInstance().getDrivetrain().resetLocation(new Pose2d(1.772, 1.149, Rotation2d.fromDegrees(0)));    
   }
 

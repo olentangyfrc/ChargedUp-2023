@@ -24,6 +24,7 @@ import frc.robot.subsystems.activeintake.commands.RetractIntake;
 import frc.robot.subsystems.activeintake.commands.ReverseIntake;
 import frc.robot.subsystems.activeintake.commands.StartIntake;
 import frc.robot.subsystems.activeintake.commands.StopIntake;
+import frc.robot.subsystems.activeintake.commands.ToggleIntake;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.Claw.ClawPosition;
 import frc.robot.subsystems.claw.ClawPitch;
@@ -153,10 +154,10 @@ public class SubsystemManager {
     // Create and initialize all subsystems:
     drivetrain = new SingleFalconDrivetrain();
     drivetrain.init(new SwerveModuleSetupInfo[] {
-        new SwerveModuleSetupInfo(31, 15, 0, 261.52),
-        new SwerveModuleSetupInfo(30, 6, 2, 328.8),
-        new SwerveModuleSetupInfo(32, 62, 1, 41.36),
-        new SwerveModuleSetupInfo(33, 14, 3, 180.48),
+        new SwerveModuleSetupInfo(31, 15, 0, 260.52),
+        new SwerveModuleSetupInfo(30, 6, 2, 327.6),
+        new SwerveModuleSetupInfo(32, 62, 1, 43.9),
+        new SwerveModuleSetupInfo(33, 14, 3, 178.34),
     }, 1 / 8.07);
 
     claw = new Claw(61, 0, 1, 2, 3);
@@ -180,8 +181,8 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton,
         new StopIntake(activeIntake));
 
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new DeployIntake(activeIntake));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new RetractIntake(activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new ScoreMiddle(elevator, claw, clawPitch, activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new ScoreHigh(elevator, claw, clawPitch, activeIntake));
 
     IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.A, new ManualElevatorForward(elevator));
     IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.B, new ManualElevatorReverse(elevator));
@@ -191,10 +192,11 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown,
         new SetClawPosition(claw, ClawPosition.LOWER_LATCH));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X,
-        new SetClawPosition(claw, ClawPosition.OPEN));
+        new ToggleIntake(activeIntake));
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight, new DeployElevator(elevator));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft, new RetractElevator(elevator));
+
   }
 
   private void initCHARGED_UP_PROTO() {

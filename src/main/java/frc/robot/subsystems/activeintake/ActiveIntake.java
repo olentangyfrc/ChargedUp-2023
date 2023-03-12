@@ -85,27 +85,25 @@ public class ActiveIntake extends SubsystemBase {
       grabCommand = null;
       SubsystemManager.getInstance().getElevator().stopElevator();
     }
-    if(isBeamBroken() && !isClawHoldingGamePiece) {
+    if(isBeamBroken() && !isClawHoldingGamePiece && grabCommand == null) {
       if(!isWaiting) {
         startTimer = Timer.getFPGATimestamp();
         isWaiting = true;
       } else {
         if(Timer.getFPGATimestamp() - startTimer >= (nextPieceIsCone? GRAB_WAIT_TIME : 0)) {
-          if(grabCommand == null) {
-            grabCommand = new GrabGamePiece(
-              SubsystemManager.getInstance().getClaw(),
-              SubsystemManager.getInstance().getClawPitch(),
-              SubsystemManager.getInstance().getElevator(),
-              nextPieceIsCone
-            );
-  
-            grabCommand.andThen(new InstantCommand(() -> {
-              grabCommand = null;
-              isClawHoldingGamePiece = true;
-              isWaiting = false;
-              intakeHasRun = false;
-            })).schedule();
-          }
+          grabCommand = new GrabGamePiece(
+            SubsystemManager.getInstance().getClaw(),
+            SubsystemManager.getInstance().getClawPitch(),
+            SubsystemManager.getInstance().getElevator(),
+            nextPieceIsCone
+          );
+
+          grabCommand.andThen(new InstantCommand(() -> {
+            grabCommand = null;
+            isClawHoldingGamePiece = true;
+            isWaiting = false;
+            intakeHasRun = false;
+          })).schedule();
             
         }
       }

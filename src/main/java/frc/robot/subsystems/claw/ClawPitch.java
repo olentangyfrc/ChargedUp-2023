@@ -66,6 +66,7 @@ public class ClawPitch extends SubsystemBase {
 
   public void setTargetPitch(Rotation2d pitch) {
     targetPitch = pitch;
+    pitchController.setSetpoint(pitch.getDegrees());
   }
 
   private GenericEntry setPitch = Shuffleboard.getTab("Claw").add("Set Pitch", 0).getEntry();

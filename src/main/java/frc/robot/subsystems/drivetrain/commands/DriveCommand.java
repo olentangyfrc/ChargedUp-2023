@@ -42,7 +42,7 @@ public class DriveCommand extends CommandBase {
     );
     
     if(!drivetrain.getIsFollowingPath()) {
-      drivetrain.drive(speeds, true);
+      drivetrain.drive(speeds, !IO.getInstance().getRightStick());
     }
 
   }
