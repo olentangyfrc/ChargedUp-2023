@@ -29,25 +29,29 @@ import frc.robot.SubsystemManager;
 //Things to do: Make sure vision works on charge station
 
 public class ApriltagDetection extends SubsystemBase {
-  private SwerveDrivePoseEstimator poseEstimator = SubsystemManager.getInstance().getDrivetrain().getSwerveDrivePoseEstimator();
-  private PhotonCamera camera = new PhotonCamera("OV567");
+  private SwerveDrivePoseEstimator poseEstimator = SubsystemManager.getInstance().getDrivetrain()
+      .getSwerveDrivePoseEstimator();
+  private PhotonCamera camera = new PhotonCamera("4611LL3");
   private String path = Filesystem.getDeployDirectory().toPath().resolve("aprilTagFieldLayout.json").toString();
   private AprilTagFieldLayout aprilTagFieldLayout;
   private PhotonTrackedTarget[] targetArray;
   private PhotonPoseEstimator photonPoseEstimator;
-  private Optional<EstimatedRobotPose>  poseobject;
+  private Optional<EstimatedRobotPose> poseobject;
   private EstimatedRobotPose robotPose;
+  private PhotonPipelineResult result;
 
-  Transform3d robotToCam = new Transform3d(new Translation3d(-0.25, 0.315, 0.33), new Rotation3d(-0.0698132, -0.3752458, Math.PI)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+  Transform3d robotToCam = new Transform3d(new Translation3d(-0.25, 0.315, 0.33),
+      new Rotation3d(-0.0698132, -0.3752458, Math.PI)); // Cam mounted facing forward, half a meter forward of center,
+                                                        // half a meter up from center.
 
-
-  public void init(){
+  public void init() {
     Layout();
-    photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, camera, robotToCam);
+    photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, camera,
+        robotToCam);
 
   }
 
-  public void Layout(){
+  public void Layout() {
     try {
       aprilTagFieldLayout = new AprilTagFieldLayout(path);
     } catch (IOException e) {
@@ -57,54 +61,50 @@ public class ApriltagDetection extends SubsystemBase {
 
   }
 
-
-
-  public void photonvision(List<PhotonTrackedTarget> targets, PhotonPipelineResult result) throws IOException{
+  public void photonvision(List<PhotonTrackedTarget> targets, PhotonPipelineResult result) throws IOException {
     targetArray = targets.toArray(PhotonTrackedTarget[]::new);
     int counter = 0;
-    //Apritag area bigger than 5%
-    for(int i = 0; i < targetArray.length; i++){
-      if (((PhotonTrackedTarget) targetArray[i]).getArea() > 0.01){
+    // Apritag area bigger than 5%
+    for (int i = 0; i < targetArray.length; i++) {
+      if (((PhotonTrackedTarget) targetArray[i]).getArea() > 0.01) {
         counter++;
       }
 
     }
-    //if all tag area is above 5%
-    if (counter == targetArray.length){
+    // if all tag area is above 5%
+    if (counter == targetArray.length) {
       SmartDashboard.putBoolean("Step 2", true);
-      if (result.getBestTarget().getArea() > 0.14){
+      if (result.getBestTarget().getArea() > 0.14) {
         SmartDashboard.putBoolean("Step 3", true);
-        //Cam to Robot
-        
+        // Cam to Robot
+
         // Construct PhotonPoseEstimator
         poseobject = photonPoseEstimator.update();
-        
+
         try {
           robotPose = poseobject.get();
-                  //check if its on the ground
+          // check if its on the ground
           SmartDashboard.putNumber("pose_z", robotPose.estimatedPose.getZ());
           SmartDashboard.putNumber("pose_x", robotPose.estimatedPose.getX());
           SmartDashboard.putNumber("pose_y", robotPose.estimatedPose.getY());
 
-          if(-1 < robotPose.estimatedPose.getZ() && robotPose.estimatedPose.getZ() < 1){
-            
+          if (-1 < robotPose.estimatedPose.getZ() && robotPose.estimatedPose.getZ() < 1) {
+
             SmartDashboard.putBoolean("Step 4", true);
             addVision(robotPose.estimatedPose, robotPose.timestampSeconds);
           }
         } catch (Exception e) {
           // TODO: handle exception
         }
-        
-
 
       }
     }
 
   }
 
-  private void addVision(Pose3d position, double lastVisionTime){
-    //check it is in the field
-    if((position.getX() > 0) && (position.getY() > 0)){
+  private void addVision(Pose3d position, double lastVisionTime) {
+    // check it is in the field
+    if ((position.getX() > 0) && (position.getY() > 0)) {
       SmartDashboard.putBoolean("In Field", true);
       poseEstimator.addVisionMeasurement(position.toPose2d(), lastVisionTime, VecBuilder.fill(0, 0, 0));
       // gyro.setReset(position.getRotation().toRotation2d());
@@ -112,9 +112,9 @@ public class ApriltagDetection extends SubsystemBase {
   }
 
   @Override
-  public void periodic(){
-    var result = camera.getLatestResult();
-    if(result.hasTargets()){
+  public void periodic() {
+    result = camera.getLatestResult();
+    if (result.hasTargets()) {
       try {
         SmartDashboard.putBoolean("Step 1", true);
         photonvision(result.getTargets(), result);
@@ -125,5 +125,3 @@ public class ApriltagDetection extends SubsystemBase {
     }
   }
 }
-
-

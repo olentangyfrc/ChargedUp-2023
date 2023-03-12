@@ -22,16 +22,14 @@ import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class ScoreHigh extends SequentialCommandGroup {
+public class ScoreCubeHigh extends SequentialCommandGroup {
   /** Creates a new ScoreMiddle. */
-  public ScoreHigh(Elevator e, Claw c, ClawPitch cp, ActiveIntake ai) {
+  public ScoreCubeHigh(Elevator e, Claw c, ClawPitch cp, ActiveIntake ai) {
     addCommands(
-      // new WaitCommand(.25),
-      new ParallelCommandGroup(
-          new DeployIntake(ai),
-          new RotateClawToAngle(c, Rotation2d.fromDegrees(180)),
-          new RotateClawPitch(cp, Rotation2d.fromDegrees(115))
-        ),
+        // new WaitCommand(.25),
+        new ParallelCommandGroup(
+            new DeployIntake(ai),
+            new RotateClawPitch(cp, Rotation2d.fromDegrees(90))),
         new ParallelCommandGroup(
             new MoveElevator(e, ElevatorPosition.HIGH),
             new SequentialCommandGroup(
@@ -39,13 +37,12 @@ public class ScoreHigh extends SequentialCommandGroup {
                 new DeployElevator(e))),
         new WaitCommand(1.5),
         new ParallelCommandGroup(
-          new SequentialCommandGroup(
-            new WaitCommand(0.3),
-            new SetClawPosition(c, ClawPosition.LOWER_LATCH)
-          ),
-          new MoveElevator(e, ElevatorPosition.LOW),
-          new SequentialCommandGroup(
-              new WaitCommand(.17),
-              new RetractElevator(e))));
+            new SequentialCommandGroup(
+                new WaitCommand(0.3),
+                new SetClawPosition(c, ClawPosition.OPEN)),
+            new MoveElevator(e, ElevatorPosition.LOW),
+            new SequentialCommandGroup(
+                new WaitCommand(.17),
+                new RetractElevator(e))));
   }
 }

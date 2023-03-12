@@ -41,8 +41,10 @@ import frc.robot.subsystems.elevator.commands.ManualElevatorForward;
 import frc.robot.subsystems.elevator.commands.ManualElevatorReverse;
 import frc.robot.subsystems.elevator.commands.MoveElevator;
 import frc.robot.subsystems.elevator.commands.RetractElevator;
-import frc.robot.subsystems.elevator.commands.ScoreHigh;
-import frc.robot.subsystems.elevator.commands.ScoreMiddle;
+import frc.robot.subsystems.elevator.commands.ScoreConeHigh;
+import frc.robot.subsystems.elevator.commands.ScoreConeMiddle;
+import frc.robot.subsystems.elevator.commands.ScoreCubeHigh;
+import frc.robot.subsystems.elevator.commands.ScoreCubeMiddle;
 import frc.robot.subsystems.prototypeone.elevator.ProtoElevator;
 import frc.robot.subsystems.prototypeone.intakeArm.intakeArm;
 import frc.robot.subsystems.prototypeone.intakeArm.commands.armDown;
@@ -168,8 +170,14 @@ public class SubsystemManager {
     detector = new ApriltagDetection();
     detector.init();
 
-    Shuffleboard.getTab("Command Groups").add("Score middle", new ScoreMiddle(elevator, claw, clawPitch, activeIntake));
-    Shuffleboard.getTab("Command Groups").add("Score High", new ScoreHigh(elevator, claw, clawPitch, activeIntake));
+    Shuffleboard.getTab("Command Groups").add("Score Cone middle",
+        new ScoreConeMiddle(elevator, claw, clawPitch, activeIntake));
+    Shuffleboard.getTab("Command Groups").add("Score Cone High",
+        new ScoreConeHigh(elevator, claw, clawPitch, activeIntake));
+    Shuffleboard.getTab("Command Groups").add("Score Cube Middle",
+        new ScoreCubeMiddle(elevator, claw, clawPitch, activeIntake));
+    Shuffleboard.getTab("Command Groups").add("Score Cube High",
+        new ScoreCubeHigh(elevator, claw, clawPitch, activeIntake));
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton,
@@ -181,8 +189,10 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton,
         new StopIntake(activeIntake));
 
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new ScoreMiddle(elevator, claw, clawPitch, activeIntake));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new ScoreHigh(elevator, claw, clawPitch, activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper,
+        new ScoreConeMiddle(elevator, claw, clawPitch, activeIntake));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper,
+        new ScoreConeHigh(elevator, claw, clawPitch, activeIntake));
 
     IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.A, new ManualElevatorForward(elevator));
     IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.B, new ManualElevatorReverse(elevator));

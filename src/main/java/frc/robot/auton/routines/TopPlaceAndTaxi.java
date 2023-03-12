@@ -12,7 +12,7 @@ import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.commands.ScoreHigh;
+import frc.robot.subsystems.elevator.commands.ScoreConeHigh;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -23,8 +23,7 @@ public class TopPlaceAndTaxi extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new ScoreHigh(elevator, claw, clawPitch, intake),
-      paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi))
-    );
+        new ScoreConeHigh(elevator, claw, clawPitch, intake),
+        paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi)));
   }
 }
