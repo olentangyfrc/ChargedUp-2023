@@ -200,7 +200,7 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp,
         new SetClawPosition(claw, ClawPosition.CLOSED));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown,
-        new SetClawPosition(claw, ClawPosition.LOWER_LATCH));
+        new SetClawPosition(claw, ClawPosition.OPEN));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X,
         new ToggleIntake(activeIntake));
 

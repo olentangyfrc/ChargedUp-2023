@@ -28,7 +28,7 @@ public class Claw extends SubsystemBase {
   private CANSparkMax wristMotor;
 
   // private PIDController wristController = new PIDController(0.5, 0, 0);
-  private PIDController wristController = new PIDController(6, 0, 1.14807);
+  private PIDController wristController = new PIDController(6, 0, 0.8);
 
   private Rotation2d targetWristAngle = new Rotation2d(Math.PI);
 

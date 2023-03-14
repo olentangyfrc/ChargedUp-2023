@@ -37,7 +37,10 @@ public class ScoreConeHigh extends SequentialCommandGroup {
                 new DeployElevator(e))),
         new WaitCommand(1.5),
         new ParallelCommandGroup(
-            new SetClawPosition(c, ClawPosition.LOWER_LATCH),
+            new SequentialCommandGroup(
+              new WaitCommand(0.2),
+              new SetClawPosition(c, ClawPosition.LOWER_LATCH)
+            ),
             new MoveElevator(e, ElevatorPosition.LOW),
             new SequentialCommandGroup(
                 new WaitCommand(.25),

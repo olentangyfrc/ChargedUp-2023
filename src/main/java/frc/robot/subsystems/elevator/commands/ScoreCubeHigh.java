@@ -37,12 +37,14 @@ public class ScoreCubeHigh extends SequentialCommandGroup {
                 new DeployElevator(e))),
         new WaitCommand(1.5),
         new ParallelCommandGroup(
-            new SequentialCommandGroup(
-                new WaitCommand(0.3),
-                new SetClawPosition(c, ClawPosition.OPEN)),
-            new MoveElevator(e, ElevatorPosition.LOW),
-            new SequentialCommandGroup(
-                new WaitCommand(.17),
-                new RetractElevator(e))));
+            new SetClawPosition(c, ClawPosition.OPEN),
+            new RetractElevator(e),
+            new WaitCommand(0.4)
+        ),
+        new ParallelCommandGroup(
+            new RotateClawPitch(cp, Rotation2d.fromDegrees(115)),
+            new MoveElevator(e, ElevatorPosition.LOW)
+        )
+    );
   }
 }

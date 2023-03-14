@@ -73,7 +73,7 @@ public class Elevator extends SubsystemBase {
       ElevatorPosition.GRAB_CUBE, 1.0,
       ElevatorPosition.LOW, 1.825,
       ElevatorPosition.MIDDLE, 3.66,
-      ElevatorPosition.HIGH, 6.02);
+      ElevatorPosition.HIGH, 5.94);
 
   // These are only for development purposes
   private GenericEntry entry = Shuffleboard.getTab(getName()).add("Set pos", 0).getEntry();
