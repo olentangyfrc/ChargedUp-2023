@@ -89,7 +89,7 @@ public class Elevator extends SubsystemBase {
     elevatorMotor.setNeutralMode(NeutralMode.Brake);
 
     elevatorController.setTolerance(POSITION_TOLERANCE);
-
+    
     // resetPosition(0);
 
     elevatorController.setSetpoint(getPosition());
@@ -110,8 +110,6 @@ public class Elevator extends SubsystemBase {
   }
 
   @Override
-
-
   public void periodic() {
     // TODO: REMEMBER TO TAKE THIS OUT!!!!!
     // Re-zero our position when we pass the magnetic switch
@@ -128,26 +126,24 @@ public class Elevator extends SubsystemBase {
           elevatorController.setSetpoint(currentProfile.calculate(time).position);
         }
       }
+      
+      double clampedMeasurement = MathUtil.clamp(getPosition(), elevatorController.getSetpoint() - MAX_ERROR,
+          elevatorController.getSetpoint() + MAX_ERROR);
+      double pidControl = elevatorController.calculate(clampedMeasurement);
 
-      if (true || !isAtTargetPosition()) {
-        // System.out.println("ABC!!!");
-        double clampedMeasurement = MathUtil.clamp(getPosition(), elevatorController.getSetpoint() - MAX_ERROR,
-            elevatorController.getSetpoint() + MAX_ERROR);
-        double pidControl = elevatorController.calculate(clampedMeasurement);
-
-        // Limit the output voltage when there isn't a motion profile.
-        if (currentProfile == null) {
-          pidControl = MathUtil.clamp(pidControl, -CORRECTION_MAX_VOLTS, CORRECTION_MAX_VOLTS);
-        }
-
-        elevatorMotor.setVoltage(pidControl);
-
-        SmartDashboard.putNumber("PPosition Error", (getPosition() - elevatorController.getSetpoint()));
-        // System.out.println("PID output: " + pidControl);
-        // System.out.println("Setpoint: " + elevatorController.getSetpoint());
-        // System.out.println("Current Position: " + clampedMeasurement);
+      // Limit the output voltage when there isn't a motion profile.
+      if (currentProfile == null) {
+        pidControl = MathUtil.clamp(pidControl, -CORRECTION_MAX_VOLTS, CORRECTION_MAX_VOLTS);
       }
 
+      elevatorMotor.setVoltage(pidControl);
+
+      SmartDashboard.putNumber("PPosition Error", (getPosition() - elevatorController.getSetpoint()));
+      // System.out.println("PID output: " + pidControl);
+      // System.out.println("Setpoint: " + elevatorController.getSetpoint());
+      // System.out.println("Current Position: " + clampedMeasurement);
+    } else {
+      currentProfile = null;
     }
   }
 

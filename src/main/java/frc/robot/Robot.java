@@ -7,20 +7,13 @@ package frc.robot;
 import com.pathplanner.lib.server.PathPlannerServer;
 
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.IO.ButtonActionType;
-import frc.robot.IO.ControllerButton;
 import frc.robot.auton.AutoRoutineManager;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
-
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -34,6 +27,7 @@ public class Robot extends TimedRobot {
   private CommandBase autoCommand;
   private AutoRoutineManager routineManager;
 
+  private Compressor compressor;
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -53,6 +47,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
+    SmartDashboard.putNumber("Pitch", SubsystemManager.getInstance().getImu().getPitch());
+    SmartDashboard.putNumber("Roll", SubsystemManager.getInstance().getImu().getRoll());
   }
   @Override
   public void autonomousInit() {

@@ -16,6 +16,11 @@ public abstract class OzoneImu {
     public abstract double getAngle();
     public abstract double getPitch();
     public abstract double getRoll();
+    public abstract void reset();
+
+    public abstract void resetPitch();
+
+    public abstract void resetRoll();
 
     public abstract void setReset(Rotation2d angle);
 
@@ -24,13 +29,6 @@ public abstract class OzoneImu {
      */
     public Rotation2d getRotation2d() {
         return Rotation2d.fromDegrees(getAngle());
-    }
-    
-    /**
-     * Reset the Yaw angle of the imu to zero
-     */
-    public void reset() {
-        setReset(Rotation2d.fromDegrees(0));
     }
 
     /**

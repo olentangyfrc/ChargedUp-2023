@@ -9,13 +9,10 @@ import java.util.logging.Logger;
 
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.IO.ButtonActionType;
 import frc.robot.IO.ControllerButton;
 import frc.robot.auton.AutoDashboardManager;
-import frc.robot.auton.AutoNodeUtility;
 import frc.robot.auton.AutonPaths;
 import frc.robot.subsystems.ApriltagDetection;
 import frc.robot.subsystems.activeintake.ActiveIntake;
@@ -37,18 +34,9 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.commands.DeployElevator;
 import frc.robot.subsystems.elevator.commands.ManualElevatorForward;
 import frc.robot.subsystems.elevator.commands.ManualElevatorReverse;
-import frc.robot.subsystems.elevator.commands.MoveElevator;
 import frc.robot.subsystems.elevator.commands.RetractElevator;
 import frc.robot.subsystems.elevator.commands.ScoreConeHigh;
 import frc.robot.subsystems.elevator.commands.ScoreConeMiddle;
-import frc.robot.subsystems.elevator.commands.ScoreCubeHigh;
-import frc.robot.subsystems.elevator.commands.ScoreCubeMiddle;
-import frc.robot.subsystems.prototypeone.elevator.ProtoElevator;
-import frc.robot.subsystems.prototypeone.intakeArm.intakeArm;
-import frc.robot.subsystems.prototypeone.intakeArm.commands.PlaceItem;
-import frc.robot.subsystems.prototypeone.intakeArm.commands.armDown;
-import frc.robot.subsystems.prototypeone.intakeArm.commands.armUp;
-import frc.robot.subsystems.prototypeone.intakeArm.commands.toggleClaw;
 import frc.robot.telemetry.OzoneImu;
 import frc.robot.telemetry.Pigeon;
 import frc.robot.telemetry.Pigeon2;
@@ -65,8 +53,6 @@ public class SubsystemManager {
   private SwerveDrivetrain drivetrain;
   private PowerDistribution pdp;
   private ApriltagDetection detector;
-  private intakeArm intakeArm;
-  private ProtoElevator protoElevator;
 
   private ActiveIntake activeIntake;
   private Claw claw;
@@ -134,9 +120,6 @@ public class SubsystemManager {
       case RIO99:
         initRIO99();
         break;
-      case CHARGED_UP_PROTO:
-        initCHARGED_UP_PROTO();
-        break;
       case CHARGED_UP_PROTO_2:
         initCHARGED_UP_PROTO_2();
         break;
@@ -169,15 +152,6 @@ public class SubsystemManager {
     detector = new ApriltagDetection();
     detector.init();
 
-    Shuffleboard.getTab("Command Groups").add("Score Cone middle",
-        new ScoreConeMiddle(elevator, claw, clawPitch, activeIntake));
-    Shuffleboard.getTab("Command Groups").add("Score Cone High",
-        new ScoreConeHigh(elevator, claw, clawPitch, activeIntake));
-    Shuffleboard.getTab("Command Groups").add("Score Cube Middle",
-        new ScoreCubeMiddle(elevator, claw, clawPitch, activeIntake));
-    Shuffleboard.getTab("Command Groups").add("Score Cube High",
-        new ScoreCubeHigh(elevator, claw, clawPitch, activeIntake));
-
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton,
         new StartIntake(activeIntake));
@@ -206,51 +180,19 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight, new DeployElevator(elevator));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft, new RetractElevator(elevator));
 
+
   }
 
-  private void initCHARGED_UP_PROTO() {
-
-    imu = new Pigeon2(5);
-    imu.reset();
-
-    // Create and initialize all subsystems:
-    drivetrain = new SingleFalconDrivetrain();
-    drivetrain.init(new SwerveModuleSetupInfo[] {
-        new SwerveModuleSetupInfo(41, 59, 1, 331.6),
-        new SwerveModuleSetupInfo(40, 8, 3, 28.39),
-        new SwerveModuleSetupInfo(42, 17, 2, 28.87),
-        new SwerveModuleSetupInfo(43, 15, 0, 267.34),
-    }, 1 / 8.07);
-    detector = new ApriltagDetection();
-
-    protoElevator = new ProtoElevator();
-    paths = new AutonPaths(drivetrain);
-    autoDashboardManager = new AutoDashboardManager();
-
-    detector.init();
-    // elevator = new Elevator();
-
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
-
-    intakeArm = new intakeArm();
-    intakeArm.init();
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new PlaceItem("Cone", "High"));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new toggleClaw(intakeArm));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new armDown(intakeArm));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new armUp(intakeArm));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton,
-        new MoveElevator(elevator, ProtoElevator.ELEVATOR_HIGH_POS));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton,
-        new MoveElevator(elevator, 0));
-
-    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.Start, Commands.run(
-        () -> paths.pathToPositionCommand(AutoNodeUtility.getNodeDrivePosition(autoDashboardManager.getSelectedNode()))
-            .schedule()));
-  }
+  private void initCHARGED_UP_PROTO() {}
 
   private void initBLUE() {
-  }
 
+    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new autoBalancePitch(drivetrain));
+
+    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight, new DeployElevator(elevator));
+    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft, new RetractElevator(elevator));
+  }
+  
   /**
    * Initializes COVID subsystems
    * 
@@ -273,6 +215,10 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new EnableBrakeMode(drivetrain));
     IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RadialUp, new DisableBrakeMode(drivetrain));
+
+    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, new autoBalancePitchGroup());
+    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new driveUp(drivetrain));
+    // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new driveOverStation(drivetrain));
   }
 
   /**
@@ -312,10 +258,6 @@ public class SubsystemManager {
     return pdp;
   }
 
-  public intakeArm getIntakeArm() {
-    return intakeArm;
-  }
-
   public OzoneImu getImu() {
     return imu;
   }
@@ -326,10 +268,6 @@ public class SubsystemManager {
 
   public ApriltagDetection getDetector() {
     return detector;
-  }
-
-  public ProtoElevator getProtoElevator() {
-    return protoElevator;
   }
 
   public Claw getClaw() {

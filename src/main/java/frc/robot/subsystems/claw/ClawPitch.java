@@ -11,7 +11,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -35,6 +34,8 @@ public class ClawPitch extends SubsystemBase {
     pitchMotor.restoreFactoryDefaults();
     pitchMotor.setInverted(true);
     pitchMotor.setIdleMode(IdleMode.kBrake);
+
+    // pitchMotor.getEncoder().setPosition(0);
 
     pitchController.setTolerance(PITCH_TOLERANCE);
 
@@ -68,8 +69,6 @@ public class ClawPitch extends SubsystemBase {
     targetPitch = pitch;
     pitchController.setSetpoint(pitch.getDegrees());
   }
-
-  private GenericEntry setPitch = Shuffleboard.getTab("Claw").add("Set Pitch", 0).getEntry();
 
   @Override
   public void periodic() {
