@@ -154,7 +154,7 @@ public class SubsystemManager {
     elevator = new Elevator(42, 6, 7);
 
 
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new ParallelCommandGroup(new InstantCommand(imu::reset), new InstantCommand(imu::resetPitch), new InstantCommand(imu::resetRoll)));
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new ParallelCommandGroup(new InstantCommand(imu::reset), new InstantCommand(imu::resetPitch), new InstantCommand(imu::resetRoll), new InstantCommand( ()-> System.out.print("Reseting Gyro"))));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new StartIntake(activeIntake));
     IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, new StopIntake(activeIntake));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new ReverseIntake(activeIntake));
@@ -170,7 +170,7 @@ public class SubsystemManager {
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new SetClawPosition(claw, ClawPosition.CLOSED));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown, new SetClawPosition(claw, ClawPosition.OPEN));
 
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new autoBalancePitchGroup());
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new autoBalancePitch(drivetrain));
 
     // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight, new DeployElevator(elevator));
     // IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft, new RetractElevator(elevator));

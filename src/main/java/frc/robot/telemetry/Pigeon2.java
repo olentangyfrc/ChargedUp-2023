@@ -30,7 +30,7 @@ public class Pigeon2 extends OzoneImu {
         // if (imu.getPitch() >= offset && imu.getPitch() < 0) {
         //     return 0;
         // }
-        return (imu.getRoll() % 360) - pitchOffset;
+        return imu.getRoll() - pitchOffset;
     }
 
     @Override
@@ -51,11 +51,11 @@ public class Pigeon2 extends OzoneImu {
 
     @Override
     public void resetPitch() {
-        pitchOffset = getPitch();
+        rollOffset = getRoll();
     }
 
     @Override
     public void resetRoll() {
-        rollOffset = getRoll();
+        pitchOffset = getPitch();
     }
 }

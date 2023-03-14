@@ -24,7 +24,7 @@ public class autoBalancePitch extends CommandBase {
   //safe speed: 0.01
   final double SPEED = 0.01;
   //safe tolernace = 2.0
-  final double TOLERANCE = 0.09;
+  final double TOLERANCE = 2.0;
   double pitchSpeed = 0;
   double previousPitch = 0;
   double rollSpeed = 0;
@@ -36,12 +36,12 @@ public class autoBalancePitch extends CommandBase {
   double ROLL_PID = 0;
 
   boolean isPitchAtSetpoint = false;
-  //boolean isRollAtSetpoint = false;
+  boolean isRollAtSetpoint = false;
 
   //safe p: 0.006
   //safe d: 0.002269
-  PIDController pidPitch = new PIDController(0.006, 0, 0.002269);
-  PIDController pidRoll = new PIDController(0.006, 0, 0.002269);
+  PIDController pidPitch = new PIDController(0.016, 0, 0.002269);
+  PIDController pidRoll = new PIDController(0.016, 0, 0.002269);
 
   /** Creates a new autoBalance. */
   public autoBalancePitch(SwerveDrivetrain drivetrain) {
@@ -70,26 +70,22 @@ public class autoBalancePitch extends CommandBase {
   @Override
   public void execute() {
     pitch = pigeon.getPitch();
-    PITCH_PID = pidPitch.calculate(MathUtil.clamp(pigeon.getPitch(), pidPitch.getSetpoint() - MAX_ERROR, pidPitch.getSetpoint() + MAX_ERROR));
-    //ROLL_PID = pidRoll.calculate(MathUtil.clamp(pigeon.getRoll(), pidRoll.getSetpoint() - MAX_ERROR, pidRoll.getSetpoint() + MAX_ERROR));
+    PITCH_PID = -pidPitch.calculate(MathUtil.clamp(pigeon.getPitch(), pidPitch.getSetpoint() - MAX_ERROR, pidPitch.getSetpoint() + MAX_ERROR));
+    ROLL_PID = -pidRoll.calculate(MathUtil.clamp(pigeon.getRoll(), pidRoll.getSetpoint() - MAX_ERROR, pidRoll.getSetpoint() + MAX_ERROR));
     ChassisSpeeds speed = new ChassisSpeeds(PITCH_PID, ROLL_PID, 0);
-    if(!(isPitchAtSetpoint /*&& pidRoll.atSetpoint()*/)) {
+    if(!pidPitch.atSetpoint() || !pidRoll.atSetpoint()) {
       drivetrain.drive(speed, false);
     }
     else{
-      ChassisSpeeds stopDrive = new ChassisSpeeds(0, 0, 0);
-      drivetrain.drive(stopDrive, false);
+      drivetrain.stop();
     }
-
-    previousPitch = pitch;
-
-    isPitchAtSetpoint = pidPitch.atSetpoint();
-    //isRollAtSetpoint = pidRoll.atSetpoint();
 
     SmartDashboard.putNumber("PID Pitch Output", PITCH_PID);
     SmartDashboard.putNumber("PID Roll Output", ROLL_PID);
     SmartDashboard.putBoolean("Is Pitch At Setpoint", isPitchAtSetpoint);
-    // SmartDashboard.putBoolean("Is Roll At Setpoint", isRollAtSetpoint);
+    SmartDashboard.putBoolean("Is Roll At Setpoint", isRollAtSetpoint);
+    SmartDashboard.putNumber("PID Pitch Error", pidPitch.getPositionError());
+    SmartDashboard.putNumber("PID Roll Error", pidRoll.getPositionError());
 
     //SmartDashboard.putNumber("Bang Bang Output", bangBang(pitch, TOLERANCE));
 
@@ -101,12 +97,12 @@ public class autoBalancePitch extends CommandBase {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     return false;
-    //return bangBang(pitch, TOLERANCE) == 0;
   }
 }
