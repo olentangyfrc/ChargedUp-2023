@@ -19,8 +19,6 @@ import frc.robot.auton.AutoNodeUtility;
 import frc.robot.auton.AutonPaths;
 import frc.robot.subsystems.ApriltagDetection;
 import frc.robot.subsystems.activeintake.ActiveIntake;
-import frc.robot.subsystems.activeintake.commands.DeployIntake;
-import frc.robot.subsystems.activeintake.commands.RetractIntake;
 import frc.robot.subsystems.activeintake.commands.ReverseIntake;
 import frc.robot.subsystems.activeintake.commands.StartIntake;
 import frc.robot.subsystems.activeintake.commands.StopIntake;
@@ -47,6 +45,7 @@ import frc.robot.subsystems.elevator.commands.ScoreCubeHigh;
 import frc.robot.subsystems.elevator.commands.ScoreCubeMiddle;
 import frc.robot.subsystems.prototypeone.elevator.ProtoElevator;
 import frc.robot.subsystems.prototypeone.intakeArm.intakeArm;
+import frc.robot.subsystems.prototypeone.intakeArm.commands.PlaceItem;
 import frc.robot.subsystems.prototypeone.intakeArm.commands.armDown;
 import frc.robot.subsystems.prototypeone.intakeArm.commands.armUp;
 import frc.robot.subsystems.prototypeone.intakeArm.commands.toggleClaw;
@@ -235,6 +234,7 @@ public class SubsystemManager {
 
     intakeArm = new intakeArm();
     intakeArm.init();
+    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new PlaceItem("Cone", "High"));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new toggleClaw(intakeArm));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new armDown(intakeArm));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new armUp(intakeArm));
@@ -310,6 +310,10 @@ public class SubsystemManager {
    */
   public PowerDistribution getPdp() {
     return pdp;
+  }
+
+  public intakeArm getIntakeArm() {
+    return intakeArm;
   }
 
   public OzoneImu getImu() {

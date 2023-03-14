@@ -31,7 +31,7 @@ public class intakeArm extends SubsystemBase{
         arm = new DoubleSolenoid(PCM_CAN_ID, PneumaticsModuleType.CTREPCM, pnematicsArmForward, pnematicsArmBackward);
         arm.set(Value.kOff);
         claw = new DoubleSolenoid(PCM_CAN_ID, PneumaticsModuleType.CTREPCM, pnematicsClawForward, pnematicsClawBackward);
-        claw.set(Value.kOff);
+        //claw.set(Value.kOff);
     }
 
     public void extendArm() {
