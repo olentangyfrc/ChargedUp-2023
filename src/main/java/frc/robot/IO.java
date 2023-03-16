@@ -12,7 +12,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
- * The IO class manages the driver input to the robot. This includes getting axis values and binding buttons.
+ * The IO class manages the driver input to the robot. This includes getting
+ * axis values and binding buttons.
  */
 public class IO {
 
@@ -23,7 +24,8 @@ public class IO {
     public static final int RIGHT_BUTTON_BOX_PORT = 4;
     // Deadzone for Xbox controller sticks
     private static final double DEADZONE = 0.02;
-    // This value is used to turn an analog input into a digital one so that commands can be mapped to it.
+    // This value is used to turn an analog input into a digital one so that
+    // commands can be mapped to it.
     private static final double NOMINAL_ANALOG_VALUE = 0.5;
 
     private GenericHID leftButtonBox;
@@ -49,45 +51,42 @@ public class IO {
     private Trigger rightXPos;
     private Trigger rightXNeg;
 
-
-
     private Map<Integer, Trigger> customButtons;
+
+    private Map<XboxControllerName, CommandXboxController> xboxControllers = new HashMap<XboxControllerName, CommandXboxController>();
 
     // Code for singleton
     private static IO instance;
     private static IO auxInstance;
 
-    private IO() {}
+    private IO() {
+    }
 
     /**
-     * Get the pre-existing instance of the IO class, or create one if there isn't one.
+     * Get the pre-existing instance of the IO class, or create one if there isn't
+     * one.
      * 
      * @return An instance of the IO class
      */
     public static IO getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new IO();
-            instance.init(false);
+            instance.init();
         }
         return instance;
-    }
-
-    public static IO getAuxInstance() {
-        if(auxInstance == null) {
-            auxInstance = new IO();
-            auxInstance.init(true);
-        }
-
-        return auxInstance;
     }
 
     /**
      * Initialize or reinitialize the IO class.
      * <p>
-     * This does not need to be called when initializing with the getInstance() method.
+     * This does not need to be called when initializing with the getInstance()
+     * method.
      */
-    public void init(boolean isAux){
-        xbox = new CommandXboxController(isAux? AUX_XBOX_PORT : XBOX_PORT);
+    public void init() {
+        xboxControllers.put(XboxControllerName.XBOX, new CommandXboxController(XBOX_PORT));
+        xboxControllers.put(XboxControllerName.AUXXBOX, new CommandXboxController(AUX_XBOX_PORT));
+
+        xbox = xboxControllers.get(XboxControllerName.XBOX);
 
         initializeCustomButtons();
     }
@@ -100,22 +99,38 @@ public class IO {
      * <li>Square the raw axis value to make it feel more natural for drivers
      * </ul>
      * <hr>
+     * 
      * @param input The raw axis value.
      * @return The filtered axis value.
      */
-    public double filter(double input){
+    public double filter(double input) {
         double x = Math.copySign(Math.pow(input, 2), input); // Square input
         return MathUtil.applyDeadband(x, DEADZONE); // Apply deadzone and return
     }
 
+    /**
+     * @return The value of the right stick button on the main Xbox controller
+     */
     public boolean getRightStick() {
         return xbox.rightStick().getAsBoolean();
     }
-    
+
+    /**
+     * 
+     * @param controllerName The name of the controller to get the right stick
+     * @return The value of the right stick button on the specified Xbox controller
+     */
+    public boolean getRightStick(XboxControllerName controllerName) {
+        CommandXboxController xbox = xboxControllers.get(controllerName);
+        return xbox.rightStick().getAsBoolean();
+    }
+
     /**
      * Types of button bindings
      * 
-     * @see <a href="https://first.wpi.edu/wpilib/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Button.html">See the button class for definitions of types.</a>
+     * @see <a href=
+     *      "https://first.wpi.edu/wpilib/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Button.html">See
+     *      the button class for definitions of types.</a>
      */
     public enum ButtonActionType {
         WHEN_HELD,
@@ -155,28 +170,68 @@ public class IO {
         rightXNeg(24);
 
         public final int VALUE;
-        
+
         ControllerButton(int VALUE) {
             this.VALUE = VALUE;
-         }
-    }    
+        }
+    }
 
     /**
-     * Bind a command to a button on the Xbox controller.
+     * Bind a command to a button on the main Xbox controller.
      * 
-     * @param type The type of binding to perform
+     * @param type       The type of binding to perform
      * @param xboxButton The button on the Xbox controller to bind to
-     * @param command The command to bind
+     * @param command    The command to bind
      */
-    public void bind(ButtonActionType type, ControllerButton xboxButton, CommandBase command) {
+    public void bind(ButtonActionType type, ControllerButton xboxButton,
+            CommandBase command) {
+
         Trigger button;
         if (xboxButton.VALUE >= 11) {
             button = customButtons.get(xboxButton.VALUE);
         } else {
             button = new JoystickButton(xbox.getHID(), xboxButton.VALUE);
         }
-        
-        switch(type) {
+
+        switch (type) {
+            case TOGGLE_WHEN_PRESSED:
+                button.toggleOnTrue(command);
+                break;
+            case WHEN_HELD:
+                button.whileTrue(command);
+                break;
+            case WHEN_PRESSED:
+                button.onTrue(command);
+                break;
+            case WHEN_RELEASED:
+                button.onFalse(command);
+                break;
+            case WHILE_HELD:
+                button.whileTrue(new RepeatCommand(command));
+                break;
+        }
+    }
+
+    /**
+     * Bind a command to a button on a specific Xbox controller.
+     * 
+     * @param controllerName The name of the controller to bind toc
+     * @param type           The type of binding to perform
+     * @param xboxButton     The button on the Xbox controller to bind to
+     * @param command        The command to bind
+     */
+    public void bind(XboxControllerName controllerName, ButtonActionType type, ControllerButton xboxButton,
+            CommandBase command) {
+        CommandXboxController xbox = xboxControllers.get(controllerName);
+
+        Trigger button;
+        if (xboxButton.VALUE >= 11) {
+            button = customButtons.get(xboxButton.VALUE);
+        } else {
+            button = new JoystickButton(xbox.getHID(), xboxButton.VALUE);
+        }
+
+        switch (type) {
             case TOGGLE_WHEN_PRESSED:
                 button.toggleOnTrue(command);
                 break;
@@ -198,17 +253,18 @@ public class IO {
     /**
      * Bind a button to the button box.
      * <p>
-     * Do not look at this code as an example! It is repetitive, but competition is in a week.
+     * Do not look at this code as an example! It is repetitive, but competition is
+     * in a week.
      * 
-     * @param command The command to assign
+     * @param command         The command to assign
      * @param buttonBoxButton The button to assign to.
-     * @param type The type of action
+     * @param type            The type of action
      */
     public void bindButtonBox(CommandBase command, StickButton buttonBoxButton, ButtonActionType type) {
         GenericHID buttonBoxSide;
         int buttonNum;
 
-        if(buttonBoxButton.ordinal() <= 10) {
+        if (buttonBoxButton.ordinal() <= 10) {
             buttonBoxSide = leftButtonBox;
             buttonNum = buttonBoxButton.ordinal() + 1;
         } else {
@@ -218,7 +274,7 @@ public class IO {
 
         JoystickButton button = new JoystickButton(buttonBoxSide, buttonNum);
 
-        switch(type) {
+        switch (type) {
             case TOGGLE_WHEN_PRESSED:
                 button.toggleOnTrue(command);
                 break;
@@ -240,30 +296,30 @@ public class IO {
     /**
      * Initialize the custom buttons
      */
-    public void initializeCustomButtons(){
-        rightTriggerButton = new Trigger( () -> {
-            return xbox.getRightTriggerAxis() > NOMINAL_ANALOG_VALUE; 
-        } );
+    public void initializeCustomButtons() {
+        rightTriggerButton = new Trigger(() -> {
+            return xbox.getRightTriggerAxis() > NOMINAL_ANALOG_VALUE;
+        });
 
-        leftTriggerButton = new Trigger( () -> {
+        leftTriggerButton = new Trigger(() -> {
             return xbox.getLeftTriggerAxis() > NOMINAL_ANALOG_VALUE;
-        } );
+        });
 
-        radialUp = new Trigger( () -> {
+        radialUp = new Trigger(() -> {
             return xbox.pov(0).getAsBoolean();
-        } );
+        });
 
-        radialRight = new Trigger( () -> {
+        radialRight = new Trigger(() -> {
             return xbox.pov(90).getAsBoolean();
-        } );
+        });
 
-        radialDown = new Trigger( () -> {
+        radialDown = new Trigger(() -> {
             return xbox.pov(180).getAsBoolean();
-        } );
-  
-        radialLeft = new Trigger( () -> {
+        });
+
+        radialLeft = new Trigger(() -> {
             return xbox.pov(270).getAsBoolean();
-        } );
+        });
 
         leftYPos = new Trigger(() -> {
             return xbox.getLeftY() < -NOMINAL_ANALOG_VALUE;
@@ -292,7 +348,7 @@ public class IO {
 
         customButtons = new HashMap<Integer, Trigger>();
 
-        customButtons.put(11,rightTriggerButton);
+        customButtons.put(11, rightTriggerButton);
         customButtons.put(12, leftTriggerButton);
         customButtons.put(13, radialUp);
         customButtons.put(14, radialRight);
@@ -307,32 +363,73 @@ public class IO {
         customButtons.put(23, rightXPos);
         customButtons.put(24, rightXNeg);
     }
-    
+
     /**
-     * @return Get the horizontal axis of the left stick on the Xbox controller
+     * @return Get the horizontal axis of the left stick on the main Xbox controller
      */
-    public double getLeftX(){
+    public double getLeftX() {
         return filter(xbox.getLeftX());
     }
 
     /**
-     * @return Get the horizontal axis of the right stick on the Xbox controller
+     * @param controllerName The name of the controller to get the left stick from
+     * @return Get the horizontal axis of the left stick on the specified Xbox
+     *         controller
      */
-    public double getRightX(){
+    public double getLeftX(XboxControllerName controllerName) {
+        CommandXboxController xbox = xboxControllers.get(controllerName);
+        return filter(xbox.getLeftX());
+    }
+
+    /**
+     * @return Get the horizontal axis of the right stick on the main Xbox
+     *         controller
+     */
+    public double getRightX() {
         return filter(xbox.getRightX());
     }
-    
+
     /**
-     * @return Get the vertical axis of the left stick on the Xbox controller
+     * @param controllerName The name of the controller to get the right stick from
+     * @return Get the horizontal axis of the right stick on the specified Xbox
+     *         controller
      */
-    public double getLeftY(){
+    public double getRightX(XboxControllerName controllerName) {
+        CommandXboxController xbox = xboxControllers.get(controllerName);
+        return filter(xbox.getRightX());
+    }
+
+    /**
+     * @return Get the vertical axis of the left stick on the main Xbox controller
+     */
+    public double getLeftY() {
         return filter(-xbox.getLeftY());
     }
 
     /**
-     * @return Get the vertical axis of the right stick on the Xbox controller
+     * @param controllerName The name of the controller to get the left stick from
+     * @return Get the vertical axis of the left stick on the specified Xbox
+     *         controller
      */
-    public double getRightY(){
+    public double getLeftY(XboxControllerName controllerName) {
+        CommandXboxController xbox = xboxControllers.get(controllerName);
+        return filter(-xbox.getLeftY());
+    }
+
+    /**
+     * @return Get the vertical axis of the right stick on the main Xbox controller
+     */
+    public double getRightY() {
+        return filter(-xbox.getRightY());
+    }
+
+    /**
+     * @param controllerName The name of the controller to get the right stick from
+     * @return Get the vertical axis of the right stick on the specified Xbox
+     *         controller
+     */
+    public double getRightY(XboxControllerName controllerName) {
+        CommandXboxController xbox = xboxControllers.get(controllerName);
         return filter(-xbox.getRightY());
     }
 
@@ -363,6 +460,9 @@ public class IO {
         RIGHT_10,
         RIGHT_11,
     }
+
+    public enum XboxControllerName {
+        XBOX,
+        AUXXBOX
+    }
 }
-
-
