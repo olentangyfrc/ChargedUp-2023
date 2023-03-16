@@ -3,6 +3,8 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/Shuffleboard/Auton/AutoChooser": "String Chooser",
+      "/Shuffleboard/Auton/KILL PITCH": "Command",
+      "/Shuffleboard/Auton/REVIVE PITCH": "Command",
       "/Shuffleboard/Claw/Forwards": "Command",
       "/Shuffleboard/Claw/Pitch Back": "Command",
       "/Shuffleboard/Claw/Pitch Forwards": "Command",

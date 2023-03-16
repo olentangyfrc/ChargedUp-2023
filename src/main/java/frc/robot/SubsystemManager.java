@@ -171,99 +171,126 @@ public class SubsystemManager {
     IO io = IO.getInstance();
 
     // Intake
-    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton,
+    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.RightTriggerButton,
         new DeployIntake(activeIntake).andThen(new StartIntake(activeIntake)));
 
-    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton,
+    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_RELEASED,
+        ControllerButton.RightTriggerButton,
         new StopIntake(activeIntake).andThen(new RetractIntake(activeIntake)));
 
-    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton,
+    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.LeftTriggerButton,
         new RetractIntake(activeIntake).andThen(new ReverseIntake(activeIntake)));
 
-    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton,
+    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_RELEASED,
+        ControllerButton.LeftTriggerButton,
         new StopIntake(activeIntake).andThen(new RetractIntake(activeIntake)));
 
-    // Reach high
-    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, Commands.either(
-        new ScoreConeHigh(elevator, claw, clawPitch, activeIntake),
-        new ScoreCubeHigh(elevator, claw, clawPitch, activeIntake),
-        activeIntake::nextPieceIsCone));
+    // // Reach high
+    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.RightBumper, Commands.either(
+            new ScoreConeHigh(elevator, claw, clawPitch, activeIntake),
+            new ScoreCubeHigh(elevator, claw, clawPitch, activeIntake),
+            activeIntake::nextPieceIsCone));
 
-    // Reach mid
-    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, Commands.either(
-        new ScoreConeMiddle(elevator, claw, clawPitch, activeIntake),
-        new ScoreCubeMiddle(elevator, claw, clawPitch, activeIntake),
-        activeIntake::nextPieceIsCone));
+    // // Reach mid
+    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.LeftBumper, Commands.either(
+            new ScoreConeMiddle(elevator, claw, clawPitch, activeIntake),
+            new ScoreCubeMiddle(elevator, claw, clawPitch, activeIntake),
+            activeIntake::nextPieceIsCone));
 
     // Place Game Piece
-    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.A, Commands.either(
-        new PlaceCone(elevator, claw, clawPitch, activeIntake),
-        new PlaceCube(elevator, claw, clawPitch, activeIntake),
-        activeIntake::nextPieceIsCone));
+    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.A, Commands.either(
+            new PlaceCone(elevator, claw, clawPitch, activeIntake),
+            new PlaceCube(elevator, claw, clawPitch, activeIntake),
+            activeIntake::nextPieceIsCone));
 
-    // Zero Gyro
-    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(() -> {
-      imu.reset();
-      imu.resetPitch();
-      imu.resetRoll();
-    }));
+    // // Zero Gyro
+    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.Y, new InstantCommand(() -> {
+          imu.reset();
+          imu.resetPitch();
+          imu.resetRoll();
+        }));
 
-    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp,
+    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.RadialUp,
         new SetClawPosition(claw, ClawPosition.OPEN));
-    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown,
+    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.RadialDown,
         new SetClawPosition(claw, ClawPosition.CLOSED));
 
-    // Brake Mode
-    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.B, Commands.either(
-        new DisableBrakeMode(drivetrain),
-        new EnableBrakeMode(drivetrain),
-        drivetrain::isInBrakeMode));
+    // // Brake Mode
+    io.bind(XboxControllerName.XBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.B, Commands.either(
+            new DisableBrakeMode(drivetrain),
+            new EnableBrakeMode(drivetrain),
+            drivetrain::isInBrakeMode));
 
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.Back,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.Back,
         new EmergencyCommandCancel(elevator));
 
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_HELD, ControllerButton.leftYNeg,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_HELD,
+        ControllerButton.leftYNeg,
         new ManualElevatorReverse(elevator));
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_HELD, ControllerButton.leftYPos,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_HELD,
+        ControllerButton.leftYPos,
         new ManualElevatorForward(elevator));
 
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.RightTriggerButton,
         new DeployElevator(elevator));
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.LeftTriggerButton,
         new RetractElevator(elevator));
 
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.Start,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.Start,
         new EmergencyCommandCancel(elevator));
 
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_HELD, ControllerButton.A, Commands.startEnd(
-        () -> activeIntake.setForceBeamBreak(true),
-        () -> activeIntake.setForceBeamBreak(false)));
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_HELD,
+        ControllerButton.A, Commands.startEnd(
+            () -> activeIntake.setForceBeamBreak(true),
+            () -> activeIntake.setForceBeamBreak(false)));
 
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.Y,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.Y,
         new SetClawPosition(claw, ClawPosition.OPEN));
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.X,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.X,
         new SetClawPosition(claw, ClawPosition.CLOSED));
 
-    // Toggle Claw Angle
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.B, Commands.either(
-        new RotateClawToAngle(claw, Rotation2d.fromDegrees(0)),
-        new RotateClawToAngle(claw, Rotation2d.fromDegrees(180)),
-        () -> claw.getWristAngle().getDegrees() >= 90));
+    // // Toggle Claw Angle
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.B, Commands.either(
+            new RotateClawToAngle(claw, Rotation2d.fromDegrees(0)),
+            new RotateClawToAngle(claw, Rotation2d.fromDegrees(180)),
+            () -> claw.getWristAngle().getDegrees() >= 90));
 
-    // Claw Pitch
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper,
+    // // Claw Pitch
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.RightBumper,
         new RotateClawPitch(clawPitch, Rotation2d.fromDegrees(115)));
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.LeftBumper,
         new RotateClawPitch(clawPitch, Rotation2d.fromDegrees(0)));
 
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_HELD, ControllerButton.rightXPos,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_HELD,
+        ControllerButton.rightXPos,
         new ManualClawForwards(claw));
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_HELD, ControllerButton.rightXNeg,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_HELD,
+        ControllerButton.rightXNeg,
         new ManualClawBackwards(claw));
 
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.RadialLeft,
         Commands.runOnce(() -> activeIntake.setIsNextPieceCone(true)));
-    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight,
+    io.bind(XboxControllerName.AUXXBOX, ButtonActionType.WHEN_PRESSED,
+        ControllerButton.RadialRight,
         Commands.runOnce(() -> activeIntake.setIsNextPieceCone(false)));
 
     Shuffleboard.getTab("Auton").add("KILL PITCH", Commands.runOnce(() -> clawPitch.setKillPitch(true)));
