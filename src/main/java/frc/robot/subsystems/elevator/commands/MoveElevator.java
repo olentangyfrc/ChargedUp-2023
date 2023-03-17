@@ -10,7 +10,7 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 
 public class MoveElevator extends CommandBase {
-  private static final double MINIMUM_DURATION = 0.3;
+  private static final double MINIMUM_DURATION = 1;
 
   private double startTime;
   private Elevator elevator;
@@ -49,6 +49,6 @@ public class MoveElevator extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(elevator.getPosition() - elevator.getGoalPosition()) <= Elevator.POSITION_TOLERANCE;
+    return (Timer.getFPGATimestamp() - startTime >= MINIMUM_DURATION) && (Math.abs(elevator.getPosition() - elevator.getGoalPosition()) <= Elevator.POSITION_TOLERANCE);
   }
 }

@@ -28,23 +28,13 @@ public class ScoreCubeMiddle extends SequentialCommandGroup {
         addCommands(
                 // new WaitCommand(.25),
                 new ParallelCommandGroup(
-                        new DeployIntake(ai),
+                        // new DeployIntake(ai),
                         new RotateClawPitch(cp, Rotation2d.fromDegrees(90))),
                 new ParallelCommandGroup(
                         new MoveElevator(e, ElevatorPosition.MIDDLE),
                         new SequentialCommandGroup(
                                 new WaitCommand(.25),
-                                new DeployElevator(e))),
-                new WaitCommand(1.5),
-                new ParallelCommandGroup(
-                        new SetClawPosition(c, ClawPosition.OPEN),
-                        new RetractElevator(e),
-                        new WaitCommand(0.4)
-                ),
-                new ParallelCommandGroup(
-                        new RotateClawPitch(cp, Rotation2d.fromDegrees(115)),
-                        new MoveElevator(e, ElevatorPosition.LOW)
-                )
+                                new DeployElevator(e)))
         );
         }
 }

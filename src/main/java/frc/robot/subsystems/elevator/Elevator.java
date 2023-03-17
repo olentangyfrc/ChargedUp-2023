@@ -50,7 +50,7 @@ public class Elevator extends SubsystemBase {
   // DEVICES
   private WPI_TalonFX elevatorMotor;
   private DoubleSolenoid elevatorSolenoid;
-  private DigitalInput magSwitch = new DigitalInput(7);
+  private DigitalInput magSwitch = new DigitalInput(0);
 
   // CONTROL LOGIC
   // private PIDController elevatorController = new PIDController(6, 0, 0); //
@@ -89,8 +89,6 @@ public class Elevator extends SubsystemBase {
     elevatorMotor.setNeutralMode(NeutralMode.Brake);
 
     elevatorController.setTolerance(POSITION_TOLERANCE);
-    
-    // resetPosition(0);
 
     elevatorController.setSetpoint(getPosition());
 
@@ -145,6 +143,13 @@ public class Elevator extends SubsystemBase {
     } else {
       currentProfile = null;
     }
+  }
+
+  public void zero() {
+    currentProfile = null;
+    resetPosition(0);
+    goalPosition = 0;
+    elevatorController.setSetpoint(getPosition());
   }
 
   public void resetPosition(double position) {

@@ -28,7 +28,7 @@ public class ScoreConeMiddle extends SequentialCommandGroup {
   public ScoreConeMiddle(Elevator e, Claw c, ClawPitch cp, ActiveIntake ai) {
     addCommands(
         new ParallelCommandGroup(
-            new DeployIntake(ai),
+            // new DeployIntake(ai),
             // new WaitCommand(.25),
             new RotateClawToAngle(c, Rotation2d.fromDegrees(180)),
             new RotateClawPitch(cp, Rotation2d.fromDegrees(115))),
@@ -36,16 +36,7 @@ public class ScoreConeMiddle extends SequentialCommandGroup {
             new MoveElevator(e, ElevatorPosition.MIDDLE),
             new SequentialCommandGroup(
                 new WaitCommand(.25),
-                new DeployElevator(e))),
-        new InstantCommand(() -> System.out.println("START PLACING")),
-        new WaitCommand(1.5),
-        new ParallelCommandGroup(
-            new SequentialCommandGroup(
-                new WaitCommand(0.2),
-                new SetClawPosition(c, ClawPosition.LOWER_LATCH)),
-            new MoveElevator(e, ElevatorPosition.LOW),
-            new SequentialCommandGroup(
-                new WaitCommand(.25),
-                new RetractElevator(e))));
+                new DeployElevator(e)))
+    );
   }
 }

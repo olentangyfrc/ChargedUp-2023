@@ -17,9 +17,18 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.SubsystemManager;
+import frc.robot.subsystems.activeintake.ActiveIntake;
+import frc.robot.subsystems.activeintake.commands.DeployIntake;
+import frc.robot.subsystems.activeintake.commands.RetractIntake;
+import frc.robot.subsystems.activeintake.commands.StartIntake;
+import frc.robot.subsystems.activeintake.commands.StopIntake;
+import frc.robot.subsystems.claw.Claw;
+import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
+import frc.robot.subsystems.elevator.Elevator;
 
 // TODO: Separate Auto routines into another class
 public class AutonPaths {
@@ -31,8 +40,15 @@ public class AutonPaths {
 
     private SwerveAutoBuilder builder;
 
-    public AutonPaths(SwerveDrivetrain drivetrain) {
+    private Map<String, Command> eventMap;
+
+    public AutonPaths(SwerveDrivetrain drivetrain, ActiveIntake intake, Claw claw, ClawPitch clawPitch, Elevator elevator) {
         this.drivetrain = drivetrain;
+
+        eventMap = Map.of(
+            "DeployIntake", Commands.parallel(new DeployIntake(intake), new StartIntake(intake)),
+            "RetractIntake", Commands.parallel(new RetractIntake(intake), new StopIntake(intake))
+        );
 
         trajectoryMap = new HashMap<AutoTrajectory, PathPlannerTrajectory>();
 
@@ -42,10 +58,11 @@ public class AutonPaths {
             drivetrain.translationPidConstants,
             drivetrain.rotationPidConstants,
             (speeds) -> drivetrain.drive(speeds, false),
-            new HashMap<String, Command>(),
+            eventMap,
             true,
             drivetrain
         );
+
         
         generatePaths();
     }
@@ -134,6 +151,7 @@ public class AutonPaths {
         BottomToChargingStation,
 
         TopTaxi,
+        BottomTaxi,
         OnChargingStation
     }
 

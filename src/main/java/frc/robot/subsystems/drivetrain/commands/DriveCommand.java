@@ -8,6 +8,8 @@ import java.util.Map;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.IO;
@@ -36,8 +38,8 @@ public class DriveCommand extends CommandBase {
   public void execute() {
     IO io = IO.getInstance();
     ChassisSpeeds speeds = new ChassisSpeeds(
-      io.getLeftY() * SwerveDrivetrain.MAX_LINEAR_SPEED * speedEntry.getDouble(1),
-      -io.getLeftX() * SwerveDrivetrain.MAX_LINEAR_SPEED * speedEntry.getDouble(1),
+      io.getLeftY() * SwerveDrivetrain.MAX_LINEAR_SPEED * speedEntry.getDouble(1) * ((DriverStation.getAlliance() == Alliance.Blue)? 1 : -1),
+      -io.getLeftX() * SwerveDrivetrain.MAX_LINEAR_SPEED * speedEntry.getDouble(1) * ((DriverStation.getAlliance() == Alliance.Blue)? 1 : -1),
       -io.getRightX() * SwerveDrivetrain.MAX_ROTATION_SPEED * speedEntry.getDouble(1)
     );
     

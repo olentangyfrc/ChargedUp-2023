@@ -332,6 +332,10 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         isInBrakeMode = false;
     }
 
+    public boolean isInBrakeMode() {
+        return isInBrakeMode;
+    }
+
     public void setIsFollowingPath(boolean isFollowingPath) {
         this.isFollowingPath = isFollowingPath;
     }

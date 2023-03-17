@@ -21,6 +21,8 @@ public class ClawPitch extends SubsystemBase {
   private static final double MAX_ERROR = 45; // Pitch error will be clamped to [-MAX_ERROR, MAX_ERROR] in degrees.
   private static final double PITCH_TOLERANCE = 3;
 
+  private boolean killClawPitch = false;
+
   private CANSparkMax pitchMotor;
 
   private PIDController pitchController = new PIDController(0.14853, 0, 0.013545);
@@ -44,6 +46,7 @@ public class ClawPitch extends SubsystemBase {
     setTargetPitch(getPitch());
 
     Shuffleboard.getTab("Claw").addNumber("Pitch", () -> getPitch().getDegrees());
+    Shuffleboard.getTab("Claw").addNumber("Pitch Output", pitchMotor::get);
     Shuffleboard.getTab("Claw").add("Pitch Forwards", new RotateClawPitch(this, Rotation2d.fromDegrees(0)));
     Shuffleboard.getTab("Claw").add("Pitch Back", new RotateClawPitch(this, Rotation2d.fromDegrees(115)));
     Shuffleboard.getTab("Claw").add("Reset pitch", Commands.runOnce(() -> {
@@ -61,8 +64,17 @@ public class ClawPitch extends SubsystemBase {
     return Rotation2d.fromRotations(pitchMotor.getEncoder().getPosition() / GEAR_RATIO);
   }
 
+  public void setKillPitch(boolean killPitch) {
+    killClawPitch = killPitch;
+  }
+
   public boolean isAtPitch() {
     return Math.abs(getPitch().getDegrees() - targetPitch.getDegrees()) <= PITCH_TOLERANCE;
+  }
+
+  public void zero() {
+    pitchMotor.getEncoder().setPosition((115.0 / 360) * GEAR_RATIO);
+    setTargetPitch(getPitch());
   }
 
   public void setTargetPitch(Rotation2d pitch) {
@@ -72,6 +84,10 @@ public class ClawPitch extends SubsystemBase {
 
   @Override
   public void periodic() {
+    if(killClawPitch) {
+      pitchMotor.stopMotor();
+      return;
+    }
     double targetDegrees = targetPitch.getDegrees();
     // This method will be called once per scheduler run
     double clampedError = MathUtil.clamp(getPitch().getDegrees(), targetDegrees - MAX_ERROR, targetDegrees + MAX_ERROR);

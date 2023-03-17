@@ -3,6 +3,8 @@ package frc.robot.telemetry;
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class Pigeon2 extends OzoneImu {
     private WPI_Pigeon2 imu;
@@ -46,7 +48,11 @@ public class Pigeon2 extends OzoneImu {
 
     @Override
     public void reset() {
-        imu.reset();
+        if(DriverStation.getAlliance() == Alliance.Blue) {
+            setReset(new Rotation2d());
+        } else {
+            setReset(Rotation2d.fromDegrees(180));
+        }
     }
 
     @Override

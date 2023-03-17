@@ -10,30 +10,31 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.activeintake.ActiveIntake;
 import frc.robot.subsystems.claw.Claw;
+import frc.robot.subsystems.claw.Claw.ClawPosition;
 import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.claw.commands.RotateClawPitch;
-import frc.robot.subsystems.claw.commands.RotateClawToAngle;
+import frc.robot.subsystems.claw.commands.SetClawPosition;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class ScoreConeHigh extends SequentialCommandGroup {
-  /** Creates a new ScoreMiddle. */
-  public ScoreConeHigh(Elevator e, Claw c, ClawPitch cp, ActiveIntake ai) {
+public class PlaceCube extends SequentialCommandGroup {
+  /** Creates a new PlaceCube. */
+  public PlaceCube(Elevator e, Claw c, ClawPitch cp, ActiveIntake ai) {
+    // Add your commands in the addCommands() call, e.g.
+    // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        // new DeployIntake(ai),
-        // new WaitCommand(.25),
-        new ParallelCommandGroup(
-          new RotateClawToAngle(c, Rotation2d.fromDegrees(180)),
-          new RotateClawPitch(cp, Rotation2d.fromDegrees(115))
-        ),
-        new ParallelCommandGroup(
-            new MoveElevator(e, ElevatorPosition.HIGH),
-            new SequentialCommandGroup(
-                new WaitCommand(.5),
-                new DeployElevator(e)))
+      new ParallelCommandGroup(
+                        new SetClawPosition(c, ClawPosition.OPEN),
+                        new RetractElevator(e),
+                        new WaitCommand(0.4)
+                ),
+                new ParallelCommandGroup(
+                        new RotateClawPitch(cp, Rotation2d.fromDegrees(115)),
+                        new MoveElevator(e, ElevatorPosition.LOW)
+                )
     );
   }
 }

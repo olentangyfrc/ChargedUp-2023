@@ -9,7 +9,6 @@ import com.pathplanner.lib.server.PathPlannerServer;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.auton.AutoRoutineManager;
@@ -47,8 +46,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putNumber("Pitch", SubsystemManager.getInstance().getImu().getPitch());
-    SmartDashboard.putNumber("Roll", SubsystemManager.getInstance().getImu().getRoll());
+    // SmartDashboard.putNumber("Pitch", SubsystemManager.getInstance().getImu().getPitch());
+    // SmartDashboard.putNumber("Roll", SubsystemManager.getInstance().getImu().getRoll());
   }
   @Override
   public void autonomousInit() {
@@ -82,10 +81,15 @@ public class Robot extends TimedRobot {
   public void disabledPeriodic() {}
 
   @Override
-  public void testInit() {}
+  public void testInit() {
+    SubsystemManager.getInstance().getElevator().zero();
+    SubsystemManager.getInstance().getClaw().zero();
+    SubsystemManager.getInstance().getClawPitch().zero();
+  }
 
   @Override
   public void testPeriodic() {
     CommandScheduler.getInstance().run();
+    SubsystemManager.getInstance().getActiveIntake().retract();
   }
 }

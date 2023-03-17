@@ -11,7 +11,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.auton.AutonPaths.AutoTrajectory;
-import frc.robot.auton.routines.TopPlaceAndTaxi;
+import frc.robot.auton.routines.bottom.BottomPlace;
+import frc.robot.auton.routines.bottom.BottomPlaceAndTaxi;
+import frc.robot.auton.routines.bottom.BottomTwoPiece;
+import frc.robot.auton.routines.middle.MiddlePlace;
+import frc.robot.auton.routines.middle.MiddlePlaceAndEngage;
+import frc.robot.auton.routines.top.TopPlace;
+import frc.robot.auton.routines.top.TopPlaceAndTaxi;
+import frc.robot.auton.routines.top.TopTwoPiece;
 import frc.robot.subsystems.activeintake.ActiveIntake;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.ClawPitch;
@@ -25,11 +32,18 @@ public class AutoRoutineManager {
     private AutonPaths paths;
 
     public AutoRoutineManager(SwerveDrivetrain drivetrain, ActiveIntake intake, Claw claw, ClawPitch clawPitch, Elevator elevator) {
-        paths = new AutonPaths(drivetrain);
+        paths = new AutonPaths(drivetrain, intake, claw, clawPitch, elevator);
         routineMap = Map.of(
             AutoRoutine.NOTHING, new InstantCommand(),
             AutoRoutine.TopPlaceAndTaxi, new TopPlaceAndTaxi(intake, claw, clawPitch, elevator, paths),
-            AutoRoutine.OnChargingStation, paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.OnChargingStation))
+            AutoRoutine.TopPlace, new TopPlace(drivetrain, intake, claw, clawPitch, elevator),
+            AutoRoutine.TopTwoPiece, new TopTwoPiece(intake, claw, clawPitch, elevator, paths),
+            AutoRoutine.BottomPlace, new BottomPlace(drivetrain, intake, claw, clawPitch, elevator),
+            AutoRoutine.BottomPlaceAndTaxi, new BottomPlaceAndTaxi(intake, claw, clawPitch, elevator, paths),
+            AutoRoutine.BottomTwoPiece, new BottomTwoPiece(intake, claw, clawPitch, elevator, paths),
+            AutoRoutine.MiddlePlace, new MiddlePlace(drivetrain, intake, claw, clawPitch, elevator),
+            AutoRoutine.MiddlePlaceAndEngage, new MiddlePlaceAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths),
+            AutoRoutine.JustTopTaxi, paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi))
         );
 
         // add paths to chooser here
@@ -52,8 +66,18 @@ public class AutoRoutineManager {
 
     public static enum AutoRoutine {
         NOTHING,
+
+        TopPlace,
         TopPlaceAndTaxi,
-        OnChargingStation
+        TopTwoPiece,
+        JustTopTaxi,
+
+        BottomPlace,
+        BottomPlaceAndTaxi,
+        BottomTwoPiece,
+
+        MiddlePlace,
+        MiddlePlaceAndEngage
     }
 
 }

@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.math.MathUtil;
@@ -16,6 +17,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class IO {
 
     private static final int XBOX_PORT = 0;
+    private static final int AUX_XBOX_PORT = 1;
+
     public static final int LEFT_BUTTON_BOX_PORT = 3;
     public static final int RIGHT_BUTTON_BOX_PORT = 4;
     // Deadzone for Xbox controller sticks
@@ -36,10 +39,23 @@ public class IO {
     private Trigger radialDown;
     private Trigger radialLeft;
 
+    private Trigger leftYPos;
+    private Trigger leftYNeg;
+    private Trigger leftXPos;
+    private Trigger leftXNeg;
+
+    private Trigger rightYPos;
+    private Trigger rightYNeg;
+    private Trigger rightXPos;
+    private Trigger rightXNeg;
+
+
+
     private Map<Integer, Trigger> customButtons;
 
     // Code for singleton
     private static IO instance;
+    private static IO auxInstance;
 
     private IO() {}
 
@@ -51,9 +67,18 @@ public class IO {
     public static IO getInstance() {
         if(instance == null) {
             instance = new IO();
-            instance.init();
+            instance.init(false);
         }
         return instance;
+    }
+
+    public static IO getAuxInstance() {
+        if(auxInstance == null) {
+            auxInstance = new IO();
+            auxInstance.init(true);
+        }
+
+        return auxInstance;
     }
 
     /**
@@ -61,20 +86,10 @@ public class IO {
      * <p>
      * This does not need to be called when initializing with the getInstance() method.
      */
-    public void init(){
-        xbox = new CommandXboxController(XBOX_PORT);
+    public void init(boolean isAux){
+        xbox = new CommandXboxController(isAux? AUX_XBOX_PORT : XBOX_PORT);
 
-        leftButtonBox = new GenericHID(LEFT_BUTTON_BOX_PORT);
-        rightButtonBox = new GenericHID(RIGHT_BUTTON_BOX_PORT);
         initializeCustomButtons();
-        customButtons = Map.of(
-            11,rightTriggerButton,
-            12, leftTriggerButton,
-            13, radialUp,
-            14, radialRight,
-            15, radialDown,
-            16, radialLeft
-        );
     }
 
     /**
@@ -114,22 +129,30 @@ public class IO {
      * Buttons on the Xbox Controller
      */
     public enum ControllerButton {
-        LeftBumper(5),
-        RightBumper(6),
-        LeftStick(9),
-        RightStick(10),
         A(1),
         B(2),
         X(3),
         Y(4),
+        LeftBumper(5),
+        RightBumper(6),
         Back(7),
         Start(8),
+        LeftStick(9),
+        RightStick(10),
         RightTriggerButton(11),
         LeftTriggerButton(12),
         RadialUp(13),
         RadialRight(14),
         RadialDown(15),
-        RadialLeft(16);
+        RadialLeft(16),
+        leftYPos(17),
+        leftYNeg(18),
+        leftXPos(19),
+        leftXNeg(20),
+        rightYPos(21),
+        rightYNeg(22),
+        rightXPos(23),
+        rightXNeg(24);
 
         public final int VALUE;
         
@@ -241,6 +264,48 @@ public class IO {
         radialLeft = new Trigger( () -> {
             return xbox.pov(270).getAsBoolean();
         } );
+
+        leftYPos = new Trigger(() -> {
+            return xbox.getLeftY() < -NOMINAL_ANALOG_VALUE;
+        });
+        leftYNeg = new Trigger(() -> {
+            return xbox.getLeftY() > NOMINAL_ANALOG_VALUE;
+        });
+        leftXPos = new Trigger(() -> {
+            return xbox.getLeftX() > NOMINAL_ANALOG_VALUE;
+        });
+        leftXNeg = new Trigger(() -> {
+            return xbox.getLeftX() < -NOMINAL_ANALOG_VALUE;
+        });
+        rightYPos = new Trigger(() -> {
+            return xbox.getRightY() < -NOMINAL_ANALOG_VALUE;
+        });
+        rightYNeg = new Trigger(() -> {
+            return xbox.getRightY() > NOMINAL_ANALOG_VALUE;
+        });
+        rightXPos = new Trigger(() -> {
+            return xbox.getRightX() > NOMINAL_ANALOG_VALUE;
+        });
+        rightXNeg = new Trigger(() -> {
+            return xbox.getRightTriggerAxis() < -NOMINAL_ANALOG_VALUE;
+        });
+
+        customButtons = new HashMap<Integer, Trigger>();
+
+        customButtons.put(11,rightTriggerButton);
+        customButtons.put(12, leftTriggerButton);
+        customButtons.put(13, radialUp);
+        customButtons.put(14, radialRight);
+        customButtons.put(15, radialDown);
+        customButtons.put(16, radialLeft);
+        customButtons.put(17, leftYPos);
+        customButtons.put(18, leftYNeg);
+        customButtons.put(19, leftXPos);
+        customButtons.put(20, leftXNeg);
+        customButtons.put(21, rightYPos);
+        customButtons.put(22, rightYNeg);
+        customButtons.put(23, rightXPos);
+        customButtons.put(24, rightXNeg);
     }
     
     /**

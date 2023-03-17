@@ -10,6 +10,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.claw.Claw;
+import frc.robot.subsystems.claw.Claw.ClawPosition;
 import frc.robot.subsystems.claw.commands.GrabGamePiece;
 
 public class ActiveIntake extends SubsystemBase {
@@ -46,7 +48,7 @@ public class ActiveIntake extends SubsystemBase {
 
   private double startTimer = Timer.getFPGATimestamp();
 
-  private Claw claw;
+  private boolean forceBeamBreak = false;
 
   /** Creates a new ActiveIntake. */
   public ActiveIntake(int upperMotorCAN, int lowerMotorCAN, int forwardPneumaticChannel, int reversePneumaticChannel) {
@@ -54,7 +56,7 @@ public class ActiveIntake extends SubsystemBase {
     lowerMotor = new CANSparkMax(lowerMotorCAN, MotorType.kBrushless);
     intakeSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, forwardPneumaticChannel, reversePneumaticChannel);
 
-    beamBreaker = new DigitalInput(8);
+    beamBreaker = new DigitalInput(6);
 
     upperMotor.restoreFactoryDefaults();
     lowerMotor.restoreFactoryDefaults();
@@ -79,8 +81,10 @@ public class ActiveIntake extends SubsystemBase {
 
   @Override
   public void periodic(){
-    nextPieceIsCone = isConeEntry.getBoolean(true);
-    if(!isBeamBroken() && grabCommand != null) {
+    if(DriverStation.isTest()) {
+      return;
+    }
+    if(!isBeamBroken() && grabCommand != null && !SubsystemManager.getInstance().getClaw().isClosed()) {
       grabCommand.cancel();
       grabCommand = null;
       SubsystemManager.getInstance().getElevator().stopElevator();
@@ -95,12 +99,14 @@ public class ActiveIntake extends SubsystemBase {
             SubsystemManager.getInstance().getClaw(),
             SubsystemManager.getInstance().getClawPitch(),
             SubsystemManager.getInstance().getElevator(),
+            this,
             nextPieceIsCone
           );
 
+          isClawHoldingGamePiece = true;
+          
           grabCommand.andThen(new InstantCommand(() -> {
             grabCommand = null;
-            isClawHoldingGamePiece = true;
             isWaiting = false;
             intakeHasRun = false;
           })).schedule();
@@ -124,12 +130,20 @@ public class ActiveIntake extends SubsystemBase {
     this.forceBelts = forceBelts;
   }
 
+  public void setForceBeamBreak(boolean forceBeamBreak) {
+    this.forceBeamBreak = forceBeamBreak;
+  }
+
   public void setUpperMotor(double speed) {
     if(speed > 0) {
       intakeHasRun = true;
     }
     upperMotor.set(speed);
     // System.out.println("SET UPPER MOTOR");
+  }
+
+  public void setIsNextPieceCone(boolean nextPieceIsCone) {
+    this.nextPieceIsCone = nextPieceIsCone;
   }
 
   public boolean nextPieceIsCone() {
@@ -153,6 +167,9 @@ public class ActiveIntake extends SubsystemBase {
   }
 
   public boolean isBeamBroken(){
+    if(forceBeamBreak) {
+      return true;
+    }
     return !(beamBreaker.get());
   }
 }

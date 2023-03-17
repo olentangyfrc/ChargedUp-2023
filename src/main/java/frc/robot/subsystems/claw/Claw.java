@@ -23,7 +23,9 @@ public class Claw extends SubsystemBase {
   // Wrist
   private static final double WRIST_GEAR_RATIO = 90;
   private static final double MAX_WRIST_ERROR = 0.7854;
-  private static final double WRIST_ANGLE_TOLERANCE = 0.0349;
+  private static final double WRIST_ANGLE_TOLERANCE = 0.0698132;
+
+  public static final double MANUAL_SPEED = 2;
 
   private CANSparkMax wristMotor;
 
@@ -34,6 +36,10 @@ public class Claw extends SubsystemBase {
 
   private DoubleSolenoid upperSolenoid;
   private DoubleSolenoid lowerSolenoid;
+
+  private boolean isManualControl = false;
+
+  private ClawPosition clawPosition = ClawPosition.CLOSED;
 
   /** Creates a new Claw. */
   public Claw(int wristCanId, int upperForwardChannel, int upperReverseChannel, int lowerForwardChannel,
@@ -47,9 +53,6 @@ public class Claw extends SubsystemBase {
     lowerSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, lowerForwardChannel, lowerReverseChannel);
 
     wristController.setTolerance(WRIST_ANGLE_TOLERANCE);
-    wristMotor.getEncoder().setPosition((180.0 / 360) * WRIST_GEAR_RATIO);
-
-    setTargetClawAngle(Rotation2d.fromDegrees(180));
 
     Shuffleboard.getTab(getName()).addNumber("Claw position", () -> getWristAngle().getDegrees());
     Shuffleboard.getTab(getName()).addNumber("Current Radians", () -> getWristAngle().getRadians());
@@ -61,14 +64,16 @@ public class Claw extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double targetRadians = targetWristAngle.getRadians();
-    double clampedCurrentAngle = MathUtil.clamp(getWristAngle().getRadians(), targetRadians - MAX_WRIST_ERROR,
-        targetRadians + MAX_WRIST_ERROR);
-    SmartDashboard.putNumber("Clamped angle", clampedCurrentAngle);
-    double pidOutput = wristController.calculate(clampedCurrentAngle, targetRadians);
-
-    if (!wristController.atSetpoint()) {
-      wristMotor.setVoltage(pidOutput);
+    if(!isManualControl) {
+      double targetRadians = targetWristAngle.getRadians();
+      double clampedCurrentAngle = MathUtil.clamp(getWristAngle().getRadians(), targetRadians - MAX_WRIST_ERROR,
+          targetRadians + MAX_WRIST_ERROR);
+      SmartDashboard.putNumber("Clamped angle", clampedCurrentAngle);
+      double pidOutput = wristController.calculate(clampedCurrentAngle, targetRadians);
+  
+      if (!wristController.atSetpoint()) {
+        wristMotor.setVoltage(pidOutput);
+      }
     }
   }
 
@@ -86,6 +91,7 @@ public class Claw extends SubsystemBase {
   }
 
   public void setClawPosition(ClawPosition position) {
+    clawPosition = position;
     switch (position) {
       case OPEN:
         upperSolenoid.set(Value.kReverse);
@@ -107,6 +113,25 @@ public class Claw extends SubsystemBase {
         upperSolenoid.set(Value.kOff);
         lowerSolenoid.set(Value.kOff);
         break;
+    }
+  }
+
+  public boolean isClosed() {
+    return clawPosition == ClawPosition.CLOSED;
+  }
+
+  public void setIsManualControl(boolean isManualControl) {
+    this.isManualControl = isManualControl;
+  }
+
+  public void zero() {
+    wristMotor.getEncoder().setPosition((180.0 / 360) * WRIST_GEAR_RATIO);
+    setTargetClawAngle(Rotation2d.fromDegrees(180));
+  }
+
+  public void setClawVoltage(double voltage) {
+    if(isManualControl) {
+      wristMotor.setVoltage(voltage);
     }
   }
 

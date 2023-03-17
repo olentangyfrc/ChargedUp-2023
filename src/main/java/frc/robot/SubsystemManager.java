@@ -7,8 +7,12 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PS4Controller.Button;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.IO.ButtonActionType;
 import frc.robot.IO.ControllerButton;
@@ -16,6 +20,8 @@ import frc.robot.auton.AutoDashboardManager;
 import frc.robot.auton.AutonPaths;
 import frc.robot.subsystems.ApriltagDetection;
 import frc.robot.subsystems.activeintake.ActiveIntake;
+import frc.robot.subsystems.activeintake.commands.DeployIntake;
+import frc.robot.subsystems.activeintake.commands.RetractIntake;
 import frc.robot.subsystems.activeintake.commands.ReverseIntake;
 import frc.robot.subsystems.activeintake.commands.StartIntake;
 import frc.robot.subsystems.activeintake.commands.StopIntake;
@@ -23,6 +29,10 @@ import frc.robot.subsystems.activeintake.commands.ToggleIntake;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.Claw.ClawPosition;
 import frc.robot.subsystems.claw.ClawPitch;
+import frc.robot.subsystems.claw.commands.ManualClawBackwards;
+import frc.robot.subsystems.claw.commands.ManualClawForwards;
+import frc.robot.subsystems.claw.commands.RotateClawPitch;
+import frc.robot.subsystems.claw.commands.RotateClawToAngle;
 import frc.robot.subsystems.claw.commands.SetClawPosition;
 import frc.robot.subsystems.drivetrain.SingleFalconDrivetrain;
 import frc.robot.subsystems.drivetrain.SparkMaxDrivetrain;
@@ -34,9 +44,13 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.commands.DeployElevator;
 import frc.robot.subsystems.elevator.commands.ManualElevatorForward;
 import frc.robot.subsystems.elevator.commands.ManualElevatorReverse;
+import frc.robot.subsystems.elevator.commands.PlaceCone;
+import frc.robot.subsystems.elevator.commands.PlaceCube;
 import frc.robot.subsystems.elevator.commands.RetractElevator;
 import frc.robot.subsystems.elevator.commands.ScoreConeHigh;
 import frc.robot.subsystems.elevator.commands.ScoreConeMiddle;
+import frc.robot.subsystems.elevator.commands.ScoreCubeHigh;
+import frc.robot.subsystems.elevator.commands.ScoreCubeMiddle;
 import frc.robot.telemetry.OzoneImu;
 import frc.robot.telemetry.Pigeon;
 import frc.robot.telemetry.Pigeon2;
@@ -139,9 +153,9 @@ public class SubsystemManager {
     drivetrain = new SingleFalconDrivetrain();
     drivetrain.init(new SwerveModuleSetupInfo[] {
         new SwerveModuleSetupInfo(31, 15, 0, 260.52),
-        new SwerveModuleSetupInfo(30, 6, 2, 327.6),
+        new SwerveModuleSetupInfo(30, 6, 3, 327.6),
         new SwerveModuleSetupInfo(32, 62, 1, 43.9),
-        new SwerveModuleSetupInfo(33, 14, 3, 178.34),
+        new SwerveModuleSetupInfo(33, 14, 2, 178.34),
     }, 1 / 8.07);
 
     claw = new Claw(61, 0, 1, 2, 3);
@@ -152,35 +166,107 @@ public class SubsystemManager {
     detector = new ApriltagDetection();
     detector.init();
 
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton,
-        new StartIntake(activeIntake));
-    IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton,
-        new StopIntake(activeIntake));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton,
-        new ReverseIntake(activeIntake));
-    IO.getInstance().bind(ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton,
-        new StopIntake(activeIntake));
+    // Main driver controls:
+    IO io = IO.getInstance();
 
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper,
-        new ScoreConeMiddle(elevator, claw, clawPitch, activeIntake));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper,
-        new ScoreConeHigh(elevator, claw, clawPitch, activeIntake));
+    // Intake
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, 
+      new DeployIntake(activeIntake).andThen(new StartIntake(activeIntake))
+    );
 
-    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.A, new ManualElevatorForward(elevator));
-    IO.getInstance().bind(ButtonActionType.WHEN_HELD, ControllerButton.B, new ManualElevatorReverse(elevator));
+    io.bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, 
+      new StopIntake(activeIntake).andThen(new RetractIntake(activeIntake))
+    );
 
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp,
-        new SetClawPosition(claw, ClawPosition.CLOSED));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown,
-        new SetClawPosition(claw, ClawPosition.OPEN));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X,
-        new ToggleIntake(activeIntake));
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, 
+      new RetractIntake(activeIntake).andThen(new ReverseIntake(activeIntake))
+    );
 
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight, new DeployElevator(elevator));
-    IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft, new RetractElevator(elevator));
+    io.bind(ButtonActionType.WHEN_RELEASED, ControllerButton.LeftTriggerButton, 
+      new StopIntake(activeIntake).andThen(new RetractIntake(activeIntake))
+    );
 
 
+    // Reach high
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, Commands.either(
+      new ScoreConeHigh(elevator, claw, clawPitch, activeIntake),
+      new ScoreCubeHigh(elevator, claw, clawPitch, activeIntake),
+      activeIntake::nextPieceIsCone
+    ));
+
+    // Reach mid
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, Commands.either(
+      new ScoreConeMiddle(elevator, claw, clawPitch, activeIntake),
+      new ScoreCubeMiddle(elevator, claw, clawPitch, activeIntake),
+      activeIntake::nextPieceIsCone
+    ));
+
+    // Place Game Piece
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, Commands.either(
+      new PlaceCone(elevator, claw, clawPitch, activeIntake),
+      new PlaceCube(elevator, claw, clawPitch, activeIntake),
+      activeIntake::nextPieceIsCone
+    ));
+
+    // Zero Gyro
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(() -> {
+      imu.reset();
+      imu.resetPitch();
+      imu.resetRoll();
+    }));
+
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new SetClawPosition(claw, ClawPosition.OPEN));
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown, new SetClawPosition(claw, ClawPosition.CLOSED));
+
+    // Brake Mode
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, Commands.either(
+      new DisableBrakeMode(drivetrain),
+      new EnableBrakeMode(drivetrain),
+      drivetrain::isInBrakeMode
+    ));
+
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Back, new EmergencyCommandCancel(elevator));
+
+
+
+    // Aux Driver Controls
+    IO aux = IO.getAuxInstance();
+
+    aux.bind(ButtonActionType.WHEN_HELD, ControllerButton.leftYPos, new ManualElevatorForward(elevator));
+    aux.bind(ButtonActionType.WHEN_HELD, ControllerButton.leftYNeg, new ManualElevatorReverse(elevator));
+
+    aux.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, new DeployElevator(elevator));
+    aux.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, new RetractElevator(elevator));
+
+    aux.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Start, new EmergencyCommandCancel(elevator));
+
+    aux.bind(ButtonActionType.WHEN_HELD, ControllerButton.A, Commands.startEnd(
+      () -> activeIntake.setForceBeamBreak(true),
+      () -> activeIntake.setForceBeamBreak(false)
+    ));
+
+    aux.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new SetClawPosition(claw, ClawPosition.OPEN));
+    aux.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new SetClawPosition(claw, ClawPosition.CLOSED));
+
+    // Toggle Claw Angle
+    aux.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, Commands.either(
+      new RotateClawToAngle(claw, Rotation2d.fromDegrees(0)),
+      new RotateClawToAngle(claw, Rotation2d.fromDegrees(180)),
+      () -> claw.getWristAngle().getDegrees() >= 90
+    ));
+
+    // Claw Pitch
+    aux.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, new RotateClawPitch(clawPitch, Rotation2d.fromDegrees(115)));
+    aux.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, new RotateClawPitch(clawPitch, Rotation2d.fromDegrees(0)));
+
+    aux.bind(ButtonActionType.WHEN_HELD, ControllerButton.rightXPos, new ManualClawForwards(claw));
+    aux.bind(ButtonActionType.WHEN_HELD, ControllerButton.rightXNeg, new ManualClawBackwards(claw));
+
+    aux.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialLeft, Commands.runOnce(() -> activeIntake.setIsNextPieceCone(true)));
+    aux.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialRight, Commands.runOnce(() -> activeIntake.setIsNextPieceCone(false)));
+
+    Shuffleboard.getTab("Auton").add("KILL PITCH", Commands.runOnce(() -> clawPitch.setKillPitch(true)));
+    Shuffleboard.getTab("Auton").add("REVIVE PITCH", Commands.runOnce(() -> clawPitch.setKillPitch(false)));
   }
 
   private void initCHARGED_UP_PROTO() {}
@@ -210,7 +296,7 @@ public class SubsystemManager {
         new SwerveModuleSetupInfo(30, 31, 3, 159.65),
     }, 1 / 8.33);
 
-    paths = new AutonPaths(drivetrain);
+    // paths = new AutonPaths(drivetrain);
 
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(imu::reset));
     IO.getInstance().bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialUp, new EnableBrakeMode(drivetrain));
