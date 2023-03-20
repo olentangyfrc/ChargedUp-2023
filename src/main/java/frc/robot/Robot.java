@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.auton.AutoRoutineManager;
+import frc.robot.subsystems.claw.Claw.ClawPosition;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;
@@ -51,6 +52,7 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void autonomousInit() {
+    SubsystemManager.getInstance().getClaw().setClawPosition(ClawPosition.CLOSED);
     autoCommand = routineManager.getSelectedRoutine();
     autoCommand.schedule();
   }
@@ -85,6 +87,8 @@ public class Robot extends TimedRobot {
     SubsystemManager.getInstance().getElevator().zero();
     SubsystemManager.getInstance().getClaw().zero();
     SubsystemManager.getInstance().getClawPitch().zero();
+
+    SubsystemManager.getInstance().getClaw().setClawPosition(ClawPosition.CLOSED);
   }
 
   @Override

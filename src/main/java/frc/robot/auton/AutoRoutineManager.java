@@ -4,6 +4,7 @@
 
 package frc.robot.auton;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -11,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.auton.AutonPaths.AutoTrajectory;
+import frc.robot.auton.routines.PlaceConeAndGoBack;
 import frc.robot.auton.routines.bottom.BottomPlace;
 import frc.robot.auton.routines.bottom.BottomPlaceAndTaxi;
 import frc.robot.auton.routines.bottom.BottomTwoPiece;
@@ -33,18 +35,19 @@ public class AutoRoutineManager {
 
     public AutoRoutineManager(SwerveDrivetrain drivetrain, ActiveIntake intake, Claw claw, ClawPitch clawPitch, Elevator elevator) {
         paths = new AutonPaths(drivetrain, intake, claw, clawPitch, elevator);
-        routineMap = Map.of(
-            AutoRoutine.NOTHING, new InstantCommand(),
-            AutoRoutine.TopPlaceAndTaxi, new TopPlaceAndTaxi(intake, claw, clawPitch, elevator, paths),
-            AutoRoutine.TopPlace, new TopPlace(drivetrain, intake, claw, clawPitch, elevator),
-            AutoRoutine.TopTwoPiece, new TopTwoPiece(intake, claw, clawPitch, elevator, paths),
-            AutoRoutine.BottomPlace, new BottomPlace(drivetrain, intake, claw, clawPitch, elevator),
-            AutoRoutine.BottomPlaceAndTaxi, new BottomPlaceAndTaxi(intake, claw, clawPitch, elevator, paths),
-            AutoRoutine.BottomTwoPiece, new BottomTwoPiece(intake, claw, clawPitch, elevator, paths),
-            AutoRoutine.MiddlePlace, new MiddlePlace(drivetrain, intake, claw, clawPitch, elevator),
-            AutoRoutine.MiddlePlaceAndEngage, new MiddlePlaceAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths),
-            AutoRoutine.JustTopTaxi, paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi))
-        );
+        routineMap = new HashMap<AutoRoutine, CommandBase>();
+        
+        routineMap.put(AutoRoutine.NOTHING, new InstantCommand());
+        routineMap.put(AutoRoutine.TopPlaceAndTaxi, new TopPlaceAndTaxi(intake, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.TopPlace, new TopPlace(drivetrain, intake, claw, clawPitch, elevator));
+        routineMap.put(AutoRoutine.TopTwoPiece, new TopTwoPiece(intake, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.BottomPlace, new BottomPlace(drivetrain, intake, claw, clawPitch, elevator));
+        routineMap.put(AutoRoutine.BottomPlaceAndTaxi, new BottomPlaceAndTaxi(intake, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.BottomTwoPiece, new BottomTwoPiece(intake, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.MiddlePlace, new MiddlePlace(drivetrain, intake, claw, clawPitch, elevator));
+        routineMap.put(AutoRoutine.MiddlePlaceAndEngage, new MiddlePlaceAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.JustTopTaxi, paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi)));
+        routineMap.put(AutoRoutine.PlaceConeAndGoBack, new PlaceConeAndGoBack(drivetrain, intake, claw, clawPitch, elevator));
 
         // add paths to chooser here
         for(AutoRoutine routine : AutoRoutine.values()) {
@@ -77,7 +80,9 @@ public class AutoRoutineManager {
         BottomTwoPiece,
 
         MiddlePlace,
-        MiddlePlaceAndEngage
+        MiddlePlaceAndEngage,
+
+        PlaceConeAndGoBack
     }
 
 }

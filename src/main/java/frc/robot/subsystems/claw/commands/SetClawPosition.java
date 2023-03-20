@@ -4,7 +4,7 @@
 
 package frc.robot.subsystems.claw.commands;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.Claw.ClawPosition;
@@ -12,7 +12,7 @@ import frc.robot.subsystems.claw.Claw.ClawPosition;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class SetClawPosition extends InstantCommand {
+public class SetClawPosition extends CommandBase {
   private Claw claw;
   private ClawPosition clawPosition;
 
@@ -36,5 +36,10 @@ public class SetClawPosition extends InstantCommand {
   public void end(boolean interrupted) {
     System.out.println("Claw position set");
 
+  }
+
+  @Override
+  public boolean isFinished() {
+    return claw.getClawPosition() == clawPosition;
   }
 }

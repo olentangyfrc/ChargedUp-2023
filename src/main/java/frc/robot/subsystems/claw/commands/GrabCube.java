@@ -14,8 +14,8 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.elevator.commands.MoveElevator;
 
-public class GrabGamePiece extends SequentialCommandGroup {
-    public GrabGamePiece(Claw claw, ClawPitch clawPitch, Elevator elevator, ActiveIntake intake, boolean isCone) {
+public class GrabCube extends SequentialCommandGroup {
+    public GrabCube(Claw claw, ClawPitch clawPitch, Elevator elevator, ActiveIntake intake, boolean isCone) {
         addCommands(
                 // new RotateClawToAngle(claw, new Rotation2d(0)),
                 new InstantCommand(() -> System.out.println("GRABBING PIECE")),
@@ -32,15 +32,6 @@ public class GrabGamePiece extends SequentialCommandGroup {
                 new WaitCommand(0.3),
                 new MoveElevator(elevator, ElevatorPosition.LOW)
         );
-
-        if(isCone) {
-            addCommands(
-                new ParallelCommandGroup(
-                    new RotateClawToAngle(claw, Rotation2d.fromDegrees(180)),
-                    new RotateClawPitch(clawPitch, Rotation2d.fromDegrees(115))
-                )
-            );
-        }
     }
 
 }

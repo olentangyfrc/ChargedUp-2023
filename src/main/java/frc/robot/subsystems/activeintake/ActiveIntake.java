@@ -10,19 +10,22 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.claw.Claw;
-import frc.robot.subsystems.claw.Claw.ClawPosition;
-import frc.robot.subsystems.claw.commands.GrabGamePiece;
+import frc.robot.subsystems.claw.ClawPitch;
+import frc.robot.subsystems.claw.commands.GrabCone;
+import frc.robot.subsystems.claw.commands.GrabCube;
+import frc.robot.subsystems.elevator.Elevator;
 
 public class ActiveIntake extends SubsystemBase {
   public static final double UPPER_MOTOR_SPEED = 1;
@@ -56,7 +59,7 @@ public class ActiveIntake extends SubsystemBase {
     lowerMotor = new CANSparkMax(lowerMotorCAN, MotorType.kBrushless);
     intakeSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, forwardPneumaticChannel, reversePneumaticChannel);
 
-    beamBreaker = new DigitalInput(6);
+    beamBreaker = new DigitalInput(1);
 
     upperMotor.restoreFactoryDefaults();
     lowerMotor.restoreFactoryDefaults();
@@ -95,7 +98,15 @@ public class ActiveIntake extends SubsystemBase {
         isWaiting = true;
       } else {
         if(Timer.getFPGATimestamp() - startTimer >= (nextPieceIsCone? GRAB_WAIT_TIME : 0)) {
-          grabCommand = new GrabGamePiece(
+          Claw claw = SubsystemManager.getInstance().getClaw();
+          ClawPitch clawPitch = SubsystemManager.getInstance().getClawPitch();
+          Elevator elevator = SubsystemManager.getInstance().getElevator();
+          grabCommand = Commands.either(
+            new GrabCone(claw, clawPitch, elevator, this, nextPieceIsCone),
+            new GrabCube(claw, clawPitch, elevator, this, nextPieceIsCone),
+            this::nextPieceIsCone
+          );
+          grabCommand = new GrabCube(
             SubsystemManager.getInstance().getClaw(),
             SubsystemManager.getInstance().getClawPitch(),
             SubsystemManager.getInstance().getElevator(),

@@ -5,6 +5,7 @@
 package frc.robot.auton.routines.middle;
 
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.SubsystemManager;
 import frc.robot.auton.AutonPaths;
@@ -33,7 +34,7 @@ public class MiddlePlaceAndEngage extends SequentialCommandGroup {
         }),
         new ScoreCubeHigh(elevator, claw, clawPitch, intake),
         new PlaceCube(elevator, claw, clawPitch, intake),
-        paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.OnChargingStation)),
+        new ProxyCommand(() -> paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.OnChargingStation))),
         new AutoBalance(drivetrain)
     );
   }

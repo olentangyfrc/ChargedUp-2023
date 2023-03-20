@@ -85,6 +85,10 @@ public class Claw extends SubsystemBase {
     return wristController.atSetpoint();
   }
 
+  public ClawPosition getClawPosition() {
+    return clawPosition;
+  }
+
   public void setTargetClawAngle(Rotation2d targetAngle) {
     targetWristAngle = targetAngle;
     wristController.setSetpoint(targetAngle.getRadians());

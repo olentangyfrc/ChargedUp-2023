@@ -22,5 +22,6 @@ public class DeployIntake extends InstantCommand {
   @Override
   public void initialize() {
     intake.deploy();
+    System.out.println("Deploy Intake!");
   }
 }

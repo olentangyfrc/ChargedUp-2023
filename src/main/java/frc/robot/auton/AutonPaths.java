@@ -8,13 +8,17 @@ import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
+import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
+import com.pathplanner.lib.commands.FollowPathWithEvents;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -55,15 +59,16 @@ public class AutonPaths {
         builder = new SwerveAutoBuilder(
             drivetrain::getLocation,
             drivetrain::resetLocation,
-            drivetrain.translationPidConstants,
-            drivetrain.rotationPidConstants,
+            // drivetrain.translationPidConstants,
+            new PIDConstants(0, 0, 0),
+            new PIDConstants(0, 0, 0),
+            // drivetrain.rotationPidConstants,
             (speeds) -> drivetrain.drive(speeds, false),
             eventMap,
-            true,
+            false,
             drivetrain
         );
 
-        
         generatePaths();
     }
 
@@ -90,7 +95,9 @@ public class AutonPaths {
     }
 
     public PathPlannerTrajectory getTrajectory(AutoTrajectory trajectory) {
-        return trajectoryMap.getOrDefault(trajectory, null);
+        System.out.println(((DriverStation.getAlliance() == Alliance.Red)? "Red" : "") + trajectory.name() + "______)ASty7jw497y9w");
+        return trajectoryMap.getOrDefault(AutoTrajectory.valueOf(((DriverStation.getAlliance() == Alliance.Red)? "Red" : "") + trajectory.name()), null);
+
     }
     
     /**
@@ -118,7 +125,7 @@ public class AutonPaths {
             drivetrain.rotationPidConstants,
             (speeds) -> drivetrain.drive(speeds, false),
             new HashMap<String, Command>(),
-            true,
+            false,
             drivetrain
         );
 
@@ -142,9 +149,10 @@ public class AutonPaths {
 
     public static enum AutoTrajectory {
         GetGamepieceOne,
-        GetGamepieceTwo,
-        GetGamepieceThree,
         GetGamepieceFour,
+
+        RedGetGamepieceOne,
+        RedGetGamepieceFour,
         
         TopToChargingStation,
         MiddleToChargingStation,
@@ -152,7 +160,11 @@ public class AutonPaths {
 
         TopTaxi,
         BottomTaxi,
-        OnChargingStation
+        OnChargingStation,
+
+        RedTopTaxi,
+        RedBottomTaxi,
+        RedOnChargingStation
     }
 
     public static void displayPath(PathPlannerTrajectory trajectory) {

@@ -4,6 +4,7 @@
 
 package frc.robot.auton.routines.top;
 
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.auton.AutonPaths;
 import frc.robot.auton.AutonPaths.AutoTrajectory;
@@ -25,7 +26,7 @@ public class TopPlaceAndTaxi extends SequentialCommandGroup {
     addCommands(
         new ScoreCubeHigh(elevator, claw, clawPitch, intake),
         new PlaceCube(elevator, claw, clawPitch, intake),
-        paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi))
+        new ProxyCommand( () -> paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi)))
     );
   }
 }
