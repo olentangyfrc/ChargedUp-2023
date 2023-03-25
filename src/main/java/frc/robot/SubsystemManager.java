@@ -14,6 +14,9 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.IO.ButtonActionType;
 import frc.robot.IO.ControllerButton;
 import frc.robot.auton.AutoDashboardManager;
@@ -41,9 +44,11 @@ import frc.robot.subsystems.drivetrain.SwerveModuleSetupInfo;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
 import frc.robot.subsystems.drivetrain.commands.EnableBrakeMode;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 import frc.robot.subsystems.elevator.commands.DeployElevator;
 import frc.robot.subsystems.elevator.commands.ManualElevatorForward;
 import frc.robot.subsystems.elevator.commands.ManualElevatorReverse;
+import frc.robot.subsystems.elevator.commands.MoveElevator;
 import frc.robot.subsystems.elevator.commands.PlaceCone;
 import frc.robot.subsystems.elevator.commands.PlaceCube;
 import frc.robot.subsystems.elevator.commands.RetractElevator;
@@ -118,7 +123,7 @@ public class SubsystemManager {
    * Create and initialize all of the subsystems.
    */
   public void init() {
-    pdp = new PowerDistribution(52, ModuleType.kCTRE);
+    pdp = new PowerDistribution(1, ModuleType.kRev);
     botType = getBotType();
 
     switch (botType) {
@@ -160,18 +165,35 @@ public class SubsystemManager {
 
     claw = new Claw(61, 0, 1, 2, 3);
     clawPitch = new ClawPitch(7);
-    activeIntake = new ActiveIntake(5, 9, 5, 4);
+    activeIntake = new ActiveIntake(5, 9, 5, 4, 9);
     elevator = new Elevator(42, 6, 7);
 
-    detector = new ApriltagDetection();
-    detector.init();
+    // detector = new ApriltagDetection();
+    // detector.init();
 
     // Main driver controls:
     IO io = IO.getInstance();
 
+    Shuffleboard.getTab("Intake Control").add("deploy", Commands.runOnce(activeIntake::deploy));
+    Shuffleboard.getTab("Intake Control").add("retract", Commands.runOnce(activeIntake::retract));
+    Shuffleboard.getTab("Intake Control").add("off", Commands.runOnce(activeIntake::setOff));
+
     // Intake
-    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightTriggerButton, 
-      new DeployIntake(activeIntake).andThen(new StartIntake(activeIntake))
+    io.bind(ButtonActionType.WHEN_HELD, ControllerButton.RightTriggerButton, 
+      // Commands.sequence(Commands.parallel(new DeployIntake(activeIntake), new StartIntake(activeIntake)))
+      // Commands.sequence(Commands.parallel(Commands.runOnce(activeIntake::setOff), new StartIntake(activeIntake)))
+      Commands.sequence(
+        new DeployIntake(activeIntake),
+        new StartIntake(activeIntake),
+        new ParallelCommandGroup(
+          new MoveElevator(elevator, ElevatorPosition.LOW),
+          new SequentialCommandGroup(
+            new WaitCommand(0.3),
+            Commands.runOnce((activeIntake::setOff))
+          )
+        )
+      )
+      // new DeployIntake(activeIntake).andThen(new StartIntake(activeIntake)).andThen(new MoveElevator(elevator, ElevatorPosition.LOW))
     );
 
     io.bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, 

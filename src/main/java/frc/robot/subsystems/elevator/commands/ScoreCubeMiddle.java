@@ -33,7 +33,7 @@ public class ScoreCubeMiddle extends SequentialCommandGroup {
                 new ParallelCommandGroup(
                         new MoveElevator(e, ElevatorPosition.MIDDLE),
                         new SequentialCommandGroup(
-                                new WaitCommand(.25),
+                                new WaitCommand(0),
                                 new DeployElevator(e)))
         );
         }

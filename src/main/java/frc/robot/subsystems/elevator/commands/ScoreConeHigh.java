@@ -32,7 +32,7 @@ public class ScoreConeHigh extends SequentialCommandGroup {
         new ParallelCommandGroup(
             new MoveElevator(e, ElevatorPosition.HIGH),
             new SequentialCommandGroup(
-                new WaitCommand(.5),
+                new WaitCommand(0),
                 new DeployElevator(e)))
     );
   }

@@ -11,6 +11,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -23,7 +24,7 @@ public class Claw extends SubsystemBase {
   // Wrist
   private static final double WRIST_GEAR_RATIO = 90;
   private static final double MAX_WRIST_ERROR = 0.7854;
-  private static final double WRIST_ANGLE_TOLERANCE = 0.0698132;
+  public static final double WRIST_ANGLE_TOLERANCE = 0.0698132;
 
   public static final double MANUAL_SPEED = 2;
 
@@ -40,6 +41,8 @@ public class Claw extends SubsystemBase {
   private boolean isManualControl = false;
 
   private ClawPosition clawPosition = ClawPosition.CLOSED;
+
+  // private GenericEntry targetClawAngle = Shuffleboard.getTab(getName()).add("Set Degrees", 180).getEntry();
 
   /** Creates a new Claw. */
   public Claw(int wristCanId, int upperForwardChannel, int upperReverseChannel, int lowerForwardChannel,
@@ -64,6 +67,8 @@ public class Claw extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // targetWristAngle = Rotation2d.fromDegrees(targetClawAngle.getDouble(180));
+
     if(!isManualControl) {
       double targetRadians = targetWristAngle.getRadians();
       double clampedCurrentAngle = MathUtil.clamp(getWristAngle().getRadians(), targetRadians - MAX_WRIST_ERROR,
@@ -71,9 +76,7 @@ public class Claw extends SubsystemBase {
       SmartDashboard.putNumber("Clamped angle", clampedCurrentAngle);
       double pidOutput = wristController.calculate(clampedCurrentAngle, targetRadians);
   
-      if (!wristController.atSetpoint()) {
-        wristMotor.setVoltage(pidOutput);
-      }
+      wristMotor.setVoltage(pidOutput);
     }
   }
 
@@ -92,6 +95,10 @@ public class Claw extends SubsystemBase {
   public void setTargetClawAngle(Rotation2d targetAngle) {
     targetWristAngle = targetAngle;
     wristController.setSetpoint(targetAngle.getRadians());
+  }
+
+  public double getTargetClawAngle() {
+    return targetWristAngle.getRadians();
   }
 
   public void setClawPosition(ClawPosition position) {

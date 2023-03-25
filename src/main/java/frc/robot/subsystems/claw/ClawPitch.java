@@ -11,6 +11,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -92,8 +93,6 @@ public class ClawPitch extends SubsystemBase {
     // This method will be called once per scheduler run
     double clampedError = MathUtil.clamp(getPitch().getDegrees(), targetDegrees - MAX_ERROR, targetDegrees + MAX_ERROR);
     double pidOutput = pitchController.calculate(clampedError, targetDegrees);
-    if (!pitchController.atSetpoint()) {
-      pitchMotor.setVoltage(pidOutput);
-    }
+    pitchMotor.setVoltage(pidOutput);
   }
 }

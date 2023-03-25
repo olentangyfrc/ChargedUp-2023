@@ -35,8 +35,8 @@ public class Elevator extends SubsystemBase {
   private static final double GEAR_RATIO = 5;
 
   // These are in rps and rps^2 respectively
-  public static final double MAX_VELOCITY = 10;
-  public static final double MAX_ACCEL = 6;
+  public static final double MAX_VELOCITY = 13;
+  public static final double MAX_ACCEL = 10;
 
   private static final double CORRECTION_MAX_VOLTS = 4; // Max voltage for small corrections in position when there
                                                         // isn't a motion profile.
@@ -45,7 +45,7 @@ public class Elevator extends SubsystemBase {
   public static final double POSITION_TOLERANCE = 0.06;
   private static final double MAX_ERROR = 0.9;
 
-  private static final double MAG_SWITCH_HEIGHT = 1.825;
+  private static final double MAG_SWITCH_HEIGHT = 1.968;
 
   // DEVICES
   private WPI_TalonFX elevatorMotor;
@@ -55,7 +55,7 @@ public class Elevator extends SubsystemBase {
   // CONTROL LOGIC
   // private PIDController elevatorController = new PIDController(6, 0, 0); //
   // TODO: Get actual values
-  private PIDController elevatorController = new PIDController(17, 0, 0.02);
+  private PIDController elevatorController = new PIDController(14, 0, 0);
   private double goalPosition = 0;
   // private PIDController elevatorController = new PIDController(5.2, 0, 0.02);
 
@@ -70,10 +70,11 @@ public class Elevator extends SubsystemBase {
   private static final Map<ElevatorPosition, Double> positionValues = Map.of(
       ElevatorPosition.GROUND, 0.0,
       ElevatorPosition.GRAB_CONE, 0.86,
-      ElevatorPosition.GRAB_CUBE, 1.0,
-      ElevatorPosition.LOW, 1.825,
-      ElevatorPosition.MIDDLE, 3.66,
-      ElevatorPosition.HIGH, 5.82);
+      ElevatorPosition.GRAB_CUBE, 1.0
+      ,
+      ElevatorPosition.LOW, 1.968,
+      ElevatorPosition.MIDDLE, 4.0,
+      ElevatorPosition.HIGH, 5.87);
 
   // These are only for development purposes
   private GenericEntry entry = Shuffleboard.getTab(getName()).add("Set pos", 0).getEntry();

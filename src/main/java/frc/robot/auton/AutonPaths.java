@@ -74,12 +74,12 @@ public class AutonPaths {
 
     private void generatePaths() {
         for(AutoTrajectory trajectory : AutoTrajectory.values()) {
-            trajectoryMap.put(trajectory, PathPlanner.loadPath(trajectory.name(), CONSTRAINTS));
+            trajectoryMap.put(trajectory, PathPlanner.loadPathGroup(trajectory.name(), CONSTRAINTS).get(0));
         }
     }
 
     public CommandBase followTrajectoryCommand(PathPlannerTrajectory trajectory) {
-        return (new InstantCommand(() -> drivetrain.resetLocation(trajectory.getInitialPose()))).andThen(wrapPathCommand(builder.followPathWithEvents(trajectory)));
+        return (new InstantCommand(() -> drivetrain.resetLocation(trajectory.getInitialHolonomicPose()))).andThen(wrapPathCommand(builder.followPathWithEvents(trajectory)));
     }
 
     /**

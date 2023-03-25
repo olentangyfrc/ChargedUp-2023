@@ -33,7 +33,7 @@ public class ScoreCubeHigh extends SequentialCommandGroup {
         new ParallelCommandGroup(
             new MoveElevator(e, ElevatorPosition.HIGH),
             new SequentialCommandGroup(
-                new WaitCommand(.25),
+                new WaitCommand(0),
                 new DeployElevator(e)))
     );
   }

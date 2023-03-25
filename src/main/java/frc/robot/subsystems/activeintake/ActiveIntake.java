@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -28,13 +29,14 @@ import frc.robot.subsystems.claw.commands.GrabCube;
 import frc.robot.subsystems.elevator.Elevator;
 
 public class ActiveIntake extends SubsystemBase {
-  public static final double UPPER_MOTOR_SPEED = 1;
+  public static final double UPPER_MOTOR_SPEED = 0.8;
   public static final double LOWER_MOTOR_SPEED = 1;
   
   private CANSparkMax upperMotor;
   private CANSparkMax lowerMotor;
 
   private DoubleSolenoid intakeSolenoid;
+  private Solenoid pressureSolenoid;
 
   private DigitalInput beamBreaker;
 
@@ -54,10 +56,11 @@ public class ActiveIntake extends SubsystemBase {
   private boolean forceBeamBreak = false;
 
   /** Creates a new ActiveIntake. */
-  public ActiveIntake(int upperMotorCAN, int lowerMotorCAN, int forwardPneumaticChannel, int reversePneumaticChannel) {
+  public ActiveIntake(int upperMotorCAN, int lowerMotorCAN, int forwardPneumaticChannel, int reversePneumaticChannel, int pressureSolenoidChannel) {
     upperMotor = new CANSparkMax(upperMotorCAN, MotorType.kBrushless);
     lowerMotor = new CANSparkMax(lowerMotorCAN, MotorType.kBrushless);
     intakeSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, forwardPneumaticChannel, reversePneumaticChannel);
+    pressureSolenoid = new Solenoid(2, PneumaticsModuleType.REVPH, pressureSolenoidChannel);
 
     beamBreaker = new DigitalInput(1);
 
@@ -166,11 +169,19 @@ public class ActiveIntake extends SubsystemBase {
   }
 
   public void deploy() {
+    pressureSolenoid.set(false);
     intakeSolenoid.set(Value.kForward);
   }
 
   public void retract() {
+    pressureSolenoid.set(false);
     intakeSolenoid.set(Value.kReverse);
+  }
+
+  public void setOff() {
+    if(isDeployed()) {
+      pressureSolenoid.set(true);;
+    }
   }
 
   public boolean isDeployed() {

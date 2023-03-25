@@ -35,7 +35,7 @@ public class ScoreConeMiddle extends SequentialCommandGroup {
         new ParallelCommandGroup(
             new MoveElevator(e, ElevatorPosition.MIDDLE),
             new SequentialCommandGroup(
-                new WaitCommand(.25),
+                new WaitCommand(0),
                 new DeployElevator(e)))
     );
   }

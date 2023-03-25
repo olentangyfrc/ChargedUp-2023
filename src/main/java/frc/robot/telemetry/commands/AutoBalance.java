@@ -54,6 +54,7 @@ public class AutoBalance extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    System.out.println("START AUTOBALANCE");
     pitch = pigeon.getPitch();
     pidPitch.setTolerance(TOLERANCE);
     pidPitch.setSetpoint(0);

@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import frc.robot.auton.AutonPaths.AutoTrajectory;
 import frc.robot.auton.routines.PlaceConeAndGoBack;
 import frc.robot.auton.routines.bottom.BottomPlace;
@@ -46,7 +47,7 @@ public class AutoRoutineManager {
         routineMap.put(AutoRoutine.BottomTwoPiece, new BottomTwoPiece(intake, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.MiddlePlace, new MiddlePlace(drivetrain, intake, claw, clawPitch, elevator));
         routineMap.put(AutoRoutine.MiddlePlaceAndEngage, new MiddlePlaceAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
-        routineMap.put(AutoRoutine.JustTopTaxi, paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi)));
+        routineMap.put(AutoRoutine.JustTopTaxi, new ProxyCommand(() -> paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi))));
         routineMap.put(AutoRoutine.PlaceConeAndGoBack, new PlaceConeAndGoBack(drivetrain, intake, claw, clawPitch, elevator));
 
         // add paths to chooser here

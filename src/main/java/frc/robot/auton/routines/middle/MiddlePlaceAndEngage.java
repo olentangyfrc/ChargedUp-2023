@@ -35,6 +35,8 @@ public class MiddlePlaceAndEngage extends SequentialCommandGroup {
         new ScoreCubeHigh(elevator, claw, clawPitch, intake),
         new PlaceCube(elevator, claw, clawPitch, intake),
         new ProxyCommand(() -> paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.OnChargingStation))),
+        //  ^^^ THIS COMMAND IS NOT ENDING ^^^
+        Commands.print("Finish following command"),
         new AutoBalance(drivetrain)
     );
   }
