@@ -59,6 +59,9 @@ import frc.robot.subsystems.elevator.commands.ScoreCubeMiddle;
 import frc.robot.telemetry.OzoneImu;
 import frc.robot.telemetry.Pigeon;
 import frc.robot.telemetry.Pigeon2;
+import frc.robot.telemetry.commands.AutoBalance;
+import frc.robot.telemetry.commands.DriveBackOntoChargeStation;
+import frc.robot.telemetry.commands.DriveOverChargeStation;
 
 /**
  * This class instantiates and initializes all of the subsystems and stores
@@ -224,11 +227,12 @@ public class SubsystemManager {
     ));
 
     // Place Game Piece
-    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, Commands.either(
+    /*io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, Commands.either(
       new PlaceCone(elevator, claw, clawPitch, activeIntake),
       new PlaceCube(elevator, claw, clawPitch, activeIntake),
       activeIntake::nextPieceIsCone
     ));
+    */
 
     // Zero Gyro
     io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Y, new InstantCommand(() -> {
@@ -241,15 +245,18 @@ public class SubsystemManager {
     io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RadialDown, new SetClawPosition(claw, ClawPosition.CLOSED));
 
     // Brake Mode
-    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, Commands.either(
+    /*io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, Commands.either(
       new DisableBrakeMode(drivetrain),
       new EnableBrakeMode(drivetrain),
       drivetrain::isInBrakeMode
     ));
+    */
 
     io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Back, new EmergencyCommandCancel(elevator));
 
-
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new DriveOverChargeStation(drivetrain));
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, new DriveBackOntoChargeStation(drivetrain));
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new AutoBalance(drivetrain));
 
     // Aux Driver Controls
     IO aux = IO.getAuxInstance();
