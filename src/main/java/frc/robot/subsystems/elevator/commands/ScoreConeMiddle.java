@@ -5,7 +5,6 @@
 package frc.robot.subsystems.elevator.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -13,10 +12,8 @@ import frc.robot.subsystems.activeintake.ActiveIntake;
 import frc.robot.subsystems.activeintake.commands.DeployIntake;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.ClawPitch;
-import frc.robot.subsystems.claw.Claw.ClawPosition;
 import frc.robot.subsystems.claw.commands.RotateClawPitch;
 import frc.robot.subsystems.claw.commands.RotateClawToAngle;
-import frc.robot.subsystems.claw.commands.SetClawPosition;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 
@@ -28,15 +25,17 @@ public class ScoreConeMiddle extends SequentialCommandGroup {
   public ScoreConeMiddle(Elevator e, Claw c, ClawPitch cp, ActiveIntake ai) {
     addCommands(
         new ParallelCommandGroup(
-            // new DeployIntake(ai),
+            new DeployIntake(ai),
             // new WaitCommand(.25),
             new RotateClawToAngle(c, Rotation2d.fromDegrees(180)),
             new RotateClawPitch(cp, Rotation2d.fromDegrees(115))),
-        new ParallelCommandGroup(
-            new MoveElevator(e, ElevatorPosition.MIDDLE),
-            new SequentialCommandGroup(
-                new WaitCommand(0),
-                new DeployElevator(e)))
+            new ParallelCommandGroup(
+              new DeployElevator(e),
+              new SequentialCommandGroup(
+                new WaitCommand(0.2),
+                new MoveElevator(e, ElevatorPosition.MIDDLE)
+              )
+            )
     );
   }
 }

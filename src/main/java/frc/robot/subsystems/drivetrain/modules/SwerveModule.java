@@ -40,6 +40,8 @@ public abstract class SwerveModule {
 
     public double maxSpeed;
 
+    private double targetAngle;
+
     /**
      * Set the angle of the module in radians
      * 
@@ -47,7 +49,12 @@ public abstract class SwerveModule {
      */
     public void setAngle(Rotation2d angle) {
         double output = -anglePid.calculate(getAngle().getRadians(), angle.getRadians());
+        targetAngle = angle.getDegrees();
         setAnglePercentOutput(output);
+    }
+
+    public double getTargetAngle() {
+        return targetAngle;
     }
 
     /**

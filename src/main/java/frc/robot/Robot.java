@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.server.PathPlannerServer;
 
 import edu.wpi.first.cameraserver.CameraServer;
@@ -52,6 +53,7 @@ public class Robot extends TimedRobot {
     // SmartDashboard.putNumber("Pitch", SubsystemManager.getInstance().getImu().getPitch());
     // SmartDashboard.putNumber("Roll", SubsystemManager.getInstance().getImu().getRoll());
   }
+  
   @Override
   public void autonomousInit() {
     SubsystemManager.getInstance().getClaw().setClawPosition(ClawPosition.CLOSED);
@@ -66,6 +68,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    SubsystemManager.getInstance().getDrivetrain().stop();
     if(autoCommand != null) {
       autoCommand.cancel();
     }

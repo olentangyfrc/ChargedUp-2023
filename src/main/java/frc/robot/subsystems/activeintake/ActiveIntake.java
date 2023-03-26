@@ -30,7 +30,8 @@ import frc.robot.subsystems.elevator.Elevator;
 
 public class ActiveIntake extends SubsystemBase {
   public static final double UPPER_MOTOR_SPEED = 0.8;
-  public static final double LOWER_MOTOR_SPEED = 1;
+  public static final double LOWER_MOTOR_CONE_SPEED = 1;
+  public static final double LOWER_MOTOR_CUBE_SPEED = 0.7;
   
   private CANSparkMax upperMotor;
   private CANSparkMax lowerMotor;
@@ -93,6 +94,8 @@ public class ActiveIntake extends SubsystemBase {
     if(!isBeamBroken() && grabCommand != null && !SubsystemManager.getInstance().getClaw().isClosed()) {
       grabCommand.cancel();
       grabCommand = null;
+      isWaiting = false;
+      intakeHasRun = false;
       SubsystemManager.getInstance().getElevator().stopElevator();
     }
     if(isBeamBroken() && !isClawHoldingGamePiece && grabCommand == null) {
@@ -108,13 +111,6 @@ public class ActiveIntake extends SubsystemBase {
             new GrabCone(claw, clawPitch, elevator, this, nextPieceIsCone),
             new GrabCube(claw, clawPitch, elevator, this, nextPieceIsCone),
             this::nextPieceIsCone
-          );
-          grabCommand = new GrabCube(
-            SubsystemManager.getInstance().getClaw(),
-            SubsystemManager.getInstance().getClawPitch(),
-            SubsystemManager.getInstance().getElevator(),
-            this,
-            nextPieceIsCone
           );
 
           isClawHoldingGamePiece = true;
@@ -133,7 +129,7 @@ public class ActiveIntake extends SubsystemBase {
 
     if(!forceBelts) {
       if(!isClawHoldingGamePiece && intakeHasRun) {
-        lowerMotor.set(LOWER_MOTOR_SPEED);
+        lowerMotor.set(nextPieceIsCone? LOWER_MOTOR_CONE_SPEED : LOWER_MOTOR_CUBE_SPEED);
       } else {
         lowerMotor.stopMotor();
       }

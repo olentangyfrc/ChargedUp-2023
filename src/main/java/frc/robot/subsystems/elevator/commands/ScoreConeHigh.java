@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.activeintake.ActiveIntake;
+import frc.robot.subsystems.activeintake.commands.DeployIntake;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.claw.commands.RotateClawPitch;
@@ -23,17 +24,19 @@ public class ScoreConeHigh extends SequentialCommandGroup {
   /** Creates a new ScoreMiddle. */
   public ScoreConeHigh(Elevator e, Claw c, ClawPitch cp, ActiveIntake ai) {
     addCommands(
-        // new DeployIntake(ai),
+        new DeployIntake(ai),
         // new WaitCommand(.25),
         new ParallelCommandGroup(
           new RotateClawToAngle(c, Rotation2d.fromDegrees(180)),
           new RotateClawPitch(cp, Rotation2d.fromDegrees(115))
         ),
         new ParallelCommandGroup(
-            new MoveElevator(e, ElevatorPosition.HIGH),
-            new SequentialCommandGroup(
-                new WaitCommand(0),
-                new DeployElevator(e)))
+          new DeployElevator(e),
+          new SequentialCommandGroup(
+            new WaitCommand(0.2),
+            new MoveElevator(e, ElevatorPosition.HIGH)
+          )
+        )
     );
   }
 }

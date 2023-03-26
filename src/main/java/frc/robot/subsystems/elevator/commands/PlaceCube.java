@@ -13,6 +13,7 @@ import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.Claw.ClawPosition;
 import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.claw.commands.RotateClawPitch;
+import frc.robot.subsystems.claw.commands.RotateClawToAngle;
 import frc.robot.subsystems.claw.commands.SetClawPosition;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
@@ -27,14 +28,19 @@ public class PlaceCube extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new ParallelCommandGroup(
-                        new SetClawPosition(c, ClawPosition.OPEN),
-                        new RetractElevator(e),
-                        new WaitCommand(0.4)
-                ),
-                new ParallelCommandGroup(
-                        new RotateClawPitch(cp, Rotation2d.fromDegrees(115)),
-                        new MoveElevator(e, ElevatorPosition.LOW)
-                )
+              new SetClawPosition(c, ClawPosition.OPEN),
+              new RetractElevator(e),
+              new WaitCommand(0.4)
+      ),
+      new ParallelCommandGroup(
+              new RotateClawPitch(cp, Rotation2d.fromDegrees(115)),
+              new MoveElevator(e, ElevatorPosition.LOW)
+      ),
+      new ParallelCommandGroup(
+        new SetClawPosition(c, ClawPosition.CLOSED),
+        new RotateClawPitch(cp, Rotation2d.fromDegrees(0))
+      ),
+      new RotateClawToAngle(c, Rotation2d.fromDegrees(0))
     );
   }
 }

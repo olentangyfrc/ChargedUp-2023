@@ -123,6 +123,10 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         tab.addNumber("FR Speed", frontRightModule::getVelocity);
         tab.addNumber("BL Speed", backLeftModule::getVelocity);
         tab.addNumber("BR Speed", backRightModule::getVelocity);
+        tab.addNumber("FL Target Angle", frontLeftModule::getTargetAngle);
+        tab.addNumber("FR Target Angle", frontRightModule::getTargetAngle);
+        tab.addNumber("BL Target Angle", backLeftModule::getTargetAngle);
+        tab.addNumber("BR Target Angle", backRightModule::getTargetAngle);
 
         tab.addNumber("FL Position", () -> frontLeftModule.getPosition().distanceMeters);
         tab.addNumber("FR Position", () -> frontRightModule.getPosition().distanceMeters);
@@ -202,8 +206,6 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         frontRightModule.updateState(SwerveModuleState.optimize(states[1], frontRightModule.getAngle()));
         backLeftModule.updateState(SwerveModuleState.optimize(states[2], backLeftModule.getAngle()));
         backRightModule.updateState(SwerveModuleState.optimize(states[3], backRightModule.getAngle()));
-
-
     }
 
     /**

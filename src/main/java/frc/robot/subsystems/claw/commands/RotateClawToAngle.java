@@ -16,7 +16,7 @@ public class RotateClawToAngle extends InstantCommand {
   private Claw claw;
   private Rotation2d targetAngle;
   private double startTime;
-  private static final double MINIMUM_DURATION = 0.3;
+  private static final double MINIMUM_DURATION = 0.2;
 
   public RotateClawToAngle(Claw claw, Rotation2d targetAngle) {
     this.claw = claw;

@@ -157,10 +157,10 @@ public class SubsystemManager {
     // Create and initialize all subsystems:
     drivetrain = new SingleFalconDrivetrain();
     drivetrain.init(new SwerveModuleSetupInfo[] {
-        new SwerveModuleSetupInfo(31, 15, 0, 260.52),
-        new SwerveModuleSetupInfo(30, 6, 3, 327.6),
-        new SwerveModuleSetupInfo(32, 62, 1, 43.9),
-        new SwerveModuleSetupInfo(33, 14, 2, 178.34),
+        new SwerveModuleSetupInfo(31, 15, 0, 260.68),
+        new SwerveModuleSetupInfo(30, 6, 3, 327.65),
+        new SwerveModuleSetupInfo(32, 62, 1, 44.85),
+        new SwerveModuleSetupInfo(33, 14, 2, 175.04),
     }, 1 / 8.07);
 
     claw = new Claw(61, 0, 1, 2, 3);
@@ -168,8 +168,8 @@ public class SubsystemManager {
     activeIntake = new ActiveIntake(5, 9, 5, 4, 9);
     elevator = new Elevator(42, 6, 7);
 
-    // detector = new ApriltagDetection();
-    // detector.init();
+    detector = new ApriltagDetection();
+    detector.init();
 
     // Main driver controls:
     IO io = IO.getInstance();
