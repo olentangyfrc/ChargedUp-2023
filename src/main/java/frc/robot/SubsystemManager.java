@@ -61,6 +61,7 @@ import frc.robot.telemetry.Pigeon;
 import frc.robot.telemetry.Pigeon2;
 import frc.robot.telemetry.commands.AutoBalance;
 import frc.robot.telemetry.commands.DriveBackOntoChargeStation;
+import frc.robot.telemetry.commands.DriveOntoChargeStation;
 import frc.robot.telemetry.commands.DriveOverChargeStation;
 
 /**
@@ -255,10 +256,11 @@ public class SubsystemManager {
     io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Back, new EmergencyCommandCancel(elevator));
 
     io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new DriveOverChargeStation(drivetrain));
-    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, new DriveBackOntoChargeStation(drivetrain));
-    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new AutoBalance(drivetrain));
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, new AutoBalance(drivetrain));
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new DriveOntoChargeStation(drivetrain));
 
     // Aux Driver Controls
+
     IO aux = IO.getAuxInstance();
 
     aux.bind(ButtonActionType.WHEN_HELD, ControllerButton.leftYPos, new ManualElevatorForward(elevator));

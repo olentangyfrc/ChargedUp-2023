@@ -19,6 +19,12 @@ import frc.robot.auton.routines.bottom.BottomPlaceAndTaxi;
 import frc.robot.auton.routines.bottom.BottomTwoPiece;
 import frc.robot.auton.routines.middle.MiddlePlace;
 import frc.robot.auton.routines.middle.MiddlePlaceAndEngage;
+import frc.robot.auton.routines.otherAutonPaths.PlaceAndEngage;
+import frc.robot.auton.routines.otherAutonPaths.PlaceAndTaxiBlueLeft;
+import frc.robot.auton.routines.otherAutonPaths.PlaceAndTaxiBlueRight;
+import frc.robot.auton.routines.otherAutonPaths.PlaceAndTaxiRedLeft;
+import frc.robot.auton.routines.otherAutonPaths.PlaceAndTaxiRedRight;
+import frc.robot.auton.routines.otherAutonPaths.PlaceCrossChargeAndEngage;
 import frc.robot.auton.routines.top.TopPlace;
 import frc.robot.auton.routines.top.TopPlaceAndTaxi;
 import frc.robot.auton.routines.top.TopTwoPiece;
@@ -49,6 +55,12 @@ public class AutoRoutineManager {
         routineMap.put(AutoRoutine.MiddlePlaceAndEngage, new MiddlePlaceAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.JustTopTaxi, new ProxyCommand(() -> paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi))));
         routineMap.put(AutoRoutine.PlaceConeAndGoBack, new PlaceConeAndGoBack(drivetrain, intake, claw, clawPitch, elevator));
+        routineMap.put(AutoRoutine.PlaceAndTaxiBlueLeft, new PlaceAndTaxiBlueLeft(intake, drivetrain, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.PlaceAndTaxiBlueRight, new PlaceAndTaxiBlueRight(intake, drivetrain, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.PlaceAndTaxiRedLeft, new PlaceAndTaxiRedLeft(intake, drivetrain, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.PlaceAndTaxiRedRight, new PlaceAndTaxiRedRight(intake, drivetrain, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.PlaceAndEngage, new PlaceAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.PlaceCrossChargeAndEngage, new PlaceCrossChargeAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
 
         // add paths to chooser here
         for(AutoRoutine routine : AutoRoutine.values()) {
@@ -83,7 +95,14 @@ public class AutoRoutineManager {
         MiddlePlace,
         MiddlePlaceAndEngage,
 
-        PlaceConeAndGoBack
-    }
+        PlaceConeAndGoBack,
 
+        PlaceAndTaxiBlueLeft,
+        PlaceAndTaxiBlueRight,
+        PlaceAndTaxiRedLeft,
+        PlaceAndTaxiRedRight,
+
+        PlaceAndEngage,
+        PlaceCrossChargeAndEngage
+    }
 }
