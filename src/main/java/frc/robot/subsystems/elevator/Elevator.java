@@ -69,7 +69,7 @@ public class Elevator extends SubsystemBase {
 
   private static final Map<ElevatorPosition, Double> positionValues = Map.of(
       ElevatorPosition.GROUND, 0.0,
-      ElevatorPosition.GRAB_CONE, 0.86,
+      ElevatorPosition.GRAB_CONE, 0.9,
       ElevatorPosition.GRAB_CUBE, 1.0,
       ElevatorPosition.LOW, 2.2,
       ElevatorPosition.MIDDLE, 4.12,

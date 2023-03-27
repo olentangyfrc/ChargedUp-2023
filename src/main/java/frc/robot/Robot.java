@@ -4,19 +4,21 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.server.PathPlannerServer;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.auton.AutoRoutineManager;
+import frc.robot.auton.AutonPaths;
+import frc.robot.auton.AutonPaths.AutoTrajectory;
 import frc.robot.subsystems.claw.Claw.ClawPosition;
 import frc.robot.subsystems.drivetrain.commands.DisableBrakeMode;
+import frc.robot.telemetry.commands.AutoBalance;
 
 // import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -44,7 +46,7 @@ public class Robot extends TimedRobot {
     sm.init();
     routineManager = new AutoRoutineManager(sm.getDrivetrain(), sm.getActiveIntake(), sm.getClaw(), sm.getClawPitch(), sm.getElevator());
 
-    CameraServer.startAutomaticCapture();
+    // CameraServer.startAutomaticCapture();
     SubsystemManager.getInstance().getDrivetrain().resetLocation(new Pose2d(1.88, 5, Rotation2d.fromDegrees(0)));    
   }
 

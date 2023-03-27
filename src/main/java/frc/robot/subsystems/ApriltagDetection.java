@@ -15,8 +15,10 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -87,6 +89,9 @@ public class ApriltagDetection extends SubsystemBase {
         targets.remove(i);
         i--;
 
+      } else if(distance > 2.8) {
+        targets.remove(i);
+        i--;
       }
     }
     
@@ -94,16 +99,22 @@ public class ApriltagDetection extends SubsystemBase {
     // Construct PhotonPoseEstimator
     poseobject = photonPoseEstimator.update(result);
     // photonPoseEstimator.
-      
+    
     try {
       robotPose = poseobject.get();
       // check if its on the ground
       SmartDashboard.putNumber("pose_z", robotPose.estimatedPose.getZ());
       SmartDashboard.putNumber("pose_x", robotPose.estimatedPose.getX());
       SmartDashboard.putNumber("pose_y", robotPose.estimatedPose.getY());
-      if (-0.25 < robotPose.estimatedPose.getZ() && robotPose.estimatedPose.getZ() < 0.25) {
-
-        addVision(robotPose.estimatedPose, robotPose.timestampSeconds, result.getBestTarget().getAlternateCameraToTarget().getX());
+      SmartDashboard.putNumber("Gryo Angle", SubsystemManager.getInstance().getImu().getAngle());
+      double visionAngle = robotPose.estimatedPose.getRotation().getZ() * 180 / Math.PI;
+      SmartDashboard.putNumber("Vision Angle", visionAngle);
+      // Check if vision angle is off from gyro angle
+      if(Math.abs(visionAngle - SubsystemManager.getInstance().getImu().getAngle()) < 8) {
+        // Check if the estimated position is on the field
+        if (-0.25 < robotPose.estimatedPose.getZ() && robotPose.estimatedPose.getZ() < 0.25) {
+          addVision(robotPose.estimatedPose, robotPose.timestampSeconds, result.getBestTarget().getAlternateCameraToTarget().getX());
+        }
       }
     } catch (Exception e) {
       // TODO: handle exception
@@ -116,9 +127,12 @@ public class ApriltagDetection extends SubsystemBase {
     if ((position.getX() > 0) && (position.getY() > 0)) {
       SmartDashboard.putBoolean("Sees Vision", true);
       // poseEstimator.addVisionMeasurement(position.toPose2d(), lastVisionTime, VecBuilder.fill(distance/2, distance/2, 0));
-
-      poseEstimator.addVisionMeasurement(position.toPose2d(), lastVisionTime, VecBuilder.fill(0, 0, 0));
+      Pose2d estimatedPosition = new Pose2d(position.getTranslation().toTranslation2d(), SubsystemManager.getInstance().getImu().getRotation2d());
+      poseEstimator.addVisionMeasurement(estimatedPosition, lastVisionTime, VecBuilder.fill(0, 0, 0));
       // gyro.setReset(position.getRotation().toRotation2d());
+    }else{
+      SmartDashboard.putBoolean("Sees Vision", false);
+
     }
   }
 

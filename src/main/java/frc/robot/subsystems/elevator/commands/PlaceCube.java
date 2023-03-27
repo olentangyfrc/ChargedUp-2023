@@ -6,6 +6,7 @@ package frc.robot.subsystems.elevator.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.activeintake.ActiveIntake;
@@ -36,11 +37,15 @@ public class PlaceCube extends SequentialCommandGroup {
               new RotateClawPitch(cp, Rotation2d.fromDegrees(115)),
               new MoveElevator(e, ElevatorPosition.LOW)
       ),
-      new ParallelCommandGroup(
-        new SetClawPosition(c, ClawPosition.CLOSED),
-        new RotateClawPitch(cp, Rotation2d.fromDegrees(0))
-      ),
-      new RotateClawToAngle(c, Rotation2d.fromDegrees(0))
+      new ScheduleCommand(
+        new SequentialCommandGroup(
+          new ParallelCommandGroup(
+            new SetClawPosition(c, ClawPosition.CLOSED),
+            new RotateClawPitch(cp, Rotation2d.fromDegrees(0))
+          ),
+          new RotateClawToAngle(c, Rotation2d.fromDegrees(0))
+        )
+      )
     );
   }
 }

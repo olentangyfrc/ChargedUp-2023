@@ -19,7 +19,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public abstract class SwerveModule {
 
     // Wheel radius in meters
-    public static final double WHEEL_RADIUS = 0.0492125;
+    public static final double WHEEL_RADIUS = 0.04934585;
 
     // Ticks per revolution of the angle encoder.
     public static final double ANGLE_ENCODER_TICKS = 4096;

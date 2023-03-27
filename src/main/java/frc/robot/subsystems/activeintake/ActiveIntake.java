@@ -136,6 +136,10 @@ public class ActiveIntake extends SubsystemBase {
     }
   }
 
+  public boolean isGrabbing() {
+    return grabCommand != null;
+  }
+
   public void setForceBelts(boolean forceBelts) {
     this.forceBelts = forceBelts;
   }
