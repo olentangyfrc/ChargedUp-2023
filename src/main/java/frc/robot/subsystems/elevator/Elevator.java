@@ -38,7 +38,7 @@ public class Elevator extends SubsystemBase {
   public static final double MAX_VELOCITY = 13;
   public static final double MAX_ACCEL = 10;
 
-  private static final double CORRECTION_MAX_VOLTS = 4; // Max voltage for small corrections in position when there
+  private static final double CORRECTION_MAX_VOLTS = 7; // Max voltage for small corrections in position when there
                                                         // isn't a motion profile.
 
   // These are in elevator motor rotations.
@@ -69,12 +69,11 @@ public class Elevator extends SubsystemBase {
 
   private static final Map<ElevatorPosition, Double> positionValues = Map.of(
       ElevatorPosition.GROUND, 0.0,
-      ElevatorPosition.GRAB_CONE, 0.86,
-      ElevatorPosition.GRAB_CUBE, 1.0
-      ,
-      ElevatorPosition.LOW, 1.968,
-      ElevatorPosition.MIDDLE, 4.0,
-      ElevatorPosition.HIGH, 5.87);
+      ElevatorPosition.GRAB_CONE, 0.9,
+      ElevatorPosition.GRAB_CUBE, 1.0,
+      ElevatorPosition.LOW, 2.2,
+      ElevatorPosition.MIDDLE, 4.12,
+      ElevatorPosition.HIGH, 5.92);
 
   // These are only for development purposes
   private GenericEntry entry = Shuffleboard.getTab(getName()).add("Set pos", 0).getEntry();
@@ -128,6 +127,11 @@ public class Elevator extends SubsystemBase {
       
       double clampedMeasurement = MathUtil.clamp(getPosition(), elevatorController.getSetpoint() - MAX_ERROR,
           elevatorController.getSetpoint() + MAX_ERROR);
+      if(currentProfile == null) {
+        elevatorController.setP(20);
+      } else {
+        elevatorController.setP(14);
+      }
       double pidControl = elevatorController.calculate(clampedMeasurement);
 
       // Limit the output voltage when there isn't a motion profile.
@@ -240,6 +244,6 @@ public class Elevator extends SubsystemBase {
     GRAB_CUBE,
     LOW,
     MIDDLE,
-    HIGH
+    HIGH,
   }
 }

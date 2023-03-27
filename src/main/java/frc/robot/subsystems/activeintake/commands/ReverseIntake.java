@@ -23,6 +23,6 @@ public class ReverseIntake extends InstantCommand {
   public void initialize() {
     intake.setForceBelts(true);
     intake.setUpperMotor(-ActiveIntake.UPPER_MOTOR_SPEED);
-    intake.setLowerMotor(-ActiveIntake.LOWER_MOTOR_SPEED);
+    intake.setLowerMotor(-ActiveIntake.LOWER_MOTOR_CONE_SPEED);
   }
 }

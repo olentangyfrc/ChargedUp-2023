@@ -19,7 +19,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public abstract class SwerveModule {
 
     // Wheel radius in meters
-    public static final double WHEEL_RADIUS = 0.0492125;
+    public static final double WHEEL_RADIUS = 0.04934585;
 
     // Ticks per revolution of the angle encoder.
     public static final double ANGLE_ENCODER_TICKS = 4096;
@@ -40,6 +40,8 @@ public abstract class SwerveModule {
 
     public double maxSpeed;
 
+    private double targetAngle;
+
     /**
      * Set the angle of the module in radians
      * 
@@ -47,7 +49,12 @@ public abstract class SwerveModule {
      */
     public void setAngle(Rotation2d angle) {
         double output = -anglePid.calculate(getAngle().getRadians(), angle.getRadians());
+        targetAngle = angle.getDegrees();
         setAnglePercentOutput(output);
+    }
+
+    public double getTargetAngle() {
+        return targetAngle;
     }
 
     /**

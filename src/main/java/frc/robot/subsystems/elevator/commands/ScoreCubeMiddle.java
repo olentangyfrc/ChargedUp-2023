@@ -28,7 +28,7 @@ public class ScoreCubeMiddle extends SequentialCommandGroup {
         addCommands(
                 // new WaitCommand(.25),
                 new ParallelCommandGroup(
-                        // new DeployIntake(ai),
+                        new DeployIntake(ai),
                         new RotateClawPitch(cp, Rotation2d.fromDegrees(90))),
                 new ParallelCommandGroup(
                         new MoveElevator(e, ElevatorPosition.MIDDLE),

@@ -14,6 +14,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -34,9 +35,9 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
     public SwerveModule backRightModule;
 
     // Distance from center of wheel to center of wheel across the side of the bot in meters
-    public static final double WHEEL_BASE = 0.4445;
+    public static final double WHEEL_BASE = 0.496;
     // Distance from center of wheel to center of wheel across the front of the bot in meters
-    public static final double TRACK_WIDTH = 0.4445;
+    public static final double TRACK_WIDTH = 0.547;
 
     
     public static final double MAX_LINEAR_SPEED = 3; // Meters per second
@@ -123,6 +124,10 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         tab.addNumber("FR Speed", frontRightModule::getVelocity);
         tab.addNumber("BL Speed", backLeftModule::getVelocity);
         tab.addNumber("BR Speed", backRightModule::getVelocity);
+        tab.addNumber("FL Target Angle", frontLeftModule::getTargetAngle);
+        tab.addNumber("FR Target Angle", frontRightModule::getTargetAngle);
+        tab.addNumber("BL Target Angle", backLeftModule::getTargetAngle);
+        tab.addNumber("BR Target Angle", backRightModule::getTargetAngle);
 
         tab.addNumber("FL Position", () -> frontLeftModule.getPosition().distanceMeters);
         tab.addNumber("FR Position", () -> frontRightModule.getPosition().distanceMeters);
@@ -145,11 +150,12 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
     @Override
     public void periodic() {
         // Run the drive command periodically
-        field.setRobotPose(
-            poseEstimator.getEstimatedPosition().getX(),
-            poseEstimator.getEstimatedPosition().getY(),
-            SubsystemManager.getInstance().getImu().getRotation2d()
-        );
+        // field.setRobotPose(
+        //     poseEstimator.getEstimatedPosition().getX(),
+        //     poseEstimator.getEstimatedPosition().getY(),
+        //     poseEstimator.getEstimatedPosition().getRotation()
+        // );
+        // field.setRobotPose(poseEstimator.getEstimatedPosition());
     }
 
     /** 
@@ -189,21 +195,20 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_LINEAR_SPEED); // Normalize wheel speeds so we don't go faster than 100%
         
-        poseEstimator.update(pigeon.getRotation2d(), getModulePositions());
+        poseEstimator.updateWithTime(Timer.getFPGATimestamp(), pigeon.getRotation2d(), getModulePositions());
         
-        field.setRobotPose(
-            poseEstimator.getEstimatedPosition().getX(),
-            poseEstimator.getEstimatedPosition().getY(),
-            pigeon.getRotation2d()
-        );
+        // field.setRobotPose(
+        //     poseEstimator.getEstimatedPosition().getX(),
+        //     poseEstimator.getEstimatedPosition().getY(),
+        //     pigeon.getRotation2d()
+        // );
+        field.setRobotPose(poseEstimator.getEstimatedPosition());
 
         // Update SwerveModule states
         frontLeftModule.updateState(SwerveModuleState.optimize(states[0], frontLeftModule.getAngle()));
         frontRightModule.updateState(SwerveModuleState.optimize(states[1], frontRightModule.getAngle()));
         backLeftModule.updateState(SwerveModuleState.optimize(states[2], backLeftModule.getAngle()));
         backRightModule.updateState(SwerveModuleState.optimize(states[3], backRightModule.getAngle()));
-
-
     }
 
     /**
@@ -303,7 +308,8 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
      * @return The estimated position of the bot.
      */
     public Pose2d getLocation() {
-        return new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), SubsystemManager.getInstance().getImu().getRotation2d());
+        // return new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), SubsystemManager.getInstance().getImu().getRotation2d());
+        return poseEstimator.getEstimatedPosition();
     }
 
     public void resetLocation(Pose2d botLocation) {

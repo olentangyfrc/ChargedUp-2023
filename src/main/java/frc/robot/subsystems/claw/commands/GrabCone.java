@@ -1,6 +1,7 @@
 package frc.robot.subsystems.claw.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -31,6 +32,7 @@ public class GrabCone extends SequentialCommandGroup {
                 new SetClawPosition(claw, ClawPosition.CLOSED),
                 new WaitCommand(0.3),
                 new MoveElevator(elevator, ElevatorPosition.LOW),
+                Commands.print("SETTING UP CLAW"),
                 new ParallelCommandGroup(
                     new RotateClawToAngle(claw, Rotation2d.fromDegrees(180)),
                     new RotateClawPitch(clawPitch, Rotation2d.fromDegrees(115))
