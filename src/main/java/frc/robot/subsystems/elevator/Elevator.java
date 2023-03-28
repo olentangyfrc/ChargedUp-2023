@@ -128,7 +128,7 @@ public class Elevator extends SubsystemBase {
       double clampedMeasurement = MathUtil.clamp(getPosition(), elevatorController.getSetpoint() - MAX_ERROR,
           elevatorController.getSetpoint() + MAX_ERROR);
       if(currentProfile == null) {
-        elevatorController.setP(20);
+        elevatorController.setP(17);
       } else {
         elevatorController.setP(14);
       }

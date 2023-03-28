@@ -34,6 +34,11 @@ public class PlaceCrossPickEngage extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
+        Commands.runOnce(() -> {
+          SubsystemManager.getInstance().getImu().resetPitch();
+          SubsystemManager.getInstance().getImu().resetRoll();
+          SubsystemManager.getInstance().getImu().reset();
+        }),
         new ScoreCubeHigh(elevator, claw, clawPitch, intake),
         new PlaceCube(elevator, claw, clawPitch, intake),
         new DriveOverChargeStation(drivetrain),
