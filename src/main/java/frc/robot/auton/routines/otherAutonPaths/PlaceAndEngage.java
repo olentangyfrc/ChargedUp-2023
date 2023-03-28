@@ -40,8 +40,8 @@ public class PlaceAndEngage extends SequentialCommandGroup {
           SubsystemManager.getInstance().getImu().resetRoll();
           SubsystemManager.getInstance().getImu().reset();
         }),
-        new ScoreCubeHigh(elevator, claw, clawPitch, intake),
-        new PlaceCube(elevator, claw, clawPitch, intake),
+        //new ScoreCubeHigh(elevator, claw, clawPitch, intake),
+        //new PlaceCube(elevator, claw, clawPitch, intake),
         new ParallelCommandGroup(new MoveElevator(elevator, 0.9), new RetractIntake(intake), new DriveOntoChargeStation(drivetrain)),
         new AutoBalance(drivetrain)
     );

@@ -23,7 +23,7 @@ public class DriveOverChargeStation extends CommandBase {
   SwerveDrivetrain drivetrain;
   private OzoneImu pigeon;
 
-  public static final double TIME_TO_DRIVE = 1.0;
+  public static final double TIME_TO_DRIVE = 2.0;
   private double startTime;
 
   /** Creates a new autoBalance. */
@@ -42,7 +42,7 @@ public class DriveOverChargeStation extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    drivetrain.drive(new ChassisSpeeds(1.1, 0, 0), true);
+    drivetrain.drive(new ChassisSpeeds(0.9, 0, 0), true);
   }
 
   // Called once the command ends or is interrupted.
