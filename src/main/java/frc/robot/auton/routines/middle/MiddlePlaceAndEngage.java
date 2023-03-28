@@ -31,8 +31,10 @@ public class MiddlePlaceAndEngage extends SequentialCommandGroup {
           SubsystemManager.getInstance().getImu().resetPitch();
           SubsystemManager.getInstance().getImu().resetRoll();
         }),
+        Commands.runOnce(() ->intake.setForceBeamOpen(true)),
         new ScoreCubeHigh(elevator, claw, clawPitch, intake),
         new PlaceCube(elevator, claw, clawPitch, intake),
+        Commands.runOnce(() ->intake.setForceBeamOpen(false)),
         paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.OnChargingStation)).andThen(new AutoBalance(drivetrain)).asProxy()
     );
   }

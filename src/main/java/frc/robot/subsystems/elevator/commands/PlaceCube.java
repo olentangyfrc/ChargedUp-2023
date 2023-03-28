@@ -5,6 +5,8 @@
 package frc.robot.subsystems.elevator.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -23,8 +25,12 @@ import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class PlaceCube extends SequentialCommandGroup {
-  /** Creates a new PlaceCube. */
   public PlaceCube(Elevator e, Claw c, ClawPitch cp, ActiveIntake ai) {
+    this(e, c, cp, ai, false);
+  }
+
+  /** Creates a new PlaceCube. */
+  public PlaceCube(Elevator e, Claw c, ClawPitch cp, ActiveIntake ai, boolean endEarly) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
@@ -33,9 +39,15 @@ public class PlaceCube extends SequentialCommandGroup {
               new RetractElevator(e),
               new WaitCommand(0.4)
       ),
-      new ParallelCommandGroup(
-              new RotateClawPitch(cp, Rotation2d.fromDegrees(115)),
-              new MoveElevator(e, ElevatorPosition.LOW)
+      Commands.either(
+        new ParallelCommandGroup(
+          new ScheduleCommand(new MoveElevator(e, ElevatorPosition.LOW))
+        ),
+        new ParallelCommandGroup(
+          new RotateClawPitch(cp, Rotation2d.fromDegrees(115)),
+          new MoveElevator(e, ElevatorPosition.LOW)
+        ),
+        () -> endEarly
       ),
       new ScheduleCommand(
         new SequentialCommandGroup(

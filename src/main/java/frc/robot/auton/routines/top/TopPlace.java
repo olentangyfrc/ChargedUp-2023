@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.activeintake.ActiveIntake;
 import frc.robot.subsystems.claw.Claw;
@@ -28,8 +29,10 @@ public class TopPlace extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new ResetLocation(drivetrain, new Pose2d(1.9, 4.4, new Rotation2d((DriverStation.getAlliance() == Alliance.Blue)? 0 : 180))),
+      Commands.runOnce(() ->intake.setForceBeamOpen(true)),
       new ScoreCubeHigh(elevator, claw, clawPitch, intake),
-      new PlaceCube(elevator, claw, clawPitch, intake)
+      new PlaceCube(elevator, claw, clawPitch, intake),
+      Commands.runOnce(() ->intake.setForceBeamOpen(false))
     );
   }
 }

@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Limelight extends SubsystemBase {
   private String LL3 = "limelight";
-  private Boolean enable = true;
-  private Boolean blink = false;
+  private boolean enable = false;
+  private boolean blink = false;
   private double distanceError = 0;
   private double angleError = 0;
   private Pose2d botpose;
