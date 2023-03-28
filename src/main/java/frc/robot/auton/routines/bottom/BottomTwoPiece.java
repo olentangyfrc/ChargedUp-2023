@@ -4,6 +4,7 @@
 
 package frc.robot.auton.routines.bottom;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -27,8 +28,10 @@ public class BottomTwoPiece extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
+      Commands.runOnce(() ->intake.setForceBeamOpen(true)),
       new ScoreCubeHigh(elevator, claw, clawPitch, intake),
       new PlaceCube(elevator, claw, clawPitch, intake),
+      Commands.runOnce(() ->intake.setForceBeamOpen(false)),
       new ProxyCommand( () -> paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.GetGamepieceFour))),
       new WaitUntilCommand(() -> intake.isClawHoldingGamePiece() && !intake.isGrabbing()),
       new ScoreConeHigh(elevator, claw, clawPitch, intake),

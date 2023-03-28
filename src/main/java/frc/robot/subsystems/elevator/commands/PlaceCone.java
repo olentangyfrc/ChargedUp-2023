@@ -30,9 +30,9 @@ public class PlaceCone extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new ParallelCommandGroup(
-        new ProxyCommand(() -> new MoveElevator(e, e.getPosition() - 0.75)),
+        new ProxyCommand(() -> new MoveElevator(e, e.getPosition() - 1)),
         new SequentialCommandGroup(
-          new WaitCommand(0.2),
+          new WaitCommand(0.3),
           new SetClawPosition(c, ClawPosition.UPPER_LATCH),
           new RetractElevator(e),
           new WaitCommand(0.4),

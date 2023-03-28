@@ -8,9 +8,7 @@ import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
-import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
-import com.pathplanner.lib.commands.FollowPathWithEvents;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,6 +21,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.SubsystemManager;
 import frc.robot.subsystems.activeintake.ActiveIntake;
 import frc.robot.subsystems.activeintake.commands.DeployIntake;
@@ -33,6 +34,8 @@ import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
+import frc.robot.subsystems.elevator.commands.MoveElevator;
 
 // TODO: Separate Auto routines into another class
 public class AutonPaths {
@@ -50,7 +53,17 @@ public class AutonPaths {
         this.drivetrain = drivetrain;
 
         eventMap = Map.of(
-            "DeployIntake", Commands.parallel(new DeployIntake(intake), new StartIntake(intake)),
+            "DeployIntake", Commands.sequence(
+                new DeployIntake(intake),
+                new StartIntake(intake),
+                new ParallelCommandGroup(
+                  new MoveElevator(elevator, ElevatorPosition.LOW),
+                  new SequentialCommandGroup(
+                    new WaitCommand(0.3),
+                    Commands.runOnce((intake::setOff))
+                  )
+                )
+              ),
             "RetractIntake", Commands.parallel(new RetractIntake(intake), new StopIntake(intake))
         );
 
@@ -59,10 +72,10 @@ public class AutonPaths {
         builder = new SwerveAutoBuilder(
             drivetrain::getLocation,
             drivetrain::resetLocation,
-            // drivetrain.translationPidConstants,
-            new PIDConstants(0, 0, 0),
-            new PIDConstants(0, 0, 0),
-            // drivetrain.rotationPidConstants,
+            drivetrain.translationPidConstants,
+            // new PIDConstants(0, 0, 0),
+            // new PIDConstants(0, 0, 0),
+            drivetrain.rotationPidConstants,
             (speeds) -> drivetrain.drive(speeds, false),
             eventMap,
             false,

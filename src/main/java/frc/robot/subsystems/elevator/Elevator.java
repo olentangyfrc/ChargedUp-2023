@@ -72,7 +72,7 @@ public class Elevator extends SubsystemBase {
       ElevatorPosition.GRAB_CONE, 0.9,
       ElevatorPosition.GRAB_CUBE, 1.0,
       ElevatorPosition.LOW, 2.2,
-      ElevatorPosition.MIDDLE, 4.12,
+      ElevatorPosition.MIDDLE, 4.02,
       ElevatorPosition.HIGH, 5.92);
 
   // These are only for development purposes

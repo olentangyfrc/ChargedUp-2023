@@ -55,6 +55,7 @@ public class ActiveIntake extends SubsystemBase {
   private double startTimer = Timer.getFPGATimestamp();
 
   private boolean forceBeamBreak = false;
+  private boolean forceBeamOpen = false;
 
   /** Creates a new ActiveIntake. */
   public ActiveIntake(int upperMotorCAN, int lowerMotorCAN, int forwardPneumaticChannel, int reversePneumaticChannel, int pressureSolenoidChannel) {
@@ -72,6 +73,8 @@ public class ActiveIntake extends SubsystemBase {
     lowerMotor.setInverted(false);
 
     Shuffleboard.getTab(getName()).addBoolean("Beam Break", this::isBeamBroken);
+    Shuffleboard.getTab(getName()).addBoolean("Is Holding Gamepiece", this::isClawHoldingGamePiece);
+    Shuffleboard.getTab(getName()).addBoolean("Is grabbing", this::isGrabbing);
   }
   GenericEntry isConeEntry = Shuffleboard.getTab(getName()).add("Next piece cone", true).withWidget(BuiltInWidgets.kToggleButton).getEntry();
 
@@ -112,8 +115,6 @@ public class ActiveIntake extends SubsystemBase {
             new GrabCube(claw, clawPitch, elevator, this, nextPieceIsCone),
             this::nextPieceIsCone
           );
-
-          isClawHoldingGamePiece = true;
           
           grabCommand.andThen(new InstantCommand(() -> {
             grabCommand = null;
@@ -146,6 +147,10 @@ public class ActiveIntake extends SubsystemBase {
 
   public void setForceBeamBreak(boolean forceBeamBreak) {
     this.forceBeamBreak = forceBeamBreak;
+  }
+
+  public void setForceBeamOpen(boolean forceBeamOpen) {
+    this.forceBeamOpen = forceBeamOpen;
   }
 
   public void setUpperMotor(double speed) {
@@ -191,6 +196,8 @@ public class ActiveIntake extends SubsystemBase {
   public boolean isBeamBroken(){
     if(forceBeamBreak) {
       return true;
+    } else if(forceBeamOpen) {
+      return false;
     }
     return !(beamBreaker.get());
   }

@@ -7,6 +7,8 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.swing.ListModel;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
@@ -22,6 +24,7 @@ import frc.robot.IO.ControllerButton;
 import frc.robot.auton.AutoDashboardManager;
 import frc.robot.auton.AutonPaths;
 import frc.robot.subsystems.ApriltagDetection;
+import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.activeintake.ActiveIntake;
 import frc.robot.subsystems.activeintake.commands.DeployIntake;
 import frc.robot.subsystems.activeintake.commands.RetractIntake;
@@ -76,6 +79,7 @@ public class SubsystemManager {
   private SwerveDrivetrain drivetrain;
   private PowerDistribution pdp;
   private ApriltagDetection detector;
+  private Limelight limelight;
 
   private ActiveIntake activeIntake;
   private Claw claw;
@@ -167,13 +171,18 @@ public class SubsystemManager {
         new SwerveModuleSetupInfo(33, 14, 2, 175.04),
     }, 1 / 8.07);
 
-    claw = new Claw(61, 0, 1, 2, 3);
+    claw = new Claw(61, 1, 0, 3, 2);
     clawPitch = new ClawPitch(7);
     activeIntake = new ActiveIntake(5, 9, 5, 4, 9);
     elevator = new Elevator(42, 6, 7);
 
+    
     detector = new ApriltagDetection();
     detector.init();
+    
+    // limelight = new Limelight();
+
+    
 
     // Main driver controls:
     IO io = IO.getInstance();

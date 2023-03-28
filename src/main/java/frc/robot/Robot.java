@@ -74,6 +74,8 @@ public class Robot extends TimedRobot {
     if(autoCommand != null) {
       autoCommand.cancel();
     }
+    SubsystemManager.getInstance().getActiveIntake().setForceBeamBreak(false);
+    SubsystemManager.getInstance().getActiveIntake().setForceBeamOpen(false);
     (new DisableBrakeMode(SubsystemManager.getInstance().getDrivetrain())).schedule();
   }
 

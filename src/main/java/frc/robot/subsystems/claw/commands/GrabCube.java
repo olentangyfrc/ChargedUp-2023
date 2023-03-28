@@ -1,6 +1,7 @@
 package frc.robot.subsystems.claw.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -29,6 +30,7 @@ public class GrabCube extends SequentialCommandGroup {
                         ),
                 new MoveElevator(elevator, (isCone ? ElevatorPosition.GRAB_CONE : ElevatorPosition.GRAB_CUBE)),
                 new SetClawPosition(claw, ClawPosition.CLOSED),
+                Commands.runOnce(() -> intake.setClawHoldingGamePiece(true)),
                 new WaitCommand(0.3),
                 new MoveElevator(elevator, ElevatorPosition.LOW)
         );
