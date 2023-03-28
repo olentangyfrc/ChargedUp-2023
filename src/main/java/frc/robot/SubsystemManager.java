@@ -256,8 +256,8 @@ public class SubsystemManager {
     io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.Back, new EmergencyCommandCancel(elevator));
 
     io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.X, new DriveOverChargeStation(drivetrain));
-    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, new AutoBalance(drivetrain));
-    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new DriveOntoChargeStation(drivetrain));
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, new DriveBackOntoChargeStation(drivetrain));
+    io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.B, new AutoBalance(drivetrain));
 
     // Aux Driver Controls
 

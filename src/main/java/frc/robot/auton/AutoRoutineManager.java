@@ -25,6 +25,7 @@ import frc.robot.auton.routines.otherAutonPaths.PlaceAndTaxiBlueRight;
 import frc.robot.auton.routines.otherAutonPaths.PlaceAndTaxiRedLeft;
 import frc.robot.auton.routines.otherAutonPaths.PlaceAndTaxiRedRight;
 import frc.robot.auton.routines.otherAutonPaths.PlaceCrossChargeAndEngage;
+import frc.robot.auton.routines.otherAutonPaths.PlaceCrossPickEngage;
 import frc.robot.auton.routines.top.TopPlace;
 import frc.robot.auton.routines.top.TopPlaceAndTaxi;
 import frc.robot.auton.routines.top.TopTwoPiece;
@@ -61,6 +62,7 @@ public class AutoRoutineManager {
         routineMap.put(AutoRoutine.PlaceAndTaxiRedRight, new PlaceAndTaxiRedRight(intake, drivetrain, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.PlaceAndEngage, new PlaceAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.PlaceCrossChargeAndEngage, new PlaceCrossChargeAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.PlaceCrossPickEngage, new PlaceCrossPickEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
 
         // add paths to chooser here
         for(AutoRoutine routine : AutoRoutine.values()) {
@@ -103,6 +105,7 @@ public class AutoRoutineManager {
         PlaceAndTaxiRedRight,
 
         PlaceAndEngage,
-        PlaceCrossChargeAndEngage
+        PlaceCrossChargeAndEngage,
+        PlaceCrossPickEngage
     }
 }

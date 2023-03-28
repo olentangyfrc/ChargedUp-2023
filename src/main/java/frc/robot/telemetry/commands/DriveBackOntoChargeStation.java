@@ -15,7 +15,7 @@ public class DriveBackOntoChargeStation extends CommandBase {
   SwerveDrivetrain drivetrain;
   private OzoneImu pigeon;
 
-  public static final double TIME_TO_DRIVE = 2.4;
+  public static final double TIME_TO_DRIVE = 3.0;
   private double startTime;
 
   /** Creates a new autoBalance. */
@@ -34,7 +34,7 @@ public class DriveBackOntoChargeStation extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    drivetrain.drive(new ChassisSpeeds(-0.2, 0, 0), false);
+    drivetrain.drive(new ChassisSpeeds(-0.8, 0, 0), false);
   }
 
   // Called once the command ends or is interrupted.

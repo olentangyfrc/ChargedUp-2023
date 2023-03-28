@@ -5,7 +5,6 @@
 package frc.robot.auton.routines.otherAutonPaths;
 
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -15,12 +14,10 @@ import frc.robot.auton.AutonPaths.AutoTrajectory;
 import frc.robot.auton.commands.DriveBack;
 import frc.robot.auton.commands.TaxiBlueLeft;
 import frc.robot.subsystems.activeintake.ActiveIntake;
-import frc.robot.subsystems.activeintake.commands.RetractIntake;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.commands.MoveElevator;
 import frc.robot.subsystems.elevator.commands.PlaceCube;
 import frc.robot.subsystems.elevator.commands.ScoreCubeHigh;
 import frc.robot.telemetry.commands.AutoBalance;
@@ -31,15 +28,15 @@ import frc.robot.telemetry.commands.DriveOverChargeStation;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class PlaceCrossChargeAndEngage extends SequentialCommandGroup {
+public class PlaceCrossPickEngage extends SequentialCommandGroup {
   /** Creates a new BottomTaxi. */
-  public PlaceCrossChargeAndEngage(ActiveIntake intake, SwerveDrivetrain drivetrain, Claw claw, ClawPitch clawPitch, Elevator elevator, AutonPaths paths) {
+  public PlaceCrossPickEngage(ActiveIntake intake, SwerveDrivetrain drivetrain, Claw claw, ClawPitch clawPitch, Elevator elevator, AutonPaths paths) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
         new ScoreCubeHigh(elevator, claw, clawPitch, intake),
         new PlaceCube(elevator, claw, clawPitch, intake),
-        new ParallelCommandGroup(new MoveElevator(elevator, 0.8), new RetractIntake(intake), new DriveOverChargeStation(drivetrain)),
+        new DriveOverChargeStation(drivetrain),
         new WaitCommand(1),
         new DriveBackOntoChargeStation(drivetrain),
         new AutoBalance(drivetrain)
