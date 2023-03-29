@@ -19,7 +19,7 @@ public class MoveLeft extends CommandBase {
   SwerveDrivetrain drivetrain;
   private OzoneImu pigeon;
 
-  public static final double TIME_TO_DRIVE = 0.5;
+  public static final double TIME_TO_DRIVE = 1.0;
   private double startTime;
  
   /** Creates a new autoBalance. */
