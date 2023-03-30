@@ -20,6 +20,7 @@ import frc.robot.auton.routines.bottom.BottomTwoPiece;
 import frc.robot.auton.routines.middle.MiddleOverAndBack;
 import frc.robot.auton.routines.middle.MiddlePlace;
 import frc.robot.auton.routines.middle.MiddlePlaceAndEngage;
+import frc.robot.auton.routines.otherAutonPaths.PlaceAndEngage;
 import frc.robot.auton.routines.top.TopPlace;
 import frc.robot.auton.routines.top.TopPlaceAndBalance;
 import frc.robot.auton.routines.top.TopPlaceAndTaxi;
@@ -53,6 +54,7 @@ public class AutoRoutineManager {
         routineMap.put(AutoRoutine.PlaceConeAndGoBack, new PlaceConeAndGoBack(drivetrain, intake, claw, clawPitch, elevator));
         routineMap.put(AutoRoutine.MiddleOverAndBack, new MiddleOverAndBack(intake, drivetrain, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.TopPlaceAndBalance, new TopPlaceAndBalance(intake, drivetrain, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.PlaceAndEngage, new PlaceAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
 
         // add paths to chooser here
         for(AutoRoutine routine : AutoRoutine.values()) {
@@ -89,7 +91,8 @@ public class AutoRoutineManager {
         MiddlePlaceAndEngage,
         MiddleOverAndBack,
 
-        PlaceConeAndGoBack
-    }
+        PlaceConeAndGoBack,
 
+        PlaceAndEngage,
+    }
 }
