@@ -17,9 +17,11 @@ import frc.robot.auton.routines.PlaceConeAndGoBack;
 import frc.robot.auton.routines.bottom.BottomPlace;
 import frc.robot.auton.routines.bottom.BottomPlaceAndTaxi;
 import frc.robot.auton.routines.bottom.BottomTwoPiece;
+import frc.robot.auton.routines.middle.MiddleOverAndBack;
 import frc.robot.auton.routines.middle.MiddlePlace;
 import frc.robot.auton.routines.middle.MiddlePlaceAndEngage;
 import frc.robot.auton.routines.top.TopPlace;
+import frc.robot.auton.routines.top.TopPlaceAndBalance;
 import frc.robot.auton.routines.top.TopPlaceAndTaxi;
 import frc.robot.auton.routines.top.TopTwoPiece;
 import frc.robot.subsystems.activeintake.ActiveIntake;
@@ -49,6 +51,8 @@ public class AutoRoutineManager {
         routineMap.put(AutoRoutine.MiddlePlaceAndEngage, new MiddlePlaceAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.JustTopTaxi, new ProxyCommand(() -> paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi))));
         routineMap.put(AutoRoutine.PlaceConeAndGoBack, new PlaceConeAndGoBack(drivetrain, intake, claw, clawPitch, elevator));
+        routineMap.put(AutoRoutine.MiddleOverAndBack, new MiddleOverAndBack(intake, drivetrain, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.TopPlaceAndBalance, new TopPlaceAndBalance(intake, drivetrain, claw, clawPitch, elevator, paths));
 
         // add paths to chooser here
         for(AutoRoutine routine : AutoRoutine.values()) {
@@ -75,6 +79,7 @@ public class AutoRoutineManager {
         TopPlaceAndTaxi,
         TopTwoPiece,
         JustTopTaxi,
+        TopPlaceAndBalance,
 
         BottomPlace,
         BottomPlaceAndTaxi,
@@ -82,6 +87,7 @@ public class AutoRoutineManager {
 
         MiddlePlace,
         MiddlePlaceAndEngage,
+        MiddleOverAndBack,
 
         PlaceConeAndGoBack
     }

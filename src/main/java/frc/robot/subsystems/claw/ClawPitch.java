@@ -12,6 +12,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,7 +30,7 @@ public class ClawPitch extends SubsystemBase {
   private PIDController pitchController = new PIDController(0.14853, 0, 0.013545);
   // private PIDController pitchController = new PIDController(0.03, 0, 0);
 
-  private Rotation2d targetPitch = new Rotation2d();
+  private Rotation2d targetPitch;
 
   /** Creates a new ClawPitch. */
   public ClawPitch(int motorCanId) {
@@ -48,12 +49,12 @@ public class ClawPitch extends SubsystemBase {
 
     Shuffleboard.getTab("Claw").addNumber("Pitch", () -> getPitch().getDegrees());
     Shuffleboard.getTab("Claw").addNumber("Pitch Output", pitchMotor::get);
-    Shuffleboard.getTab("Claw").add("Pitch Forwards", new RotateClawPitch(this, Rotation2d.fromDegrees(0)));
-    Shuffleboard.getTab("Claw").add("Pitch Back", new RotateClawPitch(this, Rotation2d.fromDegrees(115)));
-    Shuffleboard.getTab("Claw").add("Reset pitch", Commands.runOnce(() -> {
-      pitchMotor.getEncoder().setPosition((115.0 / 360) * GEAR_RATIO);
-      setTargetPitch(Rotation2d.fromDegrees(115));
-    }));
+    // Shuffleboard.getTab("Claw").add("Pitch Forwards", new RotateClawPitch(this, Rotation2d.fromDegrees(0)));
+    // Shuffleboard.getTab("Claw").add("Pitch Back", new RotateClawPitch(this, Rotation2d.fromDegrees(115)));
+    // Shuffleboard.getTab("Claw").add("Reset pitch", Commands.runOnce(() -> {
+    //   pitchMotor.getEncoder().setPosition((115.0 / 360) * GEAR_RATIO);
+    //   setTargetPitch(Rotation2d.fromDegrees(115));
+    // }));
     Shuffleboard.getTab("Command Groups").addBoolean("ClawPitch At Setpoint", () -> isAtPitch());
     // Shuffleboard.getTab("Claw").addNumber("Pitch", () ->
     // getPitch().getDegrees());
@@ -75,11 +76,12 @@ public class ClawPitch extends SubsystemBase {
 
   public void zero() {
     pitchMotor.getEncoder().setPosition((115.0 / 360) * GEAR_RATIO);
-    setTargetPitch(getPitch());
+    setTargetPitch(Rotation2d.fromDegrees(115));
   }
 
   public void setTargetPitch(Rotation2d pitch) {
     targetPitch = pitch;
+
     pitchController.setSetpoint(pitch.getDegrees());
   }
 
@@ -93,6 +95,8 @@ public class ClawPitch extends SubsystemBase {
     // This method will be called once per scheduler run
     double clampedError = MathUtil.clamp(getPitch().getDegrees(), targetDegrees - MAX_ERROR, targetDegrees + MAX_ERROR);
     double pidOutput = pitchController.calculate(clampedError, targetDegrees);
-    pitchMotor.setVoltage(pidOutput);
+    if(!DriverStation.isTest()) {
+      pitchMotor.setVoltage(pidOutput);
+    }
   }
 }

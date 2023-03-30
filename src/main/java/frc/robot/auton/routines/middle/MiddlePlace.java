@@ -28,7 +28,7 @@ public class MiddlePlace extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new ResetLocation(drivetrain, new Pose2d(4.05, 2.76, new Rotation2d((DriverStation.getAlliance() == Alliance.Blue)? 0 : 180))),
+      new ResetLocation(drivetrain, new Pose2d(4.05, 2.76, Rotation2d.fromDegrees((DriverStation.getAlliance() == Alliance.Blue)? 0 : 180))),
       Commands.runOnce(() ->intake.setForceBeamOpen(true)),
       new ScoreCubeHigh(elevator, claw, clawPitch, intake),
       new PlaceCube(elevator, claw, clawPitch, intake),

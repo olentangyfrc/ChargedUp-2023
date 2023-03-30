@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.elevator;
 
+import java.sql.Driver;
 import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -69,7 +70,7 @@ public class Elevator extends SubsystemBase {
 
   private static final Map<ElevatorPosition, Double> positionValues = Map.of(
       ElevatorPosition.GROUND, 0.0,
-      ElevatorPosition.GRAB_CONE, 0.9,
+      ElevatorPosition.GRAB_CONE, 0.86,
       ElevatorPosition.GRAB_CUBE, 1.0,
       ElevatorPosition.LOW, 2.2,
       ElevatorPosition.MIDDLE, 4.02,
@@ -128,7 +129,7 @@ public class Elevator extends SubsystemBase {
       double clampedMeasurement = MathUtil.clamp(getPosition(), elevatorController.getSetpoint() - MAX_ERROR,
           elevatorController.getSetpoint() + MAX_ERROR);
       if(currentProfile == null) {
-        elevatorController.setP(20);
+        elevatorController.setP(17);
       } else {
         elevatorController.setP(14);
       }
@@ -139,7 +140,9 @@ public class Elevator extends SubsystemBase {
         pidControl = MathUtil.clamp(pidControl, -CORRECTION_MAX_VOLTS, CORRECTION_MAX_VOLTS);
       }
 
-      elevatorMotor.setVoltage(pidControl);
+      if(!DriverStation.isTest()) {
+        elevatorMotor.setVoltage(pidControl);
+      }
 
       SmartDashboard.putNumber("PPosition Error", (getPosition() - elevatorController.getSetpoint()));
       // System.out.println("PID output: " + pidControl);
@@ -154,7 +157,7 @@ public class Elevator extends SubsystemBase {
     currentProfile = null;
     resetPosition(0);
     goalPosition = 0;
-    elevatorController.setSetpoint(getPosition());
+    elevatorController.setSetpoint(0);
   }
 
   public void resetPosition(double position) {

@@ -166,18 +166,20 @@ public class AutonPaths {
 
         RedGetGamepieceOne,
         RedGetGamepieceFour,
-        
-        TopToChargingStation,
-        MiddleToChargingStation,
-        BottomToChargingStation,
 
+        GetGamepieceOneAndBalance,
+
+        RedGetGamepieceOneAndBalance,
+        
         TopTaxi,
         BottomTaxi,
         OnChargingStation,
+        OverAndBack,
 
         RedTopTaxi,
         RedBottomTaxi,
-        RedOnChargingStation
+        RedOnChargingStation,
+        RedOverAndBack
     }
 
     public static void displayPath(PathPlannerTrajectory trajectory) {

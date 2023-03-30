@@ -35,7 +35,7 @@ public class PlaceCone extends SequentialCommandGroup {
           new WaitCommand(0.3),
           new SetClawPosition(c, ClawPosition.UPPER_LATCH),
           new RetractElevator(e),
-          new WaitCommand(0.4),
+          new WaitCommand(0.6),
           new MoveElevator(e, ElevatorPosition.LOW)
         )
         // new SequentialCommandGroup(

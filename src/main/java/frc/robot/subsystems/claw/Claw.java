@@ -13,6 +13,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -76,7 +77,9 @@ public class Claw extends SubsystemBase {
       SmartDashboard.putNumber("Clamped angle", clampedCurrentAngle);
       double pidOutput = wristController.calculate(clampedCurrentAngle, targetRadians);
   
-      wristMotor.setVoltage(pidOutput);
+      if(!DriverStation.isTest()) {
+        wristMotor.setVoltage(pidOutput);
+      }
     }
   }
 
