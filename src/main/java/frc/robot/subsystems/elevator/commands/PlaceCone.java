@@ -5,18 +5,23 @@
 package frc.robot.subsystems.elevator.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.activeintake.ActiveIntake;
+import frc.robot.subsystems.activeintake.commands.RetractIntake;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.Claw.ClawPosition;
 import frc.robot.subsystems.claw.ClawPitch;
 import frc.robot.subsystems.claw.commands.RotateClawPitch;
 import frc.robot.subsystems.claw.commands.RotateClawToAngle;
 import frc.robot.subsystems.claw.commands.SetClawPosition;
+import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 
@@ -25,7 +30,7 @@ import frc.robot.subsystems.elevator.Elevator.ElevatorPosition;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class PlaceCone extends SequentialCommandGroup {
   /** Creates a new PlaceCone. */
-  public PlaceCone(Elevator e, Claw c, ClawPitch cp, ActiveIntake ai) {
+  public PlaceCone(SwerveDrivetrain drivetrain, Elevator e, Claw c, ClawPitch cp, ActiveIntake ai) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
@@ -41,6 +46,11 @@ public class PlaceCone extends SequentialCommandGroup {
         // new SequentialCommandGroup(
         // )
       ),
+      Commands.either(
+        new InstantCommand(),
+        new RetractIntake(ai),
+        DriverStation::isAutonomous),
+      Commands.runOnce(() -> drivetrain.setSpeedPercent(SwerveDrivetrain.DEFAULT_SPEED_PERCENT)),
       new ScheduleCommand(
         new SequentialCommandGroup(
           new ParallelCommandGroup(

@@ -21,7 +21,7 @@ import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
  */
 public class DriveCommand extends CommandBase {
   private SwerveDrivetrain drivetrain;
-  private GenericEntry speedEntry = Shuffleboard.getTab("Drive").add("Drive percent", 1).withProperties(Map.of("min", -1, "max", 1)).getEntry();
+  // private GenericEntry speedEntry = Shuffleboard.getTab("Drive").add("Drive percent", 1).withProperties(Map.of("min", -1, "max", 1)).getEntry();
 
   public DriveCommand(SwerveDrivetrain drivetrain) {
     this.drivetrain = drivetrain;
@@ -38,9 +38,9 @@ public class DriveCommand extends CommandBase {
   public void execute() {
     IO io = IO.getInstance();
     ChassisSpeeds speeds = new ChassisSpeeds(
-      io.getLeftY() * SwerveDrivetrain.MAX_LINEAR_SPEED * speedEntry.getDouble(1) * ((DriverStation.getAlliance() == Alliance.Blue)? 1 : -1),
-      -io.getLeftX() * SwerveDrivetrain.MAX_LINEAR_SPEED * speedEntry.getDouble(1) * ((DriverStation.getAlliance() == Alliance.Blue)? 1 : -1),
-      -io.getRightX() * SwerveDrivetrain.MAX_ROTATION_SPEED * speedEntry.getDouble(1)
+      io.getLeftY() * SwerveDrivetrain.MAX_LINEAR_SPEED * drivetrain.getSpeedPercent() * ((DriverStation.getAlliance() == Alliance.Blue)? 1 : -1),
+      -io.getLeftX() * SwerveDrivetrain.MAX_LINEAR_SPEED * drivetrain.getSpeedPercent() * ((DriverStation.getAlliance() == Alliance.Blue)? 1 : -1),
+      -io.getRightX() * SwerveDrivetrain.MAX_ROTATION_SPEED * drivetrain.getSpeedPercent()
     );
     
     if(!drivetrain.getIsFollowingPath()) {

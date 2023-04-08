@@ -30,8 +30,8 @@ public class PlaceConeAndGoBack extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new ProxyCommand(() -> Commands.runOnce(() -> SubsystemManager.getInstance().getImu().setReset(Rotation2d.fromDegrees((DriverStation.getAlliance() == Alliance.Blue)? 0 : 180)))),
-      new ScoreConeHigh(elevator, claw, clawPitch, intake),
-      new PlaceCone(elevator, claw, clawPitch, intake),
+      new ScoreConeHigh(drivetrain, elevator, claw, clawPitch, intake),
+      new PlaceCone(drivetrain, elevator, claw, clawPitch, intake),
       new DriveBack(drivetrain, 4.4)
     );
   }

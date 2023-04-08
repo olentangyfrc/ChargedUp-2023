@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import com.pathplanner.lib.auto.PIDConstants;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -81,6 +82,14 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
     private boolean isInBrakeMode = false;
     private boolean isFollowingPath = false;
 
+    private double desiredSpeedPercent = 1;
+    private double speedPercent = desiredSpeedPercent;
+    public static final double DEFAULT_SPEED_PERCENT = 1;
+    public static final double INTAKE_SPEED_PERCENT = 0.8;
+    public static final double PLACE_SPEED_PERCENT = 0.6;
+
+    private GenericEntry disableVoltageLimiting;
+
     /**
      * Initialize the drivetrain subsystem
      * 
@@ -134,6 +143,7 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
         tab.addNumber("BL Position", () -> backLeftModule.getPosition().distanceMeters);
         tab.addNumber("BR Position", () -> backRightModule.getPosition().distanceMeters);
 
+        disableVoltageLimiting = tab.add("Disable VLS", false).withWidget(BuiltInWidgets.kToggleSwitch).getEntry();
     }
 
     /**
@@ -149,6 +159,19 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
+
+        double voltageLimitedSpeed = 1;
+        double currentVoltage = SubsystemManager.getInstance().getPdp().getVoltage();
+        // if(!disableVoltageLimiting.getBoolean(true) && currentVoltage <= 8.5) {
+        //     voltageLimitedSpeed = Math.max(0, Math.pow((currentVoltage - 8.5), 1.6) * -40 + 100);
+        // } else {
+        //     voltageLimitedSpeed = 1;
+        // }
+        // speedPercent = Math.min(desiredSpeedPercent, voltageLimitedSpeed);
+
+        SmartDashboard.putNumber("VLS", voltageLimitedSpeed);
+        SmartDashboard.putNumber("speed percent", speedPercent);
+        SmartDashboard.putNumber("desired speed percent", speedPercent);
         // Run the drive command periodically
         // field.setRobotPose(
         //     poseEstimator.getEstimatedPosition().getX(),
@@ -280,6 +303,14 @@ public abstract class SwerveDrivetrain extends SubsystemBase {
 
     public boolean atTargetAngle() {
         return isAtTargetAngle;
+    }
+
+    public double getSpeedPercent() {
+        return speedPercent;
+    }
+
+    public void setSpeedPercent(double speedPercent) {
+        desiredSpeedPercent = MathUtil.clamp(speedPercent, -1, 1);
     }
 
     /**

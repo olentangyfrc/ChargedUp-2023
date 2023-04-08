@@ -161,10 +161,10 @@ public class SubsystemManager {
     // Create and initialize all subsystems:
     drivetrain = new SingleFalconDrivetrain();
     drivetrain.init(new SwerveModuleSetupInfo[] {
-        new SwerveModuleSetupInfo(31, 15, 0, 260.68),
-        new SwerveModuleSetupInfo(30, 6, 3, 327.65),
-        new SwerveModuleSetupInfo(32, 62, 1, 44.85),
-        new SwerveModuleSetupInfo(33, 14, 2, 175.04),
+        new SwerveModuleSetupInfo(31, 15, 0, 260.34),
+        new SwerveModuleSetupInfo(30, 6, 3, 328.05),
+        new SwerveModuleSetupInfo(32, 62, 1, 42.6),
+        new SwerveModuleSetupInfo(33, 14, 2, 177.3),
     }, 1 / 8.07);
 
     claw = new Claw(61, 1, 0, 3, 2);
@@ -192,6 +192,7 @@ public class SubsystemManager {
       // Commands.sequence(Commands.parallel(new DeployIntake(activeIntake), new StartIntake(activeIntake)))
       // Commands.sequence(Commands.parallel(Commands.runOnce(activeIntake::setOff), new StartIntake(activeIntake)))
       Commands.sequence(
+        Commands.runOnce(() -> drivetrain.setSpeedPercent(SwerveDrivetrain.INTAKE_SPEED_PERCENT)),
         new DeployIntake(activeIntake),
         new StartIntake(activeIntake),
         new ParallelCommandGroup(
@@ -206,7 +207,7 @@ public class SubsystemManager {
     );
 
     io.bind(ButtonActionType.WHEN_RELEASED, ControllerButton.RightTriggerButton, 
-      new StopIntake(activeIntake).andThen(new RetractIntake(activeIntake))
+      new StopIntake(activeIntake).andThen(new RetractIntake(activeIntake)).andThen(Commands.runOnce(() -> drivetrain.setSpeedPercent(SwerveDrivetrain.DEFAULT_SPEED_PERCENT)))
     );
 
     io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftTriggerButton, 
@@ -220,22 +221,22 @@ public class SubsystemManager {
 
     // Reach high
     io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.RightBumper, Commands.either(
-      new ScoreConeHigh(elevator, claw, clawPitch, activeIntake),
-      new ScoreCubeHigh(elevator, claw, clawPitch, activeIntake),
+      new ScoreConeHigh(drivetrain, elevator, claw, clawPitch, activeIntake),
+      new ScoreCubeHigh(drivetrain, elevator, claw, clawPitch, activeIntake),
       activeIntake::nextPieceIsCone
     ));
 
     // Reach mid
     io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.LeftBumper, Commands.either(
-      new ScoreConeMiddle(elevator, claw, clawPitch, activeIntake),
-      new ScoreCubeMiddle(elevator, claw, clawPitch, activeIntake),
+      new ScoreConeMiddle(drivetrain, elevator, claw, clawPitch, activeIntake),
+      new ScoreCubeMiddle(drivetrain, elevator, claw, clawPitch, activeIntake),
       activeIntake::nextPieceIsCone
     ));
 
     // Place Game Piece
     io.bind(ButtonActionType.WHEN_PRESSED, ControllerButton.A, Commands.either(
-      new PlaceCone(elevator, claw, clawPitch, activeIntake),
-      new PlaceCube(elevator, claw, clawPitch, activeIntake),
+      new PlaceCone(drivetrain, elevator, claw, clawPitch, activeIntake),
+      new PlaceCube(drivetrain, elevator, claw, clawPitch, activeIntake),
       activeIntake::nextPieceIsCone
     ));
 

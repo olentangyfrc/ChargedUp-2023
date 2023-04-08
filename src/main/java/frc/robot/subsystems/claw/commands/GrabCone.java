@@ -25,13 +25,13 @@ public class GrabCone extends SequentialCommandGroup {
                         new SetClawPosition(claw, ClawPosition.OPEN),
                         new RotateClawPitch(clawPitch, Rotation2d.fromDegrees(0))),
                         new SequentialCommandGroup(
-                            new WaitCommand(0.3),
+                            new WaitCommand(0.2),
                             new RotateClawToAngle(claw, Rotation2d.fromDegrees(0))
                         ),
                 new MoveElevator(elevator, (isCone ? ElevatorPosition.GRAB_CONE : ElevatorPosition.GRAB_CUBE)),
                 new SetClawPosition(claw, ClawPosition.CLOSED),
                 Commands.runOnce(() -> intake.setClawHoldingGamePiece(true)),
-                new WaitCommand(0.3),
+                new WaitCommand(0.2),
                 new MoveElevator(elevator, ElevatorPosition.LOW),
                 Commands.print("SETTING UP CLAW"),
                 new ParallelCommandGroup(

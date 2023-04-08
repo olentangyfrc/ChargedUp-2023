@@ -25,7 +25,7 @@ import frc.robot.telemetry.commands.DriveOntoChargeStation;
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class PlaceAndEngage extends SequentialCommandGroup {
-  /** Creates a new BottomTaxi. */
+  /** Creates a new BottomTaxi. */  
   public PlaceAndEngage(ActiveIntake intake, SwerveDrivetrain drivetrain, Claw claw, ClawPitch clawPitch, Elevator elevator, AutonPaths paths) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
@@ -35,8 +35,8 @@ public class PlaceAndEngage extends SequentialCommandGroup {
           SubsystemManager.getInstance().getImu().resetRoll();
           SubsystemManager.getInstance().getImu().reset();
         }),
-        new ScoreCubeHigh(elevator, claw, clawPitch, intake),
-        new PlaceCube(elevator, claw, clawPitch, intake),
+        new ScoreCubeHigh(drivetrain, elevator, claw, clawPitch, intake),
+        new PlaceCube(drivetrain, elevator, claw, clawPitch, intake),
         new ParallelCommandGroup(new MoveElevator(elevator, 0.9), new RetractIntake(intake), new DriveOntoChargeStation(drivetrain)),
         new AutoBalance(drivetrain)
     );

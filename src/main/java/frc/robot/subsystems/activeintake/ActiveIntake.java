@@ -41,7 +41,7 @@ public class ActiveIntake extends SubsystemBase {
 
   private DigitalInput beamBreaker;
 
-  private static final double GRAB_WAIT_TIME = 1;
+  private static final double GRAB_WAIT_TIME = 0.6;
   private boolean isClawHoldingGamePiece = false;
   private boolean isWaiting = false;
   private boolean intakeHasRun = false;
@@ -76,7 +76,9 @@ public class ActiveIntake extends SubsystemBase {
     Shuffleboard.getTab(getName()).addBoolean("Is Holding Gamepiece", this::isClawHoldingGamePiece);
     Shuffleboard.getTab(getName()).addBoolean("Is grabbing", this::isGrabbing);
   }
-  GenericEntry isConeEntry = Shuffleboard.getTab(getName()).add("Next piece cone", true).withWidget(BuiltInWidgets.kToggleButton).getEntry();
+  
+  private GenericEntry disableGrab = Shuffleboard.getTab("Auton").add("Disable Grab", false).withWidget(BuiltInWidgets.kToggleSwitch).getEntry();
+  private GenericEntry disableForce = Shuffleboard.getTab("Auton").add("Disable force", false).withWidget(BuiltInWidgets.kToggleSwitch).getEntry();
 
   public boolean isClawHoldingGamePiece() {
     return isClawHoldingGamePiece;
@@ -105,22 +107,24 @@ public class ActiveIntake extends SubsystemBase {
       if(!isWaiting) {
         startTimer = Timer.getFPGATimestamp();
         isWaiting = true;
-      } else {
+      } else { 
         if(Timer.getFPGATimestamp() - startTimer >= (nextPieceIsCone? GRAB_WAIT_TIME : 0)) {
           Claw claw = SubsystemManager.getInstance().getClaw();
           ClawPitch clawPitch = SubsystemManager.getInstance().getClawPitch();
           Elevator elevator = SubsystemManager.getInstance().getElevator();
-          grabCommand = Commands.either(
-            new GrabCone(claw, clawPitch, elevator, this, nextPieceIsCone),
-            new GrabCube(claw, clawPitch, elevator, this, nextPieceIsCone),
-            this::nextPieceIsCone
-          );
-          
-          grabCommand.andThen(new InstantCommand(() -> {
-            grabCommand = null;
-            isWaiting = false;
-            intakeHasRun = false;
-          })).schedule();
+          if(!disableGrab.getBoolean(false)) {
+            grabCommand = Commands.either(
+              new GrabCone(claw, clawPitch, elevator, this, nextPieceIsCone),
+              new GrabCube(claw, clawPitch, elevator, this, nextPieceIsCone),
+              this::nextPieceIsCone
+            );
+            
+            grabCommand.andThen(new InstantCommand(() -> {
+              grabCommand = null;
+              isWaiting = false;
+              intakeHasRun = false;
+            })).schedule();
+          }
             
         }
       }
@@ -130,7 +134,9 @@ public class ActiveIntake extends SubsystemBase {
 
     if(!forceBelts) {
       if(!isClawHoldingGamePiece && intakeHasRun) {
-        lowerMotor.set(nextPieceIsCone? LOWER_MOTOR_CONE_SPEED : LOWER_MOTOR_CUBE_SPEED);
+        if(!DriverStation.isTest()) {
+          lowerMotor.set(nextPieceIsCone? LOWER_MOTOR_CONE_SPEED : LOWER_MOTOR_CUBE_SPEED);
+        }
       } else {
         lowerMotor.stopMotor();
       }
@@ -194,10 +200,12 @@ public class ActiveIntake extends SubsystemBase {
   }
 
   public boolean isBeamBroken(){
-    if(forceBeamBreak) {
-      return true;
-    } else if(forceBeamOpen) {
-      return false;
+    if(!disableForce.getBoolean(false)) {
+      if(forceBeamBreak) {
+        return true;
+      } else if(forceBeamOpen) {
+        return false;
+      }
     }
     return !(beamBreaker.get());
   }

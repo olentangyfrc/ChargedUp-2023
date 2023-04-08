@@ -33,8 +33,8 @@ public class MiddleOverAndBack extends SequentialCommandGroup {
         SubsystemManager.getInstance().getImu().resetRoll();
       }),
       Commands.runOnce(() ->intake.setForceBeamOpen(true)),
-      new ScoreCubeHigh(elevator, claw, clawPitch, intake),
-      new PlaceCube(elevator, claw, clawPitch, intake),
+      new ScoreCubeHigh(drivetrain, elevator, claw, clawPitch, intake),
+      new PlaceCube(drivetrain, elevator, claw, clawPitch, intake),
       Commands.runOnce(() ->intake.setForceBeamOpen(false)),
       new ProxyCommand(() -> paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.OverAndBack)).andThen(new AutoBalance(drivetrain)))
     );

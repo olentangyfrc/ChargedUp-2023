@@ -18,6 +18,7 @@ import frc.robot.auton.routines.bottom.BottomPlace;
 import frc.robot.auton.routines.bottom.BottomPlaceAndTaxi;
 import frc.robot.auton.routines.bottom.BottomTwoPiece;
 import frc.robot.auton.routines.middle.MiddleOverAndBack;
+import frc.robot.auton.routines.middle.MiddleOverAndBackNoScore;
 import frc.robot.auton.routines.middle.MiddlePlace;
 import frc.robot.auton.routines.middle.MiddlePlaceAndEngage;
 import frc.robot.auton.routines.otherAutonPaths.PlaceAndEngage;
@@ -42,17 +43,18 @@ public class AutoRoutineManager {
         routineMap = new HashMap<AutoRoutine, CommandBase>();
         
         routineMap.put(AutoRoutine.NOTHING, new InstantCommand());
-        routineMap.put(AutoRoutine.TopPlaceAndTaxi, new TopPlaceAndTaxi(intake, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.TopPlaceAndTaxi, new TopPlaceAndTaxi(drivetrain, intake, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.TopPlace, new TopPlace(drivetrain, intake, claw, clawPitch, elevator));
-        routineMap.put(AutoRoutine.TopTwoPiece, new TopTwoPiece(intake, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.TopTwoPiece, new TopTwoPiece(drivetrain, intake, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.BottomPlace, new BottomPlace(drivetrain, intake, claw, clawPitch, elevator));
-        routineMap.put(AutoRoutine.BottomPlaceAndTaxi, new BottomPlaceAndTaxi(intake, claw, clawPitch, elevator, paths));
-        routineMap.put(AutoRoutine.BottomTwoPiece, new BottomTwoPiece(intake, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.BottomPlaceAndTaxi, new BottomPlaceAndTaxi(drivetrain, intake, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.BottomTwoPiece, new BottomTwoPiece(drivetrain, intake, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.MiddlePlace, new MiddlePlace(drivetrain, intake, claw, clawPitch, elevator));
         routineMap.put(AutoRoutine.MiddlePlaceAndEngage, new MiddlePlaceAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.JustTopTaxi, new ProxyCommand(() -> paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.TopTaxi))));
         routineMap.put(AutoRoutine.PlaceConeAndGoBack, new PlaceConeAndGoBack(drivetrain, intake, claw, clawPitch, elevator));
         routineMap.put(AutoRoutine.MiddleOverAndBack, new MiddleOverAndBack(intake, drivetrain, claw, clawPitch, elevator, paths));
+        routineMap.put(AutoRoutine.MiddleOverAndBackNoScore, new MiddleOverAndBackNoScore(intake, drivetrain, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.TopPlaceAndBalance, new TopPlaceAndBalance(intake, drivetrain, claw, clawPitch, elevator, paths));
         routineMap.put(AutoRoutine.PlaceAndEngage, new PlaceAndEngage(intake, drivetrain, claw, clawPitch, elevator, paths));
 
@@ -90,6 +92,7 @@ public class AutoRoutineManager {
         MiddlePlace,
         MiddlePlaceAndEngage,
         MiddleOverAndBack,
+        MiddleOverAndBackNoScore,
 
         PlaceConeAndGoBack,
 

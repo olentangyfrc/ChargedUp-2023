@@ -229,6 +229,10 @@ public class Elevator extends SubsystemBase {
     return elevatorMotor.getSelectedSensorPosition() / MOTOR_TICKS_PER_ROTATION / GEAR_RATIO;
   }
 
+  public double getPositionValue(ElevatorPosition position) {
+    return positionValues.get(position);
+  }
+
   public double getGoalPosition() {
     return goalPosition;
   }

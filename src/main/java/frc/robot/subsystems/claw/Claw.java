@@ -55,14 +55,15 @@ public class Claw extends SubsystemBase {
 
     upperSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, upperForwardChannel, upperReverseChannel);
     lowerSolenoid = new DoubleSolenoid(2, PneumaticsModuleType.REVPH, lowerForwardChannel, lowerReverseChannel);
+    setTargetClawAngle(new Rotation2d(Math.PI));
 
     wristController.setTolerance(WRIST_ANGLE_TOLERANCE);
 
     Shuffleboard.getTab(getName()).addNumber("Claw position", () -> getWristAngle().getDegrees());
     Shuffleboard.getTab(getName()).addNumber("Current Radians", () -> getWristAngle().getRadians());
     Shuffleboard.getTab(getName()).addNumber("Target Radians", () -> targetWristAngle.getRadians());
-    Shuffleboard.getTab(getName()).add("Forwards", new RotateClawToAngle(this, Rotation2d.fromDegrees(0)));
-    Shuffleboard.getTab(getName()).add("Reverse", new RotateClawToAngle(this, Rotation2d.fromDegrees(180)));
+    // Shuffleboard.getTab(getName()).add("Forwards", new RotateClawToAngle(this, Rotation2d.fromDegrees(0)));
+    // Shuffleboard.getTab(getName()).add("Reverse", new RotateClawToAngle(this, Rotation2d.fromDegrees(180)));
     Shuffleboard.getTab("Command Groups").addBoolean("Claw At Setpoint", () -> isWristAtAngle());
   }
 

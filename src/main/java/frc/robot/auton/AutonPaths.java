@@ -57,7 +57,7 @@ public class AutonPaths {
                 new DeployIntake(intake),
                 new StartIntake(intake),
                 new ParallelCommandGroup(
-                  new MoveElevator(elevator, ElevatorPosition.LOW),
+                  new MoveElevator(elevator, elevator.getPositionValue(ElevatorPosition.LOW) + 0.1),
                   new SequentialCommandGroup(
                     new WaitCommand(0.3),
                     Commands.runOnce((intake::setOff))

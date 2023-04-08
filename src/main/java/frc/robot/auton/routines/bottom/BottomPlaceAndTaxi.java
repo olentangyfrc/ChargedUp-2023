@@ -12,6 +12,7 @@ import frc.robot.auton.AutonPaths.AutoTrajectory;
 import frc.robot.subsystems.activeintake.ActiveIntake;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.ClawPitch;
+import frc.robot.subsystems.drivetrain.SwerveDrivetrain;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.commands.PlaceCube;
 import frc.robot.subsystems.elevator.commands.ScoreCubeHigh;
@@ -21,13 +22,13 @@ import frc.robot.subsystems.elevator.commands.ScoreCubeHigh;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class BottomPlaceAndTaxi extends SequentialCommandGroup {
   /** Creates a new BottomTaxi. */
-  public BottomPlaceAndTaxi(ActiveIntake intake, Claw claw, ClawPitch clawPitch, Elevator elevator, AutonPaths paths) {
+  public BottomPlaceAndTaxi(SwerveDrivetrain drivetrain, ActiveIntake intake, Claw claw, ClawPitch clawPitch, Elevator elevator, AutonPaths paths) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
         Commands.runOnce(() ->intake.setForceBeamOpen(true)),
-        new ScoreCubeHigh(elevator, claw, clawPitch, intake),
-        new PlaceCube(elevator, claw, clawPitch, intake),
+        new ScoreCubeHigh(drivetrain, elevator, claw, clawPitch, intake),
+        new PlaceCube(drivetrain, elevator, claw, clawPitch, intake),
         Commands.runOnce(() ->intake.setForceBeamOpen(false)),
         new ProxyCommand(() -> paths.followTrajectoryCommand(paths.getTrajectory(AutoTrajectory.BottomTaxi)))
     );
